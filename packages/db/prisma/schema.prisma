@@ -1,0 +1,59 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [citext]
+}
+
+model WaitlistSignup {
+  id              String    @id @default(cuid())
+  email           String    @unique @db.Citext
+  region          String?
+  locale          String
+  premiumIntent   Boolean   @default(false)
+  referralToken   String    @unique @default(cuid())
+  referredByToken String?
+  verifiedAt      DateTime?
+  ipHash          String
+  uaHash          String
+  createdAt       DateTime  @default(now())
+
+  @@index([verifiedAt])
+  @@index([referredByToken])
+}
+
+model CookieConsent {
+  id           String   @id @default(cuid())
+  anonDeviceId String   @unique
+  ipHash       String
+  choices      Json
+  version      Int
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+}
+
+model VerificationToken {
+  id        String    @id @default(cuid())
+  email     String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  @@index([email])
+}
+
+model GeoBlockEvent {
+  id        String   @id @default(cuid())
+  country   String
+  region    String?
+  ipHash    String
+  uaHash    String
+  createdAt DateTime @default(now())
+
+  @@index([country, createdAt])
+}
