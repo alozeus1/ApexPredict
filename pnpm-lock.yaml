@@ -23,9 +23,18 @@ importers:
 
   apps/web:
     dependencies:
+      '@apexpredix/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@apexpredix/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@apexpredix/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@apexpredix/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@react-email/components':
         specifier: 0.0.31
         version: 0.0.31(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
