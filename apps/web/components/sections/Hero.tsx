@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@apexpredix/ui';
+import { HeroReel } from '@/components/reel/HeroReel';
 
 export function Hero() {
   return (
@@ -26,12 +27,7 @@ export function Hero() {
           </div>
         </div>
         <div className="relative">
-          <div
-            aria-hidden
-            className="aspect-square w-full max-w-[520px] rounded-2xl bg-ink-1 ring-1 ring-white/10 shadow-glow"
-          >
-            <div className="grid h-full w-full place-items-center text-mute-2 text-sm">HeroReel (Phase 6)</div>
-          </div>
+          <HeroReel />
         </div>
       </div>
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_70%_30%,rgba(34,211,238,0.10),transparent_60%)]" />
