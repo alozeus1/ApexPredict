@@ -12,3 +12,6 @@ test-results/
 coverage/
 apps/web/public/media/reel-stills/*.png
 !apps/web/public/media/reel-stills/manifest.json
+
+# TypeScript incremental build cache
+*.tsbuildinfo
