@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { NAV_ITEMS } from './nav-items';
 import { cn } from '@apexpredix/ui';
+import { SettingsPanel } from './SettingsPanel';
+import { ThemeToggle } from './ThemeToggle';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface SidebarProps { pathname: string; }
 
@@ -36,6 +39,11 @@ export function Sidebar({ pathname }: SidebarProps) {
           })}
         </ul>
       </nav>
+      <div className="flex items-center gap-2 px-4 py-3 border-t border-white/5">
+        <SettingsPanel initialRegion="US" />
+        <ThemeToggle />
+        <LanguageSwitcher />
+      </div>
       <div className="border-t border-white/5 p-4 text-xs text-mute-2">Powered by Maralito Labs</div>
     </aside>
   );
