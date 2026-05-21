@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { SkipToContent } from '@/components/nav/SkipToContent';
+import { ThemeScript } from '@/components/nav/theme-script';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -38,6 +39,9 @@ export default async function LocaleLayout({
   const messages = (await import(`@/messages/${locale}.json`)).default;
   return (
     <html lang={locale} className={inter.variable}>
+      <head>
+        <ThemeScript />
+      </head>
       <body className="font-sans antialiased">
         <SkipToContent />
         <NextIntlClientProvider locale={locale} messages={messages}>
