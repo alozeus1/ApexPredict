@@ -1,0 +1,495 @@
+[
+  {
+    "id": "featured-1",
+    "sport": "soccer",
+    "league": "EPL",
+    "home": { "name": "Arsenal", "code": "ARS" },
+    "away": { "name": "Chelsea", "code": "CHE" },
+    "kickoff": "2026-05-24T15:00:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 1.85, "market": "1" },
+      { "bookCode": "BW", "price": 1.80, "market": "1" },
+      { "bookCode": "DK", "price": 1.78, "market": "1" }
+    ],
+    "model": { "elo": 0.58, "poisson": 0.55, "xg": 0.61, "ensemble": 0.58, "confidence": 0.893 },
+    "topPick": "ARS to Win + Over 2.5",
+    "valueBet": true,
+    "narrative": "Arsenal's home xG over the last 8 EPL matches exceeds Chelsea's defensive expectation; ensemble agrees with the line and our 1/4 Kelly call is +EV at 1.85.",
+    "featured": true
+  },
+  {
+    "id": "featured-2",
+    "sport": "soccer",
+    "league": "LaLiga",
+    "home": { "name": "Real Madrid", "code": "RMA" },
+    "away": { "name": "Atletico", "code": "ATM" },
+    "kickoff": "2026-05-24T19:00:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 1.65, "market": "1" },
+      { "bookCode": "BW", "price": 1.62, "market": "1" }
+    ],
+    "model": { "elo": 0.62, "poisson": 0.59, "xg": 0.64, "ensemble": 0.61, "confidence": 0.81 },
+    "topPick": "RMA Win",
+    "valueBet": false,
+    "narrative": "Home advantage holds; ensemble close to market — no value, but the model leans toward a clean Madrid victory.",
+    "featured": true
+  },
+  {
+    "id": "featured-3",
+    "sport": "basketball",
+    "league": "NBA",
+    "home": { "name": "Boston Celtics", "code": "BOS" },
+    "away": { "name": "Denver Nuggets", "code": "DEN" },
+    "kickoff": "2026-05-25T00:30:00.000Z",
+    "odds": [
+      { "bookCode": "DK", "price": 1.95, "market": "1" },
+      { "bookCode": "FD", "price": 1.92, "market": "1" }
+    ],
+    "model": { "elo": 0.54, "poisson": 0.52, "xg": 0.55, "ensemble": 0.53, "confidence": 0.74 },
+    "topPick": "BOS Win",
+    "valueBet": true,
+    "narrative": "Boston's home pace + 3-point efficiency over last 10 supports a slim edge vs market; small +EV at 1.95.",
+    "featured": true
+  },
+  {
+    "id": "featured-4",
+    "sport": "soccer",
+    "league": "Bundesliga",
+    "home": { "name": "Bayern Munich", "code": "BAY" },
+    "away": { "name": "Borussia Dortmund", "code": "BVB" },
+    "kickoff": "2026-05-24T17:30:00.000Z",
+    "odds": [
+      { "bookCode": "WH", "price": 1.55, "market": "1" },
+      { "bookCode": "UB", "price": 1.58, "market": "1" },
+      { "bookCode": "PN", "price": 1.53, "market": "1" }
+    ],
+    "model": { "elo": 0.65, "poisson": 0.63, "xg": 0.67, "ensemble": 0.65, "confidence": 0.87 },
+    "topPick": "BAY Win + BTTS",
+    "valueBet": true,
+    "narrative": "Der Klassiker at Allianz: Bayern's defensive solidity has improved but BVB's front line creates chances in every away game, making BTTS a solid overlay on a home win.",
+    "featured": true
+  },
+  {
+    "id": "featured-5",
+    "sport": "tennis",
+    "league": "ATP",
+    "home": { "name": "Novak Djokovic", "code": "NJD" },
+    "away": { "name": "Carlos Alcaraz", "code": "CAA" },
+    "kickoff": "2026-05-26T13:00:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 2.10, "market": "1" },
+      { "bookCode": "WH", "price": 2.05, "market": "1" }
+    ],
+    "model": { "elo": 0.51, "poisson": 0.50, "xg": 0.52, "ensemble": 0.51, "confidence": 0.63 },
+    "topPick": "Djokovic Win",
+    "valueBet": true,
+    "narrative": "Market undervalues Djokovic on clay in best-of-5 format; ELO surface-adjusted gives him a marginal edge and 2.10 is +EV at current implied probability.",
+    "featured": true
+  },
+  {
+    "id": "featured-6",
+    "sport": "soccer",
+    "league": "SerieA",
+    "home": { "name": "Inter Milan", "code": "INT" },
+    "away": { "name": "AC Milan", "code": "MIL" },
+    "kickoff": "2026-05-25T19:45:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 1.75, "market": "1" },
+      { "bookCode": "UB", "price": 1.72, "market": "1" },
+      { "bookCode": "WH", "price": 1.70, "market": "1" }
+    ],
+    "model": { "elo": 0.60, "poisson": 0.57, "xg": 0.62, "ensemble": 0.59, "confidence": 0.85 },
+    "topPick": "INT Win",
+    "valueBet": false,
+    "narrative": "Derby della Madonnina: Inter's compact midfield has dominated possession in recent derbies; model aligns near market price with no clear +EV angle.",
+    "featured": true
+  },
+  {
+    "id": "match-7",
+    "sport": "soccer",
+    "league": "Ligue1",
+    "home": { "name": "PSG", "code": "PSG" },
+    "away": { "name": "Marseille", "code": "OM" },
+    "kickoff": "2026-05-26T20:00:00.000Z",
+    "odds": [
+      { "bookCode": "UB", "price": 1.45, "market": "1" },
+      { "bookCode": "WH", "price": 1.48, "market": "1" }
+    ],
+    "model": { "elo": 0.70, "poisson": 0.68, "xg": 0.72, "ensemble": 0.70, "confidence": 0.91 },
+    "topPick": "PSG Win",
+    "valueBet": false,
+    "narrative": "Le Classique sees PSG as heavy favorites at home; high confidence but market price offers no value — monitor line movement for late sharp action."
+  },
+  {
+    "id": "match-8",
+    "sport": "basketball",
+    "league": "NBA",
+    "home": { "name": "Oklahoma City Thunder", "code": "OKC" },
+    "away": { "name": "Minnesota Timberwolves", "code": "MIN" },
+    "kickoff": "2026-05-27T01:00:00.000Z",
+    "odds": [
+      { "bookCode": "DK", "price": 1.88, "market": "1" },
+      { "bookCode": "FD", "price": 1.85, "market": "1" }
+    ],
+    "model": { "elo": 0.55, "poisson": 0.53, "xg": 0.56, "ensemble": 0.55, "confidence": 0.70 },
+    "topPick": "OKC Win",
+    "valueBet": true,
+    "narrative": "OKC's young core thrives at home; Shai Gilgeous-Alexander's scoring efficiency vs Minnesota's perimeter defense creates an exploitable mismatch at 1.88."
+  },
+  {
+    "id": "match-9",
+    "sport": "football",
+    "league": "NFL",
+    "home": { "name": "Kansas City Chiefs", "code": "KC" },
+    "away": { "name": "San Francisco 49ers", "code": "SF" },
+    "kickoff": "2026-05-28T23:30:00.000Z",
+    "odds": [
+      { "bookCode": "DK", "price": 1.80, "market": "1" },
+      { "bookCode": "FD", "price": 1.82, "market": "1" }
+    ],
+    "model": { "elo": 0.57, "poisson": 0.55, "xg": 0.58, "ensemble": 0.57, "confidence": 0.76 },
+    "topPick": "Chiefs Win",
+    "valueBet": true,
+    "narrative": "Chiefs' home playoff form holds; Mahomes vs San Francisco's defensive scheme historically favors the QB's improvisation — ensemble gives slight +EV at 1.80."
+  },
+  {
+    "id": "match-10",
+    "sport": "hockey",
+    "league": "NHL",
+    "home": { "name": "Tampa Bay Lightning", "code": "TBL" },
+    "away": { "name": "Florida Panthers", "code": "FLA" },
+    "kickoff": "2026-05-28T23:00:00.000Z",
+    "odds": [
+      { "bookCode": "DK", "price": 2.05, "market": "1" },
+      { "bookCode": "FD", "price": 2.10, "market": "1" }
+    ],
+    "model": { "elo": 0.49, "poisson": 0.51, "xg": 0.50, "ensemble": 0.50, "confidence": 0.57 },
+    "topPick": "TBL Win",
+    "valueBet": false,
+    "narrative": "Florida rivalry matchup; models are split and near-even — slight home edge but not enough edge over market to warrant a value call."
+  },
+  {
+    "id": "match-11",
+    "sport": "rugby",
+    "league": "Premiership",
+    "home": { "name": "Saracens", "code": "SAR" },
+    "away": { "name": "Exeter Chiefs", "code": "EXE" },
+    "kickoff": "2026-05-29T14:00:00.000Z",
+    "odds": [
+      { "bookCode": "WH", "price": 1.70, "market": "1" },
+      { "bookCode": "UB", "price": 1.68, "market": "1" }
+    ],
+    "model": { "elo": 0.61, "poisson": 0.58, "xg": 0.63, "ensemble": 0.61, "confidence": 0.78 },
+    "topPick": "Saracens Win",
+    "valueBet": true,
+    "narrative": "Saracens' set-piece dominance at StoneX creates sustained pressure; ELO-adjusted probability exceeds market implied probability by 4 points, making home win +EV."
+  },
+  {
+    "id": "match-12",
+    "sport": "soccer",
+    "league": "EPL",
+    "home": { "name": "Manchester City", "code": "MCI" },
+    "away": { "name": "Liverpool", "code": "LIV" },
+    "kickoff": "2026-05-30T16:30:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 1.90, "market": "1" },
+      { "bookCode": "BW", "price": 1.88, "market": "1" },
+      { "bookCode": "WH", "price": 1.85, "market": "1" }
+    ],
+    "model": { "elo": 0.53, "poisson": 0.51, "xg": 0.54, "ensemble": 0.53, "confidence": 0.67 },
+    "topPick": "Over 2.5 Goals",
+    "valueBet": true,
+    "narrative": "Classic six-pointer; both teams' attacking output over last 5 meetings averages 3.2 goals — Over 2.5 at 1.75 is the value angle not the match result."
+  },
+  {
+    "id": "match-13",
+    "sport": "soccer",
+    "league": "LaLiga",
+    "home": { "name": "Barcelona", "code": "BAR" },
+    "away": { "name": "Sevilla", "code": "SEV" },
+    "kickoff": "2026-05-31T16:15:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 1.55, "market": "1" },
+      { "bookCode": "WH", "price": 1.58, "market": "1" }
+    ],
+    "model": { "elo": 0.68, "poisson": 0.65, "xg": 0.70, "ensemble": 0.68, "confidence": 0.88 },
+    "topPick": "BAR Win",
+    "valueBet": false,
+    "narrative": "Barcelona's Camp Nou form this season has been imperious; Sevilla's defensive issues away from home make this a confident but fairly-priced home win."
+  },
+  {
+    "id": "match-14",
+    "sport": "tennis",
+    "league": "ATP",
+    "home": { "name": "Jannik Sinner", "code": "JNS" },
+    "away": { "name": "Alexander Zverev", "code": "AZV" },
+    "kickoff": "2026-06-01T11:00:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 1.72, "market": "1" },
+      { "bookCode": "UB", "price": 1.75, "market": "1" }
+    ],
+    "model": { "elo": 0.59, "poisson": 0.57, "xg": 0.60, "ensemble": 0.59, "confidence": 0.75 },
+    "topPick": "Sinner Win",
+    "valueBet": false,
+    "narrative": "Sinner's clay form this season and consistent service hold make him a moderate favorite; model aligns well with the offered price at 1.72."
+  },
+  {
+    "id": "match-15",
+    "sport": "soccer",
+    "league": "Bundesliga",
+    "home": { "name": "Bayer Leverkusen", "code": "B04" },
+    "away": { "name": "RB Leipzig", "code": "RBL" },
+    "kickoff": "2026-06-01T14:30:00.000Z",
+    "odds": [
+      { "bookCode": "WH", "price": 1.78, "market": "1" },
+      { "bookCode": "PN", "price": 1.75, "market": "1" },
+      { "bookCode": "BW", "price": 1.80, "market": "1" }
+    ],
+    "model": { "elo": 0.56, "poisson": 0.54, "xg": 0.58, "ensemble": 0.56, "confidence": 0.72 },
+    "topPick": "Leverkusen Win",
+    "valueBet": true,
+    "narrative": "Leverkusen's fluid 4-2-3-1 exploits Leipzig's high defensive line; recent home xG strongly favors the hosts and 1.78 offers marginal but actionable value."
+  },
+  {
+    "id": "match-16",
+    "sport": "hockey",
+    "league": "NHL",
+    "home": { "name": "Colorado Avalanche", "code": "COL" },
+    "away": { "name": "Vegas Golden Knights", "code": "VGK" },
+    "kickoff": "2026-06-02T02:00:00.000Z",
+    "odds": [
+      { "bookCode": "DK", "price": 1.98, "market": "1" },
+      { "bookCode": "FD", "price": 2.00, "market": "1" }
+    ],
+    "model": { "elo": 0.52, "poisson": 0.50, "xg": 0.53, "ensemble": 0.52, "confidence": 0.61 },
+    "topPick": "Colorado Win",
+    "valueBet": false,
+    "narrative": "Playoff atmosphere in Denver; ensemble near coinflip territory but home ice advantage tips the narrow probability toward Colorado at even money."
+  },
+  {
+    "id": "match-17",
+    "sport": "rugby",
+    "league": "Premiership",
+    "home": { "name": "Bath Rugby", "code": "BAT" },
+    "away": { "name": "Harlequins", "code": "HRL" },
+    "kickoff": "2026-06-02T14:30:00.000Z",
+    "odds": [
+      { "bookCode": "WH", "price": 1.65, "market": "1" },
+      { "bookCode": "UB", "price": 1.67, "market": "1" }
+    ],
+    "model": { "elo": 0.63, "poisson": 0.60, "xg": 0.64, "ensemble": 0.62, "confidence": 0.80 },
+    "topPick": "Bath Win",
+    "valueBet": false,
+    "narrative": "Bath's home record and forward pack make them consistent favorites at The Rec; market fairly prices the 63% win probability and no value edge exists."
+  },
+  {
+    "id": "match-18",
+    "sport": "soccer",
+    "league": "SerieA",
+    "home": { "name": "Napoli", "code": "NAP" },
+    "away": { "name": "Juventus", "code": "JUV" },
+    "kickoff": "2026-06-03T19:45:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 2.20, "market": "1" },
+      { "bookCode": "WH", "price": 2.15, "market": "1" },
+      { "bookCode": "UB", "price": 2.18, "market": "1" }
+    ],
+    "model": { "elo": 0.48, "poisson": 0.47, "xg": 0.50, "ensemble": 0.48, "confidence": 0.58 },
+    "topPick": "Draw or Away",
+    "valueBet": true,
+    "narrative": "Juventus' defensive solidity on the road and Napoli's inconsistent form this season mean the market overvalues the home side at 2.20; X2 at 1.55 is the value angle."
+  },
+  {
+    "id": "match-19",
+    "sport": "basketball",
+    "league": "NBA",
+    "home": { "name": "Indiana Pacers", "code": "IND" },
+    "away": { "name": "New York Knicks", "code": "NYK" },
+    "kickoff": "2026-06-04T00:30:00.000Z",
+    "odds": [
+      { "bookCode": "DK", "price": 2.05, "market": "1" },
+      { "bookCode": "FD", "price": 2.00, "market": "1" }
+    ],
+    "model": { "elo": 0.50, "poisson": 0.49, "xg": 0.51, "ensemble": 0.50, "confidence": 0.59 },
+    "topPick": "Indiana Win",
+    "valueBet": false,
+    "narrative": "Indiana's pace creates issues for Knicks' half-court defense; near-even matchup with models essentially a coin flip — no strong edge to exploit at current prices."
+  },
+  {
+    "id": "match-20",
+    "sport": "soccer",
+    "league": "Ligue1",
+    "home": { "name": "Lyon", "code": "OL" },
+    "away": { "name": "Monaco", "code": "ASM" },
+    "kickoff": "2026-06-04T19:00:00.000Z",
+    "odds": [
+      { "bookCode": "UB", "price": 2.40, "market": "1" },
+      { "bookCode": "WH", "price": 2.35, "market": "1" }
+    ],
+    "model": { "elo": 0.44, "poisson": 0.42, "xg": 0.45, "ensemble": 0.44, "confidence": 0.55 },
+    "topPick": "Monaco Win or Draw",
+    "valueBet": true,
+    "narrative": "Lyon's home struggles and Monaco's consistent away performances this season create a value angle on the visitor; ensemble slightly favors Monaco despite the away tag."
+  },
+  {
+    "id": "match-21",
+    "sport": "tennis",
+    "league": "ATP",
+    "home": { "name": "Rafael Nadal", "code": "RFN" },
+    "away": { "name": "Daniil Medvedev", "code": "DIM" },
+    "kickoff": "2026-06-05T10:00:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 1.60, "market": "1" },
+      { "bookCode": "WH", "price": 1.63, "market": "1" }
+    ],
+    "model": { "elo": 0.64, "poisson": 0.62, "xg": 0.65, "ensemble": 0.64, "confidence": 0.83 },
+    "topPick": "Nadal Win",
+    "valueBet": false,
+    "narrative": "Roland Garros conditions massively favor Nadal; surface-adjusted ELO gives him substantial edge and the market reflects that accurately — no overlay available."
+  },
+  {
+    "id": "match-22",
+    "sport": "football",
+    "league": "NFL",
+    "home": { "name": "Dallas Cowboys", "code": "DAL" },
+    "away": { "name": "Philadelphia Eagles", "code": "PHI" },
+    "kickoff": "2026-06-05T23:30:00.000Z",
+    "odds": [
+      { "bookCode": "DK", "price": 2.30, "market": "1" },
+      { "bookCode": "FD", "price": 2.25, "market": "1" }
+    ],
+    "model": { "elo": 0.46, "poisson": 0.44, "xg": 0.47, "ensemble": 0.46, "confidence": 0.60 },
+    "topPick": "Eagles Win",
+    "valueBet": true,
+    "narrative": "Division rivalry with Eagles having a better offensive line and Dallas struggling on third-down conversion; Away win at 1.90 is significantly undervalued by the market."
+  },
+  {
+    "id": "match-23",
+    "sport": "soccer",
+    "league": "EPL",
+    "home": { "name": "Tottenham", "code": "TOT" },
+    "away": { "name": "Manchester United", "code": "MNU" },
+    "kickoff": "2026-06-06T14:00:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 2.10, "market": "1" },
+      { "bookCode": "WH", "price": 2.05, "market": "1" }
+    ],
+    "model": { "elo": 0.50, "poisson": 0.48, "xg": 0.51, "ensemble": 0.50, "confidence": 0.62 },
+    "topPick": "Draw",
+    "valueBet": false,
+    "narrative": "Both clubs in mid-table form; draw at 3.20 is the statistical favorite according to Poisson with neither side showing consistent enough form to back at current prices."
+  },
+  {
+    "id": "match-24",
+    "sport": "hockey",
+    "league": "NHL",
+    "home": { "name": "New York Rangers", "code": "NYR" },
+    "away": { "name": "Carolina Hurricanes", "code": "CAR" },
+    "kickoff": "2026-06-07T00:00:00.000Z",
+    "odds": [
+      { "bookCode": "DK", "price": 1.95, "market": "1" },
+      { "bookCode": "FD", "price": 1.92, "market": "1" }
+    ],
+    "model": { "elo": 0.54, "poisson": 0.52, "xg": 0.55, "ensemble": 0.54, "confidence": 0.69 },
+    "topPick": "Rangers Win",
+    "valueBet": true,
+    "narrative": "Madison Square Garden playoff crowd plus Shesterkin's goals-saved-above-average numbers tilt probability toward New York; 1.95 provides marginal +EV on the home side."
+  },
+  {
+    "id": "match-25",
+    "sport": "soccer",
+    "league": "Bundesliga",
+    "home": { "name": "Borussia Monchengladbach", "code": "BMG" },
+    "away": { "name": "Wolfsburg", "code": "WOL" },
+    "kickoff": "2026-06-07T14:30:00.000Z",
+    "odds": [
+      { "bookCode": "WH", "price": 2.00, "market": "1" },
+      { "bookCode": "PN", "price": 1.97, "market": "1" }
+    ],
+    "model": { "elo": 0.51, "poisson": 0.50, "xg": 0.52, "ensemble": 0.51, "confidence": 0.63 },
+    "topPick": "Home Win or Draw",
+    "valueBet": false,
+    "narrative": "Mid-table Bundesliga fixture with comparable squads; neither side has strong home or away form — no clear value angle in any market for this encounter."
+  },
+  {
+    "id": "match-26",
+    "sport": "rugby",
+    "league": "Top14",
+    "home": { "name": "Stade Toulousain", "code": "TLS" },
+    "away": { "name": "La Rochelle", "code": "LRO" },
+    "kickoff": "2026-06-08T16:00:00.000Z",
+    "odds": [
+      { "bookCode": "WH", "price": 1.60, "market": "1" },
+      { "bookCode": "UB", "price": 1.62, "market": "1" }
+    ],
+    "model": { "elo": 0.64, "poisson": 0.61, "xg": 0.66, "ensemble": 0.64, "confidence": 0.84 },
+    "topPick": "Toulouse Win",
+    "valueBet": true,
+    "narrative": "Toulouse's fortress at Stade Ernest-Wallon and dominant scrum have produced 11 consecutive home wins; 1.62 slightly undervalues their 64% probability — quality +EV pick."
+  },
+  {
+    "id": "match-27",
+    "sport": "basketball",
+    "league": "NBA",
+    "home": { "name": "Cleveland Cavaliers", "code": "CLE" },
+    "away": { "name": "Detroit Pistons", "code": "DET" },
+    "kickoff": "2026-06-08T23:00:00.000Z",
+    "odds": [
+      { "bookCode": "DK", "price": 1.55, "market": "1" },
+      { "bookCode": "FD", "price": 1.52, "market": "1" }
+    ],
+    "model": { "elo": 0.68, "poisson": 0.66, "xg": 0.69, "ensemble": 0.68, "confidence": 0.86 },
+    "topPick": "Cleveland Win",
+    "valueBet": false,
+    "narrative": "Cleveland's improved defensive rating and homecourt advantage vs a young Pistons team rebuilding on the fly — high confidence but market prices this accurately."
+  },
+  {
+    "id": "match-28",
+    "sport": "soccer",
+    "league": "SerieA",
+    "home": { "name": "Lazio", "code": "LAZ" },
+    "away": { "name": "Roma", "code": "ROM" },
+    "kickoff": "2026-06-09T18:45:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 2.25, "market": "1" },
+      { "bookCode": "WH", "price": 2.20, "market": "1" },
+      { "bookCode": "UB", "price": 2.22, "market": "1" }
+    ],
+    "model": { "elo": 0.47, "poisson": 0.45, "xg": 0.49, "ensemble": 0.47, "confidence": 0.58 },
+    "topPick": "Roma Win or Draw",
+    "valueBet": true,
+    "narrative": "Derby della Capitale; Roma's tactical discipline away and Lazio's inconsistent home form this season mean the market overvalues Lazio — X2 presents solid overlay value."
+  },
+  {
+    "id": "match-29",
+    "sport": "tennis",
+    "league": "ATP",
+    "home": { "name": "Holger Rune", "code": "HOR" },
+    "away": { "name": "Tommy Paul", "code": "TOP" },
+    "kickoff": "2026-06-09T10:00:00.000Z",
+    "odds": [
+      { "bookCode": "PN", "price": 1.80, "market": "1" },
+      { "bookCode": "UB", "price": 1.82, "market": "1" }
+    ],
+    "model": { "elo": 0.57, "poisson": 0.55, "xg": 0.58, "ensemble": 0.57, "confidence": 0.73 },
+    "topPick": "Rune Win",
+    "valueBet": false,
+    "narrative": "Rune's clay game has improved markedly; surface xG-adjusted model gives him a moderate edge over Paul whose best surfaces are hard courts."
+  },
+  {
+    "id": "match-30",
+    "sport": "football",
+    "league": "NFL",
+    "home": { "name": "Baltimore Ravens", "code": "BAL" },
+    "away": { "name": "Cincinnati Bengals", "code": "CIN" },
+    "kickoff": "2026-06-10T20:15:00.000Z",
+    "odds": [
+      { "bookCode": "DK", "price": 1.75, "market": "1" },
+      { "bookCode": "FD", "price": 1.78, "market": "1" }
+    ],
+    "model": { "elo": 0.60, "poisson": 0.57, "xg": 0.62, "ensemble": 0.60, "confidence": 0.79 },
+    "topPick": "Ravens Win",
+    "valueBet": true,
+    "narrative": "Lamar Jackson's dual-threat capability at M&T Bank Stadium is consistently exploited vs Cincy's linebacker corps; ensemble gives Baltimore a 60% edge and 1.75 is +EV."
+  }
+]
