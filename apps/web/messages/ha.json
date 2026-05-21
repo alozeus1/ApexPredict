@@ -1,0 +1,33 @@
+{
+  "_meta": { "status": "stub" },
+  "nav": {
+    "predictions": "Hasashe",
+    "methodology": "Hanyar Aiki",
+    "backtest": "Gwajin Tarihi",
+    "network": "Hanyar Sadarwa",
+    "dashboard": "Allon Kallo",
+    "premium": "Premium",
+    "howToUse": "Yadda Ake Amfani",
+    "help": "Taimako",
+    "settings": "Saiti"
+  },
+  "hero": {
+    "pill": "{n} wakilan suna aiki • {events}",
+    "title": "An Gina Akan Fa'idar Lissafi",
+    "subtitle": "Hankali na AI na Wasannin Motsa Jiki — ELO + Poisson + xG ensemble. Ba mai caca ba. 18+ kawai.",
+    "ctaPrimary": "Ajiye Kujerar Premium",
+    "ctaSecondary": "Duba Hasashen Live"
+  },
+  "predictions": { "heading": "Hasashen Kai Tsaye", "modelLine": "Model: Poisson-xG v3.2 • an sabunta kowace 2h", "openFull": "Buɗe Cikakkun Hasashe →" },
+  "methodology": { "heading": "Hanyarmu", "intro": "Manyan samfura guda uku. Ƙarshen ƙungiya ɗaya. ¼ Kelly don amincin bankroll.", "ensemble": "Ƙarshen ƙungiya", "kellyTitle": "Cajin Kelly", "kellyFormula": "b = ƙima − 1, p = yiwuwa, q = 1 − p — muna amfani da ¼ Kelly don aminci." },
+  "backtest": { "heading": "Gwajin Tarihi", "disclaimer": "Yana kwaikwayon cajin $10 a kan wasanni 10 na tarihi. Aikin da ya gabata ≠ gaba." },
+  "stats": { "heading": "Lambobin da ke Magana" },
+  "network": { "heading": "Gidin Hankali na Kai Tsaye", "intro": "Wakilan kai tsaye 14. Sabuntawa kowace awanni 2 ba tare da sa hannun ɗan adam ba." },
+  "premium": { "heading": "Fasalolin Premium", "regionNote": "Musamman farashi na Afirka ta hanyar daidaituwar PPP.", "ctaReserve": "Ajiye Kujerar Premium", "ctaFree": "Fara Kyauta" },
+  "howToUse": { "heading": "Yadda Ake Amfani da ApexPredix", "step1Title": "Zaɓi yankinku", "step1Body": "Muna daidaita farashi da shawarar littafin caca zuwa inda kuke.", "step2Title": "Duba hasashe", "step2Body": "Hasashe na kai tsaye da aka sabunta kowace awanni biyu ta hanyar wakilan kai tsaye.", "step3Title": "Sami cajin darajar", "step3Body": "Lokacin da kasuwa ta saɓa wa ƙirar, cajin yana haskakawa.", "step4Title": "Caca da hankali", "step4Body": "Muna amfani da ¼ Kelly. Saita iyakokin adana. Huta. 18+." },
+  "cta": { "heading": "Shiga Cikin Majalisar", "counter": "{count} masu bincike da masu caca suna jerin sunayen jira.", "emailLabel": "Imel", "emailPlaceholder": "kai@misali.com", "eighteen": "Ina da shekaru 18+", "submit": "Ajiye wurina", "footnote": "Ba za mu taɓa raba imelinku ba. ApexPredix AI sabis ne na bincike, ba ma'aikacin caca ba." },
+  "footer": { "powered": "Powered by Maralito Labs", "rgs": "Albarkatun caca mai alhakin" },
+  "settings": { "title": "Saiti", "language": "Harshe", "theme": "Jigo", "region": "Yanki", "manageCookies": "Sarrafa kukis", "close": "Rufe" },
+  "ageGate": { "heading": "Kuna da shekaru 18 ko fiye?", "subtitle": "ApexPredix AI an yi shi ne don manya kawai.", "yes": "Ina da 18 ko fiye", "no": "Ina ƙasa da 18" },
+  "blocked": { "heading": "Ba shi da samuwa a yankinku", "body": "Ba za mu iya ba da ApexPredix AI a nan ba. Da fatan a tuntuɓi legal@apexpredix.ai." }
+}

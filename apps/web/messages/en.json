@@ -1,0 +1,33 @@
+{
+  "_meta": { "status": "stable" },
+  "nav": {
+    "predictions": "Predictions",
+    "methodology": "Methodology",
+    "backtest": "Backtest",
+    "network": "Network",
+    "dashboard": "Dashboard",
+    "premium": "Premium",
+    "howToUse": "How to Use",
+    "help": "Help",
+    "settings": "Settings"
+  },
+  "hero": {
+    "pill": "{n} agents active • {events}",
+    "title": "Built on Mathematical Edge",
+    "subtitle": "AI Sports Intelligence — built on ELO + Poisson + xG ensemble. Not a gambling operator. 18+ only.",
+    "ctaPrimary": "Reserve Premium Seat",
+    "ctaSecondary": "See Live Predictions"
+  },
+  "predictions": { "heading": "Live Predictions", "modelLine": "Model: Poisson-xG v3.2 • refreshed every 2h", "openFull": "Open Full Predictions →" },
+  "methodology": { "heading": "Our Approach", "intro": "Three independent models. One ensemble verdict. ¼ Kelly for bankroll safety.", "ensemble": "Ensemble verdict", "kellyTitle": "Kelly Criterion Staking", "kellyFormula": "b = odds − 1, p = probability, q = 1 − p — we use ¼ Kelly for safety." },
+  "backtest": { "heading": "Historical Backtesting", "disclaimer": "Simulates $10 flat stake on each of 10 historical matches. Past performance ≠ future." },
+  "stats": { "heading": "Numbers That Speak" },
+  "network": { "heading": "Live Intelligence Grid", "intro": "14 autonomous agents. 2.4M events/hr. Self-update every 2 hours. No human intervention needed." },
+  "premium": { "heading": "Premium Features", "regionNote": "Special African pricing applied via PPP adjustment.", "ctaReserve": "Reserve Premium Seat", "ctaFree": "Start Free" },
+  "howToUse": { "heading": "How to Use ApexPredix", "step1Title": "Pick your region", "step1Body": "We tailor pricing and bookmaker recommendations to where you are.", "step2Title": "Browse predictions", "step2Body": "Live forecasts updated every two hours by autonomous agents.", "step3Title": "See value bets", "step3Body": "When the market disagrees with the model, the chip lights up.", "step4Title": "Stake responsibly", "step4Body": "We use ¼ Kelly. Set deposit limits. Take breaks. 18+." },
+  "cta": { "heading": "Join the Inner Circle", "counter": "{count} analysts and bettors are on the waitlist.", "emailLabel": "Email", "emailPlaceholder": "you@example.com", "eighteen": "I am 18+", "submit": "Reserve my seat", "footnote": "We never share your email. ApexPredix AI is an analytics service, not a gambling operator." },
+  "footer": { "powered": "Powered by Maralito Labs", "rgs": "Responsible gambling resources" },
+  "settings": { "title": "Settings", "language": "Language", "theme": "Theme", "region": "Region", "manageCookies": "Manage cookies", "close": "Close" },
+  "ageGate": { "heading": "Are you 18 or older?", "subtitle": "ApexPredix AI is intended for adults only.", "yes": "I am 18 or older", "no": "I am under 18" },
+  "blocked": { "heading": "Unavailable in your region", "body": "We're not able to offer ApexPredix AI here. Please contact legal@apexpredix.ai for jurisdictional inquiries." }
+}

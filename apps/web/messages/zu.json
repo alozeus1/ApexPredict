@@ -1,0 +1,33 @@
+{
+  "_meta": { "status": "stub" },
+  "nav": {
+    "predictions": "Iziphrofetho",
+    "methodology": "Indlela Yokwenza",
+    "backtest": "Ukuhlola Umlando",
+    "network": "Inethiwekhi",
+    "dashboard": "Ibhodi Yokulawula",
+    "premium": "Premium",
+    "howToUse": "Indlela Yokusebenzisa",
+    "help": "Usizo",
+    "settings": "Izilungiselelo"
+  },
+  "hero": {
+    "pill": "{n} abameleli basebenza • {events}",
+    "title": "Yakhiwe Phezu Kwenqlawulo Yezibalo",
+    "subtitle": "Ulwazi lwe-AI lweMidlalo — ELO + Poisson + xG ensemble. Asiyona inkampani yokuqhatha. 18+ kuphela.",
+    "ctaPrimary": "Gcina Isihlalo se-Premium",
+    "ctaSecondary": "Buka Iziphrofetho Ezibukhoma"
+  },
+  "predictions": { "heading": "Iziphrofetho Ezibukhoma", "modelLine": "Imodeli: Poisson-xG v3.2 • ibuyekeziwe njalo nge-2h", "openFull": "Vula Iziphrofetho Eziphelele →" },
+  "methodology": { "heading": "Indlela Yethu", "intro": "Izimodi ezintathu ezizihlukile. Isinqumo esisodwa se-ensemble. ¼ Kelly ukuze kube nokuphepha.", "ensemble": "Isinqumo se-ensemble", "kellyTitle": "Ukukhweshwa kwe-Kelly", "kellyFormula": "b = amakhodi − 1, p = amathuba, q = 1 − p — sisebenzisa ¼ Kelly ukuze kube nokuphepha." },
+  "backtest": { "heading": "Ukuhlola Umlando", "disclaimer": "Ilingisa ukukhweshwa kwe-$10 kuwo wonke amadlalo ayi-10 omlando. Ukusebenza kwedlule ≠ ikusasa." },
+  "stats": { "heading": "Izinombolo Ezikhulumayo" },
+  "network": { "heading": "Isihlaka Solwazi Esibukhoma", "intro": "Abameleli abayi-14 abasebenza ngokuzimela. Ibuyekeziwa njalo ngemahora amabili." },
+  "premium": { "heading": "Izici ze-Premium", "regionNote": "Intengo ekhethekile yaseAfrika ihlelwa nge-PPP.", "ctaReserve": "Gcina Isihlalo se-Premium", "ctaFree": "Qala Mahhala" },
+  "howToUse": { "heading": "Indlela Yokusebenzisa i-ApexPredix", "step1Title": "Khetha isifunda sakho", "step1Body": "Silungisa amanani nezincomo zencwadi yokuqhatha ngendawo yakho.", "step2Title": "Bheka iziphrofetho", "step2Body": "Iziphrofetho ezibukhoma ezibuyekeziwa njalo ngemahora amabili.", "step3Title": "Thola ukubheja kwexabiso", "step3Body": "Uma imakethe ingavumelani nemodeli, inhlaka iyakhanya.", "step4Title": "Bheja ngokuqondile", "step4Body": "Sisebenzisa ¼ Kelly. Misa imikhawulo yokugcina. Phumula. 18+." },
+  "cta": { "heading": "Joyina Iqembu Elingaphakathi", "counter": "{count} abahlaziya nabantu ababheja basendleleni yokulinda.", "emailLabel": "I-imeyili", "emailPlaceholder": "wena@isibonelo.com", "eighteen": "Ngineminyaka engu-18+", "submit": "Gcina indawo yami", "footnote": "Asisoze sabelane nge-imeyili yakho. I-ApexPredix AI iyinsiza yokuhlaziya, hhayi umshayeli wokuqhatha." },
+  "footer": { "powered": "Powered by Maralito Labs", "rgs": "Izinsiza zokuqhatha ngokuqondile" },
+  "settings": { "title": "Izilungiselelo", "language": "Ulimi", "theme": "Itheme", "region": "Isifunda", "manageCookies": "Phatha ama-cookies", "close": "Vala" },
+  "ageGate": { "heading": "Uneminyaka engu-18 noma edlule?", "subtitle": "I-ApexPredix AI ihloselwe abantu abadala kuphela.", "yes": "Ngineminyaka engu-18 noma edlule", "no": "Ngikhinyabeza iminyaka engu-18" },
+  "blocked": { "heading": "Akutholakali esifundeni sakho", "body": "Asisakwazi ukukunikeza i-ApexPredix AI lapha. Sicela uxhumane no-legal@apexpredix.ai." }
+}

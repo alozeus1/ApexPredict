@@ -1,0 +1,33 @@
+{
+  "_meta": { "status": "stub" },
+  "nav": {
+    "predictions": "Àsọtẹlẹ",
+    "methodology": "Ọ̀nà Ìmọ̀",
+    "backtest": "Ìdánwò Àkọ́kọ́",
+    "network": "Nẹtiwọ́ọ̀kì",
+    "dashboard": "Pánẹ́ẹ̀lì",
+    "premium": "Premium",
+    "howToUse": "Bí a ṣe n lò",
+    "help": "Ìrànlọ́wọ́",
+    "settings": "Ètò"
+  },
+  "hero": {
+    "pill": "{n} àwọn aṣojú ṣiṣẹ́ • {events}",
+    "title": "Tí a Kọ́ lori Ẹ̀bùn Ìṣirò",
+    "subtitle": "Ọgbọ́n Eré Ìdárayá AI — ELO + Poisson + xG ensemble. Kìí ṣe alágbáta tẹ̀tẹ́. 18+ nìkan.",
+    "ctaPrimary": "Fi orúkọ sílẹ̀ fún Àgbàdo Premium",
+    "ctaSecondary": "Wo Àsọtẹlẹ Alálòóò"
+  },
+  "predictions": { "heading": "Àsọtẹlẹ Alálòóò", "modelLine": "Àwòṣe: Poisson-xG v3.2 • ìmúdójúìwọ̀n lójoojúmọ́ 2h", "openFull": "Ṣí Àsọtẹlẹ Gbogbo →" },
+  "methodology": { "heading": "Ọ̀nà Wa", "intro": "Àwọn àwòṣe mẹ́ta tó yàtọ̀. Ìdájọ́ ensemble kan. ¼ Kelly fún ààbò.", "ensemble": "Ìdájọ́ ensemble", "kellyTitle": "Ìdóko Kelly", "kellyFormula": "b = ìrékọjá − 1, p = ìṣeéṣe, q = 1 − p — a lò ¼ Kelly fún ààbò." },
+  "backtest": { "heading": "Ìdánwò Ìtàn", "disclaimer": "Ṣe àfihàn ìdóko $10 lórí àwọn eré 10 tó ti kọjá. Iṣẹ́ tó kọjá ≠ ọjọ́ iwájú." },
+  "stats": { "heading": "Àwọn Nọ́mbà Tó Sọ Ohun" },
+  "network": { "heading": "Àgbáyé Ọgbọ́n Alálòóò", "intro": "Àwọn aṣojú 14 tó ń ṣiṣẹ́ fúnra wọn. Ìmúdójúìwọ̀n lójoojúmọ́ 2 wákàtí." },
+  "premium": { "heading": "Àwọn Ẹ̀yà Premium", "regionNote": "Iye owó pàtàkì fún Áfíríkà.", "ctaReserve": "Fi orúkọ sílẹ̀ fún Àgbàdo Premium", "ctaFree": "Bẹ̀rẹ̀ Lọ́fẹ̀ẹ́" },
+  "howToUse": { "heading": "Bí a ṣe n lò ApexPredix", "step1Title": "Yan àgbègbè rẹ", "step1Body": "A ṣe àwọn iye ati ìmọ̀ràn fún ibiti o wà.", "step2Title": "Wo àsọtẹlẹ", "step2Body": "Àwọn àsọtẹlẹ alálòóò tí a mú dójúìwọ̀n lójoojúmọ́ 2h.", "step3Title": "Rí àwọn tẹ̀tẹ́ iye", "step3Body": "Nígbà tí ọjà ba yàtọ̀ sí àwòṣe, chip náà máa ń tàn.", "step4Title": "Tẹ̀tẹ́ pẹ̀lù ọgbọ́n", "step4Body": "A lò ¼ Kelly. Ṣeto àwọn ìdiwọ̀n. Sinmi. 18+." },
+  "cta": { "heading": "Darapọ̀ mọ́ Àyíká Abẹ́lé", "counter": "{count} àwọn onínúuuru ati àwọn oníṣẹ́ tẹ̀tẹ́ wà ní ìdúró.", "emailLabel": "Ímeèlì", "emailPlaceholder": "ẹ@àpẹẹrẹ.com", "eighteen": "Mo jẹ́ 18+", "submit": "Fi orúkọ mi sílẹ̀", "footnote": "A kò ní pín ímeèlì rẹ. ApexPredix AI jẹ́ iṣẹ́ ìmọ̀ kíkọ̀, kì í ṣe alágbáta tẹ̀tẹ́." },
+  "footer": { "powered": "Powered by Maralito Labs", "rgs": "Àwọn ohun àmúlò tẹ̀tẹ́ tó bọ́gbọ́n mu" },
+  "settings": { "title": "Ètò", "language": "Èdè", "theme": "Àwòṣe Àwọ̀", "region": "Àgbègbè", "manageCookies": "Ṣàkóso cookies", "close": "Pa" },
+  "ageGate": { "heading": "Ṣé o jẹ́ 18 tàbí ju bẹ́ẹ̀ lọ?", "subtitle": "ApexPredix AI jẹ́ fún àwọn àgbàlagbà nìkan.", "yes": "Mo jẹ́ 18 tàbí ju bẹ́ẹ̀ lọ", "no": "Mo kéré sí 18" },
+  "blocked": { "heading": "Kò sí ní àgbègbè rẹ", "body": "A kò lè pèsè ApexPredix AI níbí. Kan sí legal@apexpredix.ai." }
+}
