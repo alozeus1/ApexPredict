@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "capture:stills": "tsx scripts/capture-reel-stills.ts",
     "clean": "rm -rf .next .turbo"
   },
   "dependencies": {
@@ -52,6 +53,7 @@
     "autoprefixer": "10.4.20",
     "postcss": "8.4.49",
     "tailwindcss": "3.4.17",
-    "typescript": "5.6.3"
+    "typescript": "5.6.3",
+    "tsx": "4.19.2"
   }
 }
