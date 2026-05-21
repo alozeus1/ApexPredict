@@ -1,0 +1,15 @@
+[
+  { "code": "PN",  "name": "Pinnacle",     "regions": ["EU","GB"],           "deeplink": "https://www.pinnacle.com/en/soccer/matchups/", "logoUrl": "/media/books/pinnacle.svg" },
+  { "code": "DK",  "name": "DraftKings",   "regions": ["US"],                "deeplink": "https://sportsbook.draftkings.com/",          "logoUrl": "/media/books/draftkings.svg" },
+  { "code": "FD",  "name": "FanDuel",      "regions": ["US"],                "deeplink": "https://sportsbook.fanduel.com/",             "logoUrl": "/media/books/fanduel.svg" },
+  { "code": "BW",  "name": "Betway ZA",    "regions": ["ZA"],                "deeplink": "https://www.betway.co.za/",                   "logoUrl": "/media/books/betway.svg" },
+  { "code": "BWK", "name": "Betway KE",    "regions": ["KE"],                "deeplink": "https://www.betway.co.ke/",                   "logoUrl": "/media/books/betway.svg" },
+  { "code": "HWB", "name": "Hollywood",    "regions": ["ZA"],                "deeplink": "https://www.hollywoodbets.net/",              "logoUrl": "/media/books/hollywoodbets.svg" },
+  { "code": "WH",  "name": "William Hill", "regions": ["GB","EU"],           "deeplink": "https://sports.williamhill.com/",             "logoUrl": "/media/books/williamhill.svg" },
+  { "code": "UB",  "name": "Unibet",       "regions": ["EU","GB"],           "deeplink": "https://www.unibet.com/",                     "logoUrl": "/media/books/unibet.svg" },
+  { "code": "SB",  "name": "SportyBet",    "regions": ["NG","KE","ZA"],      "deeplink": "https://www.sportybet.com/ng/",               "logoUrl": "/media/books/sportybet.svg" },
+  { "code": "B9",  "name": "Bet9ja",       "regions": ["NG"],                "deeplink": "https://www.bet9ja.com/",                     "logoUrl": "/media/books/bet9ja.svg" },
+  { "code": "BK",  "name": "BetKing",      "regions": ["NG","KE"],           "deeplink": "https://www.betking.com/",                    "logoUrl": "/media/books/betking.svg" },
+  { "code": "NB",  "name": "Nairabet",     "regions": ["NG"],                "deeplink": "https://www.nairabet.com/",                   "logoUrl": "/media/books/nairabet.svg" },
+  { "code": "SP",  "name": "SportPesa",    "regions": ["KE"],                "deeplink": "https://www.sportpesa.com/",                  "logoUrl": "/media/books/sportpesa.svg" }
+]
