@@ -1,0 +1,8 @@
+[
+  { "region": "US", "currency": "USD", "monthly": 29,    "yearly": 290,    "pctOffBase": 0  },
+  { "region": "GB", "currency": "GBP", "monthly": 24,    "yearly": 240,    "pctOffBase": 0  },
+  { "region": "EU", "currency": "EUR", "monthly": 27,    "yearly": 270,    "pctOffBase": 0  },
+  { "region": "NG", "currency": "NGN", "monthly": 6500,  "yearly": 65000,  "pctOffBase": 85 },
+  { "region": "ZA", "currency": "ZAR", "monthly": 199,   "yearly": 1990,   "pctOffBase": 60 },
+  { "region": "KE", "currency": "KES", "monthly": 990,   "yearly": 9900,   "pctOffBase": 60 }
+]
