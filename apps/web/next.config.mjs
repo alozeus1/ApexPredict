@@ -6,7 +6,6 @@ const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'tr
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  experimental: { typedRoutes: true },
   images: { formats: ['image/avif', 'image/webp'] },
   async headers() {
     return [
