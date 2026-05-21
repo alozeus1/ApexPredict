@@ -1,6 +1,12 @@
 import Link from 'next/link';
+import { MatchCard } from '@/components/match/MatchCard';
+import fixtures from '@/data/fixtures.json';
+import type { Match } from '@apexpredix/types';
 
-export function PredictionsPreview() {
+interface Props { locale: string; }
+
+export function PredictionsPreview({ locale }: Props) {
+  const featured = (fixtures as Match[]).filter((m) => m.featured).slice(0, 6);
   return (
     <section id="predictions" className="border-b border-white/5">
       <div className="mx-auto max-w-6xl px-6 py-20">
@@ -14,13 +20,7 @@ export function PredictionsPreview() {
           </Link>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }, (_, i) => (
-            <div
-              key={i}
-              data-testid="match-card-placeholder"
-              className="aspect-[16/11] rounded-2xl bg-ink-1 ring-1 ring-white/10"
-            />
-          ))}
+          {featured.map((m) => <MatchCard key={m.id} match={m} locale={locale} />)}
         </div>
       </div>
     </section>

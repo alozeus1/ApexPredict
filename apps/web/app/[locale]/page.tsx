@@ -11,14 +11,15 @@ import { Footer } from '@/components/Footer';
 import { Sidebar } from '@/components/nav/Sidebar';
 import { MobileNav } from '@/components/nav/MobileNav';
 
-export default function Home() {
+export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   return (
     <>
       <Sidebar pathname="/" />
       <MobileNav pathname="/" />
       <main id="main" className="lg:pl-64">
         <Hero />
-        <PredictionsPreview />
+        <PredictionsPreview locale={locale} />
         <Methodology />
         <Backtest />
         <Stats />
