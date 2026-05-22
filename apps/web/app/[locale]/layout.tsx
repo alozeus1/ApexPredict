@@ -6,6 +6,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
 import { SkipToContent } from '@/components/nav/SkipToContent';
 import { ThemeScript } from '@/components/nav/theme-script';
+import { AgeGate } from '@/components/compliance/AgeGate';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -45,6 +46,7 @@ export default async function LocaleLayout({
       <body className="font-sans antialiased">
         <SkipToContent />
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <AgeGate />
           {children}
         </NextIntlClientProvider>
       </body>
