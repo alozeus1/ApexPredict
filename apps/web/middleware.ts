@@ -1,9 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
-
-const BLOCKLIST_COUNTRIES = new Set(['CN','KP','IR','CU','SA','AE','SG','FR']);
-const BLOCKLIST_US_STATES = new Set(['WA','ID','CT','TN','HI']);
+import { isBlocked } from './lib/compliance/blocklist';
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -15,8 +13,7 @@ export function middleware(request: NextRequest) {
   if (process.env.COMPLIANCE_GEOFENCE_ENABLED === 'true') {
     const country = (request.headers.get('x-vercel-ip-country') ?? '').toUpperCase();
     const state = (request.headers.get('x-vercel-ip-country-region') ?? '').toUpperCase();
-    const blocked = BLOCKLIST_COUNTRIES.has(country) || (country === 'US' && BLOCKLIST_US_STATES.has(state));
-    if (blocked && !request.nextUrl.pathname.match(/\/(blocked|under-age|legal\/)/)) {
+    if (isBlocked(country, state) && !request.nextUrl.pathname.match(/\/(blocked|under-age|legal\/)/)) {
       const url = request.nextUrl.clone();
       url.pathname = `/${routing.defaultLocale}/blocked`;
       const res = NextResponse.rewrite(url, { status: 451 });
