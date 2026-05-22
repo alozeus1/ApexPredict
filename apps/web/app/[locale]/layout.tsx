@@ -14,6 +14,7 @@ import type { RegionCode } from '@apexpredix/types';
 import { pageMetadata } from '@/lib/seo';
 import { JsonLd, organizationLD, websiteLD } from '@/components/seo/JsonLd';
 import { ConsentedAnalytics } from '@/components/analytics/ConsentedAnalytics';
+import { MotionProvider } from '@/components/motion/MotionProvider';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -64,7 +65,9 @@ export default async function LocaleLayout({
           <AgeGate />
           <RGSBanner region={region} />
           <CookieConsent />
-          {children}
+          <MotionProvider>
+            {children}
+          </MotionProvider>
           <ConsentedAnalytics />
         </NextIntlClientProvider>
       </body>
