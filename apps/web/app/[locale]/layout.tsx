@@ -13,6 +13,7 @@ import { CookieConsent } from '@/components/compliance/CookieConsent';
 import type { RegionCode } from '@apexpredix/types';
 import { pageMetadata } from '@/lib/seo';
 import { JsonLd, organizationLD, websiteLD } from '@/components/seo/JsonLd';
+import { ConsentedAnalytics } from '@/components/analytics/ConsentedAnalytics';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -64,6 +65,7 @@ export default async function LocaleLayout({
           <RGSBanner region={region} />
           <CookieConsent />
           {children}
+          <ConsentedAnalytics />
         </NextIntlClientProvider>
       </body>
     </html>
