@@ -53,9 +53,10 @@ export function WaitlistForm() {
     >
       {/* honeypot — hidden from users + assistive tech but visible to bots */}
       <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
-      <label className="flex-1">
+      <label htmlFor="waitlist-email" className="flex-1">
         <span className="sr-only">Email</span>
         <Input
+          id="waitlist-email"
           type="email"
           required
           placeholder="you@example.com"

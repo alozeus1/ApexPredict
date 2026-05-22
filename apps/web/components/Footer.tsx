@@ -1,25 +1,26 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 
-const COLUMNS = [
+const COLUMNS: ReadonlyArray<{ title: string; links: ReadonlyArray<{ label: string; href: Route<string> }> }> = [
   { title: 'Product', links: [
-    { label: 'Predictions', href: '/predictions' },
-    { label: 'Premium', href: '/premium' },
-    { label: 'How to Use', href: '/how-it-works' },
+    { label: 'Predictions', href: '/predictions' as Route<string> },
+    { label: 'Premium', href: '/premium' as Route<string> },
+    { label: 'How to Use', href: '/how-it-works' as Route<string> },
   ]},
   { title: 'Methodology', links: [
-    { label: 'ELO + Poisson + xG', href: '/methodology' },
-    { label: 'Backtest', href: '/#backtest' },
-    { label: 'Network', href: '/#network' },
+    { label: 'ELO + Poisson + xG', href: '/methodology' as Route<string> },
+    { label: 'Backtest', href: '/#backtest' as Route<string> },
+    { label: 'Network', href: '/#network' as Route<string> },
   ]},
   { title: 'Legal', links: [
-    { label: 'Privacy', href: '/legal/privacy' },
-    { label: 'Terms', href: '/legal/terms' },
-    { label: 'Cookies', href: '/legal/cookies' },
-    { label: 'Disclaimer', href: '/legal/disclaimer' },
+    { label: 'Privacy', href: '/legal/privacy' as Route<string> },
+    { label: 'Terms', href: '/legal/terms' as Route<string> },
+    { label: 'Cookies', href: '/legal/cookies' as Route<string> },
+    { label: 'Disclaimer', href: '/legal/disclaimer' as Route<string> },
   ]},
   { title: 'Company', links: [
-    { label: 'About Us', href: '/legal/disclaimer' },
-    { label: 'Contact', href: 'mailto:help@apexpredix.ai' },
+    { label: 'About Us', href: '/legal/disclaimer' as Route<string> },
+    { label: 'Contact', href: 'mailto:help@apexpredix.ai' as Route<string> },
   ]},
 ];
 

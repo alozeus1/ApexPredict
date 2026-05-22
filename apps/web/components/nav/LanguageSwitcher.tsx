@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useLocale } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
+import type { Route } from 'next';
 import { ChevronDown } from 'lucide-react';
 import { LOCALES } from '@apexpredix/types';
 
@@ -17,7 +18,7 @@ export function LanguageSwitcher() {
     document.cookie = `apexpredix-language=${next}; path=/; max-age=31536000; samesite=lax`;
     const segments = pathname.split('/');
     segments[1] = next;
-    router.push(segments.join('/'));
+    router.push(segments.join('/') as Route<string>);
     setOpen(false);
   };
 

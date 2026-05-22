@@ -40,7 +40,7 @@ export function AgeGate() {
           </button>
           <button
             type="button"
-            onClick={() => router.push('./under-age')}
+            onClick={() => router.push('/under-age')}
             className="flex-1 rounded-xl bg-ink-2 px-4 py-3 text-white ring-1 ring-white/10"
           >
             I am under 18

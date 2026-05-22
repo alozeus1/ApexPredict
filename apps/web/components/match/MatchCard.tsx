@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import type { Match } from '@apexpredix/types';
 import { ConfidenceBar } from './ConfidenceBar';
 import { ValueBetChip } from './ValueBetChip';
@@ -9,7 +10,7 @@ export function MatchCard({ match, locale }: Props) {
   const kickoff = new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(match.kickoff));
   return (
     <Link
-      href={`/predictions/${match.id}`}
+      href={`/predictions/${match.id}` as Route<string>}
       className="group block rounded-2xl bg-ink-1 p-5 ring-1 ring-white/10 transition hover:ring-edge-cyan/40"
     >
       <div className="flex items-center justify-between text-xs text-mute-2">

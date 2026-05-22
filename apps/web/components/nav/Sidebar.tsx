@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import { cookies } from 'next/headers';
 import { NAV_ITEMS } from './nav-items';
 import { cn } from '@apexpredix/ui';
@@ -15,7 +16,7 @@ export async function Sidebar({ pathname }: SidebarProps) {
   return (
     <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-64 flex-col border-r border-white/5 bg-ink-1/80 backdrop-blur">
       <div className="flex h-16 items-center px-6">
-        <Link href="/" className="text-lg font-semibold tracking-tight">
+        <Link href={'/' as Route<string>} className="text-lg font-semibold tracking-tight">
           <span className="text-edge-cyan">Apex</span>Predix<span className="text-mute-1"> AI</span>
         </Link>
       </div>

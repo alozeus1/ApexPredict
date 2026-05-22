@@ -13,7 +13,7 @@ export function ThemeToggle() {
     const next = !dark;
     setDark(next);
     document.documentElement.classList.toggle('dark', next);
-    try { localStorage.setItem('apexpredix-theme', next ? 'dark' : 'light'); } catch {}
+    try { localStorage.setItem('apexpredix-theme', next ? 'dark' : 'light'); } catch { /* storage unavailable */ }
   };
 
   return (

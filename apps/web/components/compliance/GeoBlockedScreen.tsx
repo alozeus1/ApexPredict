@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 
 export function GeoBlockedScreen({ reason }: { reason: string }) {
   return (
@@ -17,7 +18,7 @@ export function GeoBlockedScreen({ reason }: { reason: string }) {
           .
         </p>
         <div className="mt-8">
-          <Link href="/legal/disclaimer" className="text-sm text-edge-cyan hover:underline">
+          <Link href={'/legal/disclaimer' as Route<string>} className="text-sm text-edge-cyan hover:underline">
             Read the disclaimer
           </Link>
         </div>

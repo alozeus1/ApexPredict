@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import type { Route } from 'next';
 import { Menu, X } from 'lucide-react';
 import { NAV_ITEMS } from './nav-items';
 
@@ -11,7 +12,7 @@ export function MobileNav({ pathname }: MobileNavProps) {
   return (
     <>
       <div className="lg:hidden sticky top-0 z-30 flex h-14 items-center justify-between border-b border-white/5 bg-ink-1/80 px-4 backdrop-blur">
-        <Link href="/" className="font-semibold tracking-tight">
+        <Link href={'/' as Route<string>} className="font-semibold tracking-tight">
           <span className="text-edge-cyan">Apex</span>Predix
         </Link>
         <button aria-label="Open navigation" onClick={() => setOpen(true)} className="rounded-lg p-2 ring-1 ring-white/10">
