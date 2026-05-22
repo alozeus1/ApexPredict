@@ -9,26 +9,33 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/en',
 }));
 
+// Mock next/headers so the async Sidebar can read cookies in jsdom
+vi.mock('next/headers', () => ({
+  cookies: async () => ({ get: () => undefined }),
+}));
+
 import { Sidebar } from '../Sidebar';
 
-function SidebarWithIntl({ pathname }: { pathname: string }) {
-  return (
-    <NextIntlClientProvider locale="en" messages={messages}>
-      <Sidebar pathname={pathname} />
-    </NextIntlClientProvider>
-  );
-}
-
 describe('Sidebar', () => {
-  it('renders nav landmark with all primary items', () => {
-    render(<SidebarWithIntl pathname="/" />);
+  it('renders nav landmark with all primary items', async () => {
+    const ui = await Sidebar({ pathname: '/' });
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        {ui}
+      </NextIntlClientProvider>,
+    );
     const nav = screen.getByRole('navigation', { name: /primary/i });
     expect(nav).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Predictions' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Premium' })).toBeInTheDocument();
   });
-  it('marks the Dashboard item as locked', () => {
-    render(<SidebarWithIntl pathname="/" />);
+  it('marks the Dashboard item as locked', async () => {
+    const ui = await Sidebar({ pathname: '/' });
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        {ui}
+      </NextIntlClientProvider>,
+    );
     expect(screen.getByText('Dashboard').closest('a')).toHaveAttribute('aria-disabled', 'true');
   });
 });

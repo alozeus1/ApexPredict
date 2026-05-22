@@ -1,13 +1,17 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { NAV_ITEMS } from './nav-items';
 import { cn } from '@apexpredix/ui';
 import { SettingsPanel } from './SettingsPanel';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import type { RegionCode } from '@apexpredix/types';
 
 interface SidebarProps { pathname: string; }
 
-export function Sidebar({ pathname }: SidebarProps) {
+export async function Sidebar({ pathname }: SidebarProps) {
+  const cookieStore = await cookies();
+  const region = ((cookieStore.get('apexpredix-region')?.value ?? 'US') as RegionCode);
   return (
     <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-64 flex-col border-r border-white/5 bg-ink-1/80 backdrop-blur">
       <div className="flex h-16 items-center px-6">
@@ -40,7 +44,7 @@ export function Sidebar({ pathname }: SidebarProps) {
         </ul>
       </nav>
       <div className="flex items-center gap-2 px-4 py-3 border-t border-white/5">
-        <SettingsPanel initialRegion="US" />
+        <SettingsPanel initialRegion={region} />
         <ThemeToggle />
         <LanguageSwitcher />
       </div>
