@@ -9,6 +9,7 @@ import { SkipToContent } from '@/components/nav/SkipToContent';
 import { ThemeScript } from '@/components/nav/theme-script';
 import { AgeGate } from '@/components/compliance/AgeGate';
 import { RGSBanner } from '@/components/compliance/RGSBanner';
+import { CookieConsent } from '@/components/compliance/CookieConsent';
 import type { RegionCode } from '@apexpredix/types';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
@@ -53,6 +54,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AgeGate />
           <RGSBanner region={region} />
+          <CookieConsent />
           {children}
         </NextIntlClientProvider>
       </body>
