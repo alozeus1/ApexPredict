@@ -1,11 +1,14 @@
 import bundleAnalyzer from '@next/bundle-analyzer';
 import createNextIntlPlugin from 'next-intl/plugin';
+import createMDX from '@next/mdx';
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
+const withMDX = createMDX({ options: { providerImportSource: '@mdx-js/react' } });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  pageExtensions: ['ts', 'tsx', 'mdx'],
   reactStrictMode: true,
   poweredByHeader: false,
   images: { formats: ['image/avif', 'image/webp'] },
@@ -26,4 +29,4 @@ const nextConfig = {
   },
 };
 
-export default withBundleAnalyzer(withNextIntl(nextConfig));
+export default withBundleAnalyzer(withMDX(withNextIntl(nextConfig)));
