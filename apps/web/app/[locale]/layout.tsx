@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from 'next';
+import type { Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
@@ -11,14 +11,20 @@ import { AgeGate } from '@/components/compliance/AgeGate';
 import { RGSBanner } from '@/components/compliance/RGSBanner';
 import { CookieConsent } from '@/components/compliance/CookieConsent';
 import type { RegionCode } from '@apexpredix/types';
+import { pageMetadata } from '@/lib/seo';
+import { JsonLd, organizationLD, websiteLD } from '@/components/seo/JsonLd';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
-  title: 'ApexPredix AI — Sports Prediction Intelligence',
-  description: 'AI sports prediction intelligence by Maralito Labs — ELO + Poisson + xG ensemble engine.',
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return pageMetadata({
+    locale,
+    path: '',
+    title: 'ApexPredix AI — Sports Prediction Intelligence',
+    description: 'AI sports prediction intelligence by Maralito Labs — ELO + Poisson + xG ensemble engine.',
+  });
+}
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -48,6 +54,8 @@ export default async function LocaleLayout({
     <html lang={locale} className={inter.variable}>
       <head>
         <ThemeScript />
+        <JsonLd data={organizationLD} />
+        <JsonLd data={websiteLD} />
       </head>
       <body className="font-sans antialiased">
         <SkipToContent />
