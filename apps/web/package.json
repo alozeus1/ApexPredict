@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "capture:stills": "tsx scripts/capture-reel-stills.ts",
-    "clean": "rm -rf .next .turbo"
+    "clean": "rm -rf .next .turbo",
+    "lhci": "lhci autorun --config=./lighthouserc.cjs"
   },
   "dependencies": {
     "@apexpredix/db": "workspace:*",
@@ -58,6 +59,7 @@
     "postcss": "8.4.49",
     "tailwindcss": "3.4.17",
     "typescript": "5.6.3",
-    "tsx": "4.19.2"
+    "tsx": "4.19.2",
+    "@lhci/cli": "0.14.0"
   }
 }
