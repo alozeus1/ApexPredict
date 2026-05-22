@@ -15,3 +15,4 @@ apps/web/public/media/reel-stills/*.png
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+.vercel
