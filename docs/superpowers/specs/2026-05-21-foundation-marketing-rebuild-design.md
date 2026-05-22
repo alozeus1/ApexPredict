@@ -426,26 +426,6 @@ Tactics:
 > Style: dark fintech meets sports broadcast, glass and neon, motion-design feel like Stripe / Linear / Apple keynote reels. No human faces. No real team logos — use "Team A vs Team B" if any text rendering risk. UI text in clean sans (Inter / SF Pro). Sound mix: cinematic synth pad bed, two impact hits at 0.0s and 9.5s, soft UI ticks, no voiceover.
 
 ### 11.2 Reel-stills capture script
-
-Path: `apps/web/scripts/capture-reel-stills.ts`
-
-1. Launch headless Chromium at 2160×2160 DPR 2.
-2. Set `prefers-color-scheme: dark`, locale `en`, cookie `apexpredix-region=US` for consistent `$` formatting.
-3. Visit `/dev/stills/<n>` (dev-only route — wraps each target frame in a centered, padded 1080-square container; mounted only when `NODE_ENV !== 'production'`).
-4. Wait: `document.fonts.ready` → `await page.waitForLoadState('networkidle')` → 600 ms grace.
-5. Screenshot the frame container → write `public/media/reel-stills/<nn>-<slug>.png`.
-6. Optional `sharp` pipe to AVIF for the production poster.
-7. CI step `pnpm capture:stills` runs against the deploy preview URL and uploads to R2/S3 when Seedance needs reupload.
-
-Frames (matches the Seedance prompt timeline above):
-
-| # | Slug | Source selector |
-|---|---|---|
-| 01 | `hero-dark` | `<HeroSection>` |
-| 02 | `network-grid` | `<NetworkSection>` |
-| 03 | `prediction-card` | `<MatchCard matchId="featured-1">` |
-| 04 | `methodology-stack` | `<MethodologySection>` |
-| 05 | `value-bet-chip` | `<MatchDetail matchId="featured-1">` |
 | 06 | `backtest-chart` | `<BacktestSection>` |
 | 07 | `dashboard-mobile` | `<DashboardPreview>` (mobile viewport 390×844 → upscale crop) |
 | 08 | `wordmark-end` | `<WordmarkFrame>` (dev-only component) |
