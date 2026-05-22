@@ -18,7 +18,7 @@ const BASE = process.env.STILLS_BASE_URL ?? 'http://localhost:3000';
 const OUT = join(process.cwd(), 'public/media/reel-stills');
 
 async function captureFrame(page: Page, id: string, slug: string) {
-  await page.goto(`${BASE}/en/dev/stills/${id}`, { waitUntil: 'networkidle' });
+  await page.goto(`${BASE}/dev/stills/${id}`, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(600);
   const handle = await page.waitForSelector(`#still-${id}`);
