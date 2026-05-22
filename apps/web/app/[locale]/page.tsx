@@ -10,9 +10,22 @@ import { CTA } from '@/components/sections/CTA';
 import { Footer } from '@/components/Footer';
 import { Sidebar } from '@/components/nav/Sidebar';
 import { MobileNav } from '@/components/nav/MobileNav';
+import { prisma } from '@apexpredix/db';
+
+const WAITLIST_BASELINE = 14203;
+
+async function getCount(): Promise<number> {
+  try {
+    const count = await prisma.waitlistSignup.count({ where: { verifiedAt: { not: null } } });
+    return WAITLIST_BASELINE + count;
+  } catch {
+    return WAITLIST_BASELINE;
+  }
+}
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  const count = await getCount();
   return (
     <>
       <Sidebar pathname="/" />
@@ -26,7 +39,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <Network />
         <Premium />
         <HowToUse />
-        <CTA waitlistCount={14203} />
+        <CTA waitlistCount={count} />
         <Footer />
       </main>
     </>
