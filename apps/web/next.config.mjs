@@ -11,7 +11,7 @@ const nextConfig = {
   pageExtensions: ['ts', 'tsx', 'mdx'],
   reactStrictMode: true,
   poweredByHeader: false,
-  experimental: { typedRoutes: true },
+  typedRoutes: true,
   images: { formats: ['image/avif', 'image/webp'] },
   async headers() {
     return [
