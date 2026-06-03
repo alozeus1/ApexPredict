@@ -13,6 +13,13 @@ const nextConfig = {
   poweredByHeader: false,
   typedRoutes: true,
   images: { formats: ['image/avif', 'image/webp'] },
+  serverExternalPackages: ['@apexpredix/db', '@prisma/client'],
+  outputFileTracingIncludes: {
+    '/*': [
+      '../../node_modules/.prisma/client/**',
+      '../../node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/**',
+    ],
+  },
   async headers() {
     return [
       {
