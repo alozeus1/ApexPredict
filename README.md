@@ -24,6 +24,42 @@ pnpm dev
 
 Open http://localhost:3000 — it 307-redirects to `/en` and renders the full landing.
 
+## Engineer Local Deploy
+
+Use this when you need a local production-style check before pushing to any remote repository:
+
+```bash
+nvm use
+corepack enable && corepack prepare pnpm@9.12.0 --activate
+pnpm install
+cp apps/web/.env.example apps/web/.env.local
+```
+
+Set the local env values in `apps/web/.env.local`, then run:
+
+```bash
+pnpm -F @apexpredix/db generate
+pnpm -F @apexpredix/db migrate:dev
+pnpm -F @apexpredix/web typecheck
+pnpm -F @apexpredix/web test
+pnpm -F @apexpredix/web build
+pnpm -F @apexpredix/web start
+```
+
+For Vercel parity in local testing, use:
+
+```bash
+vercel dev
+```
+
+Smoke-test the deployed endpoints locally before handing work off:
+
+```bash
+curl -I http://localhost:3000/en
+curl -s http://localhost:3000/api/health
+curl -s http://localhost:3000/api/waitlist/count
+```
+
 ## Repository layout
 
 ```
@@ -135,6 +171,8 @@ To deploy:
 5. Activate `.github/workflows/ci.yml` — change `workflow_dispatch: {}` to include `pull_request` / `push` triggers
 6. Render Seedance reel + drop `apexpredix-reel.mp4` / `apexpredix-reel-poster.avif` into `apps/web/public/media/`
 7. Run DoD verification — see `docs/superpowers/dod/2026-05-21-foundation-marketing-rebuild-evidence.md`
+
+If you are mirroring the repo to a WebForx-owned Forgejo remote, keep the personal GitHub remote as `origin` and add the WebForx remote under a separate name such as `webforx`. That avoids breaking the existing personal repo history while still giving the company its own source of truth.
 
 ## Known follow-ups
 
