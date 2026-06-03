@@ -1,6 +1,6 @@
 const STEPS = [
   { n: 1, title: 'Pick your region', body: 'We tailor pricing and bookmaker recommendations to where you are.' },
-  { n: 2, title: 'Browse predictions', body: 'Live forecasts updated every two hours by autonomous agents.' },
+{ n: 2, title: 'Browse predictions', body: 'Live forecasts updated daily by autonomous agents.' },
   { n: 3, title: 'See value bets', body: 'When the market disagrees with the model, the chip lights up.' },
   { n: 4, title: 'Stake responsibly', body: 'We use ¼ Kelly. Set deposit limits. Take breaks. 18+.' },
 ];

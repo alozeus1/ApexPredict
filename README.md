@@ -16,7 +16,7 @@ cp apps/web/.env.example apps/web/.env.local
 # Fill in DATABASE_URL, RESEND_API_KEY, NEXT_PUBLIC_TURNSTILE_SITE_KEY,
 # TURNSTILE_SECRET_KEY, KV_REST_API_URL, KV_REST_API_TOKEN,
 # NEXT_PUBLIC_SITE_URL, HASH_SECRET_PRIMARY (any 32+ char random string),
-# SENTRY_DSN (optional in dev).
+# CRON_SECRET, FOOTBALL_DATA_API_TOKEN, SENTRY_DSN (optional in dev).
 pnpm -F @apexpredix/db generate
 pnpm -F @apexpredix/db migrate:dev    # only if a Neon DB is configured
 pnpm dev
@@ -31,7 +31,7 @@ apexpredix/
 ├── apps/web/                Next.js 15 App Router app
 │   ├── app/
 │   │   ├── [locale]/        landing, predictions, premium, legal, blocked, etc.
-│   │   ├── api/             health, waitlist, consent, csp-report, og/match
+│   │   ├── api/             health, waitlist, consent, cron, csp-report, og/match
 │   │   ├── opengraph-image.tsx
 │   │   ├── sitemap.ts, robots.ts, manifest.ts
 │   │   └── layout.tsx       minimal root shell
@@ -53,7 +53,7 @@ apexpredix/
 │   ├── messages/            en/es/yo/ha/zu.json
 │   ├── content/legal/       privacy/terms/cookies/disclaimer .mdx
 │   ├── lib/                 hash, rate-limit, disposable-email, geo, seo, email,
-│   │                        analytics, compliance/{blocklist,rgs,consent}
+│   │                        analytics, live-data, data, compliance/{blocklist,rgs,consent}
 │   ├── i18n/                routing.ts, request.ts, locales.ts
 │   ├── middleware.ts        geo-fence + locale negotiation + CSP nonce
 │   ├── scripts/             capture-reel-stills.ts
@@ -92,6 +92,30 @@ pnpm -F @apexpredix/db migrate:dev          # apply migrations
 
 See `docs/superpowers/specs/2026-05-21-foundation-marketing-rebuild-design.md`.
 
+## Live prediction refresh
+
+The web app reads live fixtures from Prisma first and falls back to `apps/web/data/fixtures.json` when the DB is empty or unavailable. Production refresh is handled by `GET /api/cron/daily-refresh`, protected by `Authorization: Bearer $CRON_SECRET`.
+
+Each daily refresh now runs the full feedback loop:
+
+- Sync upcoming fixtures and standings from Football-Data.
+- Generate calibrated 1/X/2 prediction snapshots with market, probability, confidence, and edge.
+- Settle finished fixtures when provider results are available.
+- Evaluate settled predictions with flat-stake profit/loss, Brier score, and log loss.
+- Persist rolling backtest metrics and calibration buckets for hit-rate, ROI, and probability calibration tracking.
+
+The cron currently runs daily at `06:00 UTC` via `vercel.json`. That cadence is compatible with Vercel Hobby. For sub-daily refreshes, move the project to Vercel Pro and split the single daily route into smaller fixture, results, stats, backtest, and heartbeat cron routes.
+
+Required production env vars:
+
+```bash
+DATABASE_URL=...
+DIRECT_URL=...
+CRON_SECRET=...
+FOOTBALL_DATA_API_TOKEN=...
+FOOTBALL_DATA_COMPETITIONS=PL,PD,BL1,SA,FL1,CL
+```
+
 ## Implementation plan
 
 See `docs/superpowers/plans/2026-05-21-foundation-marketing-rebuild-plan.md` — 71 atomic tasks across 8 phases.
@@ -102,10 +126,10 @@ Track in `docs/superpowers/dod/2026-05-21-foundation-marketing-rebuild-evidence.
 
 ## Deployment
 
-This repo is **not yet** wired to a remote git host or Vercel project. To deploy:
+To deploy:
 
-1. Create a GitHub repo and push: `git remote add origin <url> && git push -u origin main`
-2. Import into Vercel — auto-detects pnpm + Next.js
+1. Push `main` to GitHub.
+2. Import into Vercel with `apps/web` as the root directory.
 3. Set env vars in Vercel dashboard (mirror `apps/web/.env.example`)
 4. Provision Neon Postgres + apply Prisma migration (`pnpm -F @apexpredix/db migrate:deploy`)
 5. Activate `.github/workflows/ci.yml` — change `workflow_dispatch: {}` to include `pull_request` / `push` triggers

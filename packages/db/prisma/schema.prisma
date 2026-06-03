@@ -57,3 +57,192 @@ model GeoBlockEvent {
 
   @@index([country, createdAt])
 }
+
+model Competition {
+  id         String   @id
+  name       String
+  country    String
+  externalId Int      @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  fixtures   Fixture[]
+  teams      Team[]
+}
+
+model Team {
+  id            String       @id @default(cuid())
+  externalId    Int          @unique
+  name          String
+  shortName     String?
+  tla           String?
+  crestUrl      String?
+  competitionId String
+  competition   Competition  @relation(fields: [competitionId], references: [id])
+  homeFixtures  Fixture[]    @relation("HomeTeam")
+  awayFixtures  Fixture[]    @relation("AwayTeam")
+  stats         TeamStat[]
+
+  @@index([competitionId])
+}
+
+model TeamStat {
+  id             String   @id @default(cuid())
+  teamId         String
+  team           Team     @relation(fields: [teamId], references: [id])
+  competitionId  String
+  form           String?
+  position       Int?
+  played         Int?
+  won            Int?
+  drawn          Int?
+  lost           Int?
+  goalsFor       Int?
+  goalsAgainst   Int?
+  goalDifference Int?
+  points         Int?
+  capturedAt     DateTime @default(now())
+
+  @@index([competitionId, capturedAt])
+  @@index([teamId, capturedAt])
+}
+
+model Fixture {
+  id          String               @id @default(cuid())
+  externalId  Int                  @unique
+  competitionId String
+  competition Competition          @relation(fields: [competitionId], references: [id])
+  homeTeamId  String
+  awayTeamId  String
+  homeTeam    Team                 @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeam    Team                 @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  kickoff     DateTime
+  status      String
+  matchday    Int?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  odds        Odds[]
+  result      FixtureResult?
+  predictions PredictionSnapshot[]
+  evaluations PredictionEvaluation[]
+
+  @@index([kickoff])
+  @@index([status])
+  @@index([competitionId, kickoff])
+}
+
+model Odds {
+  id         String   @id @default(cuid())
+  fixtureId  String
+  fixture    Fixture  @relation(fields: [fixtureId], references: [id])
+  bookCode   String
+  market     String
+  price      Float
+  capturedAt DateTime @default(now())
+
+  @@index([fixtureId, market])
+  @@index([capturedAt])
+}
+
+model FixtureResult {
+  id         String   @id @default(cuid())
+  fixtureId  String   @unique
+  fixture    Fixture  @relation(fields: [fixtureId], references: [id])
+  homeScore  Int
+  awayScore  Int
+  finishedAt DateTime
+  raw        Json
+}
+
+model PredictionSnapshot {
+  id          String   @id @default(cuid())
+  fixtureId   String
+  fixture     Fixture  @relation(fields: [fixtureId], references: [id])
+  market      String   @default("1")
+  probability Float    @default(0.5)
+  edge        Float    @default(0)
+  elo         Float
+  poisson     Float
+  xg          Float
+  ensemble    Float
+  confidence  Float
+  topPick     String
+  valueBet    Boolean  @default(false)
+  narrative   String
+  generatedAt DateTime @default(now())
+  evaluation  PredictionEvaluation?
+
+  @@index([fixtureId, generatedAt])
+  @@index([market, generatedAt])
+}
+
+model PredictionEvaluation {
+  id                 String             @id @default(cuid())
+  predictionId        String             @unique
+  prediction          PredictionSnapshot @relation(fields: [predictionId], references: [id])
+  fixtureId           String
+  fixture             Fixture            @relation(fields: [fixtureId], references: [id])
+  market              String
+  resultMarket        String
+  probability         Float
+  confidence          Float
+  price               Float
+  impliedProbability  Float
+  edge                Float
+  stake               Float
+  returned            Float
+  profit              Float
+  hit                 Boolean
+  brierScore          Float
+  logLoss             Float
+  evaluatedAt         DateTime           @default(now())
+
+  @@index([fixtureId])
+  @@index([evaluatedAt])
+  @@index([market, evaluatedAt])
+}
+
+model PredictionBacktestRun {
+  id                 String                       @id @default(cuid())
+  windowDays         Int
+  sampleSize         Int
+  hitRate            Float
+  roi                Float
+  totalStaked        Float
+  totalReturned      Float
+  netProfit          Float
+  averageConfidence  Float
+  averageEdge        Float
+  brierScore         Float
+  logLoss            Float
+  calibrationError   Float
+  createdAt          DateTime                     @default(now())
+  buckets            PredictionCalibrationBucket[]
+
+  @@index([createdAt])
+}
+
+model PredictionCalibrationBucket {
+  id                 String                @id @default(cuid())
+  runId              String
+  run                PredictionBacktestRun @relation(fields: [runId], references: [id])
+  bucket             String
+  lowerBound         Float
+  upperBound         Float
+  sampleSize         Int
+  averageProbability Float
+  observedRate       Float
+  calibrationError   Float
+
+  @@index([runId])
+}
+
+model AgentHeartbeat {
+  id         String   @id @default(cuid())
+  agentId    String
+  status     String
+  message    String?
+  durationMs Int?
+  createdAt  DateTime @default(now())
+
+  @@index([agentId, createdAt])
+}

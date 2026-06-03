@@ -15,6 +15,8 @@ import { prisma } from '@apexpredix/db';
 const WAITLIST_BASELINE = 14203;
 
 async function getCount(): Promise<number> {
+  if (!process.env.DATABASE_URL) return WAITLIST_BASELINE;
+
   try {
     const count = await prisma.waitlistSignup.count({ where: { verifiedAt: { not: null } } });
     return WAITLIST_BASELINE + count;

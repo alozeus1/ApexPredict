@@ -35,7 +35,7 @@ export function MatchCard({ match, locale }: Props) {
       <div className="mt-4">
         <ConfidenceBar value={match.model.confidence} />
       </div>
-      <div className="mt-3 text-[10px] uppercase tracking-wide text-mute-2">Model: Poisson-xG v3.2</div>
+      <div className="mt-3 text-[10px] uppercase tracking-wide text-mute-2">Model: calibrated ensemble</div>
     </Link>
   );
 }

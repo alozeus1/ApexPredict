@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/nav/Sidebar';
 import { MobileNav } from '@/components/nav/MobileNav';
 import { Footer } from '@/components/Footer';
 import fixtures from '@/data/fixtures.json';
+import { getMatch } from '@/lib/data/get-match';
 import type { Match, RegionCode } from '@apexpredix/types';
 import { JsonLd, sportsEventLD, breadcrumbLD } from '@/components/seo/JsonLd';
 import { pageMetadata } from '@/lib/seo';
@@ -14,7 +15,7 @@ export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; matchId: string }> }) {
   const { locale, matchId } = await params;
-  const match = (fixtures as Match[]).find((m) => m.id === matchId);
+  const match = await getMatch(matchId);
   if (!match) return {};
   return pageMetadata({
     locale,
@@ -32,7 +33,7 @@ export function generateStaticParams() {
 export default async function MatchPage({ params }: { params: Promise<{ locale: string; matchId: string }> }) {
   const { locale, matchId } = await params;
   setRequestLocale(locale);
-  const match = (fixtures as Match[]).find((m) => m.id === matchId);
+  const match = await getMatch(matchId);
   if (!match) notFound();
   const cookieStore = await cookies();
   const region = ((cookieStore.get('apexpredix-region')?.value ?? 'US') as RegionCode);

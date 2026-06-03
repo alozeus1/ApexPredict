@@ -1,19 +1,18 @@
 import Link from 'next/link';
 import { MatchCard } from '@/components/match/MatchCard';
-import fixtures from '@/data/fixtures.json';
-import type { Match } from '@apexpredix/types';
+import { getFixtures } from '@/lib/data/get-fixtures';
 
 interface Props { locale: string; }
 
-export function PredictionsPreview({ locale }: Props) {
-  const featured = (fixtures as Match[]).filter((m) => m.featured).slice(0, 6);
+export async function PredictionsPreview({ locale }: Props) {
+  const featured = (await getFixtures()).filter((m) => m.featured).slice(0, 6);
   return (
     <section id="predictions" className="border-b border-white/5">
       <div className="mx-auto max-w-6xl px-6 py-20">
         <div className="mb-10 flex items-end justify-between">
           <div>
             <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Live Predictions</h2>
-            <p className="mt-2 text-mute-1">Model: Poisson-xG v3.2 • refreshed every 2h</p>
+            <p className="mt-2 text-mute-1">Model: standings-strength ensemble • refreshed daily</p>
           </div>
           <Link href="/predictions" className="text-sm text-edge-cyan hover:underline">
             Open Full Predictions →
