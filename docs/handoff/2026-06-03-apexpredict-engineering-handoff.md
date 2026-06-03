@@ -206,9 +206,9 @@ Recommended additional production env vars to configure before launch:
 
 - `NEXT_PUBLIC_SITE_URL=https://apexpredix.vercel.app` or the final custom domain.
 - `HASH_SECRET_PRIMARY` with a strong random value.
-- `RESEND_API_KEY` and `RESEND_FROM_ADDRESS` for real transactional email.
+- `RESEND_API_KEY` and `RESEND_FROM_ADDRESS`, or `SMTP_URL` / `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` plus `SMTP_FROM_ADDRESS`, for transactional email.
 - `KV_REST_API_URL` and `KV_REST_API_TOKEN` for rate limiting.
-- `SENTRY_DSN` for observability.
+- `SENTRY_DSN` and `NEXT_PUBLIC_SENTRY_DSN` for observability.
 - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` for bot protection.
 
 Security note:
@@ -622,10 +622,11 @@ For Web Forx Global Inc, recommended engineering ownership:
 3. Configure missing production env vars:
    - `NEXT_PUBLIC_SITE_URL`
    - `HASH_SECRET_PRIMARY`
-   - `RESEND_API_KEY`
+   - `RESEND_API_KEY` or SMTP settings
    - `KV_REST_API_URL`
    - `KV_REST_API_TOKEN`
    - `SENTRY_DSN`
+   - `NEXT_PUBLIC_SENTRY_DSN`
    - Turnstile keys
 4. Add CI workflow.
 5. Add Stripe/auth plan and implement account system.
