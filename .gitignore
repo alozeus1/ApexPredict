@@ -3,6 +3,7 @@ node_modules/
 dist/
 .turbo/
 .vercel/
+.vercelrc.json
 .env*
 !.env.example
 *.log
@@ -12,6 +13,12 @@ test-results/
 coverage/
 apps/web/public/media/reel-stills/*.png
 !apps/web/public/media/reel-stills/manifest.json
+
+# strategy artefacts — binaries live alongside the canonical .md for sharing,
+# but only the .md is committed to keep the repo lean
+docs/strategy/*.docx
+docs/strategy/*.pptx
+docs/strategy/*.pdf
 
 # TypeScript incremental build cache
 *.tsbuildinfo
