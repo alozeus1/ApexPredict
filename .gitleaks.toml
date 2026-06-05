@@ -1,0 +1,42 @@
+# gitleaks configuration for ApexPredix
+# https://github.com/gitleaks/gitleaks
+#
+# Extends the bundled default ruleset (broad secret detection) and layers
+# repo-specific allowlists so known placeholders and committed example files
+# do not trip the scanner. Real secrets never live in the repo — they live in
+# the 1Password / Doppler vault (see docs/runbooks/).
+
+title = "ApexPredix gitleaks config"
+
+[extend]
+# Inherit gitleaks' built-in rules (AWS keys, generic API tokens, etc.).
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for example files, placeholders and vendored lockfiles"
+
+# Paths that are allowed to contain secret-looking strings.
+paths = [
+  '''apps/web/\.env\.example''',
+  '''.*\.env\.example''',
+  '''pnpm-lock\.yaml''',
+  '''package-lock\.json''',
+  '''yarn\.lock''',
+]
+
+# Known non-secret placeholders. These are documentation values, not live keys.
+regexes = [
+  '''replace-with-32\+?-bytes-random''',
+  '''HASH_SECRET_PRIMARY=replace-with-32\+?-bytes-random''',
+  '''HASH_SECRET_SECONDARY=''',
+  '''you@example\.com''',
+  '''postgres(ql)?://user:pass@''',
+]
+
+# Specific stopwords that frequently appear in example/placeholder context.
+stopwords = [
+  "example",
+  "placeholder",
+  "changeme",
+  "replace-with",
+]

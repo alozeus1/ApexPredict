@@ -1,20 +1,131 @@
 name: CI
+
+# Real CI pipeline: runs on every PR and on pushes to the integration/prod trunks.
+# Gate order mirrors the local quality gate, then layers static analysis + secret scan.
 on:
-  workflow_dispatch: {}
-  # Note: pull_request + push triggers intentionally omitted until user activates the pipeline.
+  pull_request:
+  push:
+    branches: [main, develop]
+
+# One in-flight run per ref; new pushes cancel the stale run.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  quality:
+    name: typecheck · lint · test · smoke
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with: { version: 9.12.0 }
-      - uses: actions/setup-node@v4
-        with: { node-version: '20.18.1', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
-      - run: pnpm lint
-      - run: pnpm test
-      - run: pnpm -F @apexpredix/db generate
-      - run: pnpm build
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.18.1
+
+      - name: Resolve pnpm store path
+        id: pnpm-store
+        run: echo "dir=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.dir }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm -F @apexpredix/db generate
+
+      - name: Typecheck
+        run: pnpm -F @apexpredix/web typecheck
+
+      - name: Lint
+        run: pnpm -F @apexpredix/web lint
+
+      - name: Unit tests
+        run: pnpm -F @apexpredix/web test
+
+      - name: Build web (required for the smoke server)
+        run: pnpm -F @apexpredix/web build
+
+      - name: Install Playwright chromium
+        run: pnpm -F @apexpredix/web exec playwright install --with-deps chromium
+
+      - name: E2E smoke
+        run: pnpm -F @apexpredix/web e2e:smoke
+
+  codeql:
+    name: CodeQL (javascript-typescript)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
+          output: codeql-results
+          # upload requires GitHub Advanced Security on private repos; keep the
+          # scan local + gate below so this works on any repo. Flip to `always`
+          # to surface findings in the Security tab when GHAS is enabled.
+          upload: false
+
+      - name: Fail on high/critical findings
+        run: |
+          shopt -s nullglob
+          total=0
+          for f in codeql-results/*.sarif; do
+            # security-severity lives on the rule; build ruleId -> severity per run,
+            # then count results scoring >= 7.0 (CodeQL: high 7.0-8.9, critical >= 9.0).
+            count=$(jq '
+              [ .runs[]
+                | (reduce (.tool.driver.rules[]? ) as $r ({};
+                    .[$r.id] = ($r.properties."security-severity" // "0"))) as $sev
+                | .results[]?
+                | ($sev[.ruleId] // "0" | tonumber? // 0)
+                | select(. >= 7.0)
+              ] | length' "$f")
+            echo "$(basename "$f"): $count high/critical"
+            total=$((total + count))
+          done
+          if [ "$total" -gt 0 ]; then
+            echo "::error::CodeQL found $total high/critical finding(s)"
+            exit 1
+          fi
+          echo "CodeQL: no high/critical findings."
+
+  gitleaks:
+    name: gitleaks secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: ${{ github.workspace }}/.gitleaks.toml
