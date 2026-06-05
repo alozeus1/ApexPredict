@@ -12,19 +12,22 @@ export function Hero() {
             14 agents active • 2.4M events/hr
           </span>
           <h1 className="text-balance text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
-            Built on Mathematical Edge
+            The math behind your next bet.
           </h1>
           <p className="max-w-prose text-mute-1 md:text-lg">
-            AI Sports Intelligence — built on ELO + Poisson + xG ensemble. Not a gambling operator. 18+ only.
+            ApexPredix computes calibrated probabilities for upcoming football matches and flags where the market is mispriced. We publish our scoreboard openly — see how we score before you trust a pick.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button asChild variant="primary" size="lg">
-              <Link href="#cta">Reserve Premium Seat</Link>
+              <Link href="#predictions">See today&rsquo;s picks</Link>
             </Button>
             <Button asChild variant="secondary" size="lg">
-              <Link href="#predictions">See Live Predictions</Link>
+              <Link href="#methodology">How we measure ourselves</Link>
             </Button>
           </div>
+          <p className="text-xs text-mute-2">
+            18+ only. Decision support, not a bookmaker. Past performance does not guarantee future results.
+          </p>
         </div>
         <div className="relative">
           <HeroReel />
