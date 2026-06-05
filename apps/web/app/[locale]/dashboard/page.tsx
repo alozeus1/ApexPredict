@@ -16,18 +16,21 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     locale,
     path: '/dashboard',
     title: 'Dashboard — ApexPredix AI',
-    description: 'Your performance dashboard: tracked predictions, ROI, win rate, streaks. Demo access during open beta.',
+    description: 'Your tracked-pick performance during open beta. Decision support, not a sportsbook.',
   });
 }
 
-// Demo numbers for open-beta dashboard. Real per-user tracking lands in sub-project 5.
-const KPIS = [
-  { label: 'Win Rate', value: '89.3%', tone: 'green' as const },
-  { label: 'Total Staked', value: '$1,250', tone: 'mute' as const },
-  { label: 'Total Returned', value: '$1,356', tone: 'mute' as const },
-  { label: 'Net Profit', value: '+$106', tone: 'green' as const },
-  { label: 'ROI', value: '+8.5%', tone: 'green' as const },
-  { label: 'Active Streak', value: '6W', tone: 'cyan' as const },
+// Per-user metrics. Real values come from UserPick + PredictionEvaluation (sub-project
+// 5); until each metric reaches its minimum sample it shows "Awaiting sample" — never a
+// fabricated number. Threshold for the user's own hit rate is n >= 30.
+const MIN_SAMPLE = 30;
+const trackedPickCount = 0; // no settled UserPick rows yet
+const METRICS: ReadonlyArray<{ label: string; ref?: string }> = [
+  { label: 'Tracked picks (30d)' },
+  { label: 'Hit rate (your bucket)' },
+  { label: 'Brier score', ref: 'baseline 0.21' },
+  { label: 'Calibration error' },
+  { label: 'Current streak' },
 ];
 
 export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -48,11 +51,11 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
           <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full bg-edge-cyan/15 px-3 py-1 text-xs text-edge-cyan ring-1 ring-edge-cyan/30">
-                <span className="h-1.5 w-1.5 rounded-full bg-edge-cyan animate-pulse-dot" aria-hidden /> Open Beta · all features unlocked
+                <span className="h-1.5 w-1.5 rounded-full bg-edge-cyan animate-pulse-dot" aria-hidden /> Open beta
               </span>
               <h1 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">Your Performance</h1>
               <p className="mt-2 text-mute-1">
-                Demo data while we onboard real users. Per-user tracking + real settlement land with the auth + ledger release.
+                Your tracked-pick data feeds this dashboard once you start saving picks.
               </p>
             </div>
             <Link href="/predictions" className="rounded-xl bg-edge-cyan px-4 py-2 text-sm font-medium text-ink-0 hover:bg-cyan-300">
@@ -60,19 +63,25 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
             </Link>
           </div>
 
-          {/* KPI tiles */}
-          <dl className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-            {KPIS.map((k) => (
+          <p className="mb-8 rounded-2xl bg-ink-1 px-5 py-4 text-sm text-mute-1 ring-1 ring-white/10">
+            Open beta — your tracked-pick data feeds your dashboard. We&rsquo;re not a sportsbook;
+            nothing here is a guarantee.
+          </p>
+
+          {/* Per-user metric tiles — show "Awaiting sample" until the minimum n is reached */}
+          <dl className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+            {METRICS.map((k) => (
               <div key={k.label} className="rounded-2xl bg-ink-1 p-5 ring-1 ring-white/10">
                 <dt className="text-xs uppercase tracking-wide text-mute-2">{k.label}</dt>
                 <dd
                   className={
-                    'mt-1 text-2xl font-semibold ' +
-                    (k.tone === 'green' ? 'text-edge-green' : k.tone === 'cyan' ? 'text-edge-cyan' : 'text-white')
+                    'mt-1 font-semibold ' +
+                    (trackedPickCount >= MIN_SAMPLE ? 'text-2xl text-white' : 'text-sm text-mute-1')
                   }
                 >
-                  {k.value}
+                  {trackedPickCount >= MIN_SAMPLE ? '—' : 'Awaiting sample'}
                 </dd>
+                {k.ref && <p className="mt-1 text-[10px] uppercase tracking-wide text-mute-2">{k.ref}</p>}
               </div>
             ))}
           </dl>

@@ -20,7 +20,10 @@ export default function WaitlistVerify({ verifyUrl, locale }: WaitlistVerifyProp
             If the button does not work, paste this link into your browser: {verifyUrl}
           </Text>
           <Text style={{ color: '#A1A1AA', fontSize: 12 }}>
-            ApexPredix AI is an analytics service, not a gambling operator. 18+ only.
+            ApexPredix AI is a sports prediction analytics service. We are not a bookmaker. 18+ only.{' '}
+            <Link href="https://apexpredix.ai/unsubscribe" style={{ color: '#A1A1AA', textDecoration: 'underline' }}>Unsubscribe</Link>.{' '}
+            Need a break?{' '}
+            <Link href="https://apexpredix.ai/legal/responsible-gaming" style={{ color: '#A1A1AA', textDecoration: 'underline' }}>Visit our responsible-gaming page</Link>.
           </Text>
         </Container>
       </Body>
