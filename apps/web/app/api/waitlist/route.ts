@@ -93,7 +93,7 @@ export async function POST(req: Request) {
 
     const raw = crypto.randomBytes(32).toString('base64url');
     const tokenHash = crypto.createHash('sha256').update(raw).digest('hex');
-    await prisma.verificationToken.create({
+    await prisma.waitlistVerificationToken.create({
       data: {
         email,
         tokenHash,
