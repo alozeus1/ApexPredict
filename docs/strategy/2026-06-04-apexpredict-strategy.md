@@ -708,3 +708,30 @@ Assumptions: launch month-1 → 5,000 free signups (NG); free → paid conversio
 Market sizing, regulatory and payment context drawn from independent reporting and statutory sources (June 2026). See accompanying executive-summary PDF for the linked source list.
 
 — *ApexPredict Strategy v1 · prepared by Cowork (CTO/PM advisory) for Web Forx Global Inc · 2026-06-04*
+
+---
+
+## Sprint S0 — completed by agent on 2026-06-05
+
+Five foundational PRs were executed autonomously and pushed to both remotes
+(GitHub `origin`, Forgejo `webforx`), each branched off `develop`. Fill in the PR
+links once opened from the Forgejo compare URLs.
+
+| # | Branch | Summary | PR link |
+|---|--------|---------|---------|
+| 1 | `chore/ci-cd-and-scanners` | Real CI (typecheck/lint/test/build/e2e smoke) + CodeQL + gitleaks; Forgejo mirror; PR template; CONTRIBUTING. | _<!-- paste PR URL -->_ |
+| 2 | `chore/repo-hygiene` | Removed fabricated waitlist count; locale gate (drop es/zu, add ig, env-gated yo/ha/ig, English-only); `HASH_SECRET_SECONDARY` rotation; `/api/health/deep`. | _<!-- paste PR URL -->_ |
+| 3 | `feat/copy-repositioning` | Value-bet-signal repositioning; removed demo KPIs; disclaimers module; entitlements scaffold; email compliance footers. | _<!-- paste PR URL -->_ |
+| 4 | `feat/identity-foundation` | Auth.js v5 + Prisma migration (User/Account/Session/Subscription/AuditLog; waitlist token renamed); argon2id; entitlements matrix; 6 auth pages; audit + tests. | _<!-- paste PR URL -->_ |
+| 5 | `feat/data-and-prediction-scaffolds` | Provider interfaces + `runWorker`; widened market enum + Zod; synthetic odds never persisted; `UserPick` model + helpers + migration. | _<!-- paste PR URL -->_ |
+
+**Notes for the team:**
+- Each PR's local quality gate (typecheck · lint · test · build) is green. PRs 4 & 5
+  ship **generated** migration SQL only — apply via `prisma migrate deploy` after review,
+  never auto-applied against Neon.
+- A live Vercel token was found in `apps/web/.vercelrc.json` (now gitignored, never
+  committed) — **rotate it**.
+- Brand spelling is inconsistent: code renders `ApexPredix`, docs say `ApexPredict` —
+  unify before launch.
+
+— *Sprint S0 execution log · 2026-06-05*
