@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
+    "e2e:smoke": "playwright test e2e/00-smoke.spec.ts --project=chromium",
     "capture:stills": "tsx scripts/capture-reel-stills.ts",
     "clean": "rm -rf .next .turbo",
     "lhci": "lhci autorun --config=./lighthouserc.cjs"
