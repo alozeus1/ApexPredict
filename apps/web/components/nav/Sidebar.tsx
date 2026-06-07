@@ -6,6 +6,7 @@ import { cn } from '@apexpredix/ui';
 import { SettingsPanel } from './SettingsPanel';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { ENABLED_LOCALES } from '@/i18n/locales';
 import type { RegionCode } from '@apexpredix/types';
 
 interface SidebarProps { pathname: string; }
@@ -45,9 +46,9 @@ export async function Sidebar({ pathname }: SidebarProps) {
         </ul>
       </nav>
       <div className="flex items-center gap-2 px-4 py-3 border-t border-white/5">
-        <SettingsPanel initialRegion={region} />
+        <SettingsPanel initialRegion={region} enabledLocales={ENABLED_LOCALES} />
         <ThemeToggle />
-        <LanguageSwitcher />
+        <LanguageSwitcher locales={ENABLED_LOCALES} />
       </div>
       <div className="border-t border-white/5 p-4 text-xs text-mute-2">Powered by Maralito Labs</div>
     </aside>

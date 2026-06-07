@@ -12,16 +12,19 @@ import { Sidebar } from '@/components/nav/Sidebar';
 import { MobileNav } from '@/components/nav/MobileNav';
 import { prisma } from '@apexpredix/db';
 
-const WAITLIST_BASELINE = 14203;
+// Only surface a waitlist count once it is large enough to be meaningful.
+// Below this threshold (or when the DB is unavailable) we show no number at all
+// rather than a fabricated one.
+const WAITLIST_DISPLAY_THRESHOLD = 5000;
 
-async function getCount(): Promise<number> {
-  if (!process.env.DATABASE_URL) return WAITLIST_BASELINE;
+async function getCount(): Promise<number | null> {
+  if (!process.env.DATABASE_URL) return null;
 
   try {
     const count = await prisma.waitlistSignup.count({ where: { verifiedAt: { not: null } } });
-    return WAITLIST_BASELINE + count;
+    return count >= WAITLIST_DISPLAY_THRESHOLD ? count : null;
   } catch {
-    return WAITLIST_BASELINE;
+    return null;
   }
 }
 

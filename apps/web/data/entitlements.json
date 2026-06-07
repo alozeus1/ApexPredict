@@ -1,0 +1,6 @@
+{
+  "FREE":    { "picksPerDay": 4,  "valueBets": false, "alerts": null,       "kelly": false, "warRoom": "none",    "telegram": false, "whatsapp": false, "calibrationDepthDays": 7 },
+  "WEEKLY":  { "picksPerDay": 10, "valueBets": true,  "alerts": "email",    "kelly": true,  "warRoom": "partial", "telegram": true,  "whatsapp": false, "calibrationDepthDays": 30 },
+  "MONTHLY": { "picksPerDay": 10, "valueBets": true,  "alerts": "push",     "kelly": true,  "warRoom": "partial", "telegram": true,  "whatsapp": true,  "calibrationDepthDays": 90 },
+  "YEARLY":  { "picksPerDay": 10, "valueBets": true,  "alerts": "priority", "kelly": true,  "warRoom": "full",    "telegram": true,  "whatsapp": true,  "calibrationDepthDays": 365 }
+}

@@ -3,7 +3,6 @@ node_modules/
 dist/
 .turbo/
 .vercel/
-.vercelrc.json
 .env*
 !.env.example
 *.log
@@ -14,11 +13,14 @@ coverage/
 apps/web/public/media/reel-stills/*.png
 !apps/web/public/media/reel-stills/manifest.json
 
-# strategy artefacts — binaries live alongside the canonical .md for sharing,
-# but only the .md is committed to keep the repo lean
+# Strategy artefacts: the canonical source is the .md. Binaries (board decks,
+# exports) live alongside it for sharing but are not committed.
 docs/strategy/*.docx
 docs/strategy/*.pptx
 docs/strategy/*.pdf
+
+# Vercel CLI token cache — never commit (holds a live access token).
+.vercelrc.json
 
 # TypeScript incremental build cache
 *.tsbuildinfo

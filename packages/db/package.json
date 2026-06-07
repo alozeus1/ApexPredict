@@ -10,15 +10,19 @@
     "migrate:deploy": "prisma migrate deploy",
     "studio": "prisma studio",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src"
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint -c ../config/eslint.cjs src"
   },
   "dependencies": {
     "@prisma/client": "5.22.0"
   },
   "devDependencies": {
     "@apexpredix/config": "workspace:*",
+    "@types/node": "22.10.2",
+    "eslint": "9.17.0",
     "prisma": "5.22.0",
     "typescript": "5.6.3"
   },
-  "prisma": { "schema": "prisma/schema.prisma" }
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  }
 }

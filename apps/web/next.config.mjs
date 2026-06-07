@@ -13,7 +13,7 @@ const nextConfig = {
   poweredByHeader: false,
   typedRoutes: true,
   images: { formats: ['image/avif', 'image/webp'] },
-  serverExternalPackages: ['@apexpredix/db', '@prisma/client'],
+  serverExternalPackages: ['@apexpredix/db', '@prisma/client', 'argon2'],
   outputFileTracingIncludes: {
     '/*': [
       '../../node_modules/.prisma/client/**',

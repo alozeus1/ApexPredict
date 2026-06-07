@@ -37,7 +37,10 @@ model CookieConsent {
   expiresAt    DateTime
 }
 
-model VerificationToken {
+// Waitlist email-confirmation token (NOT the Auth.js token). Renamed from
+// `VerificationToken` so the Auth.js PrismaAdapter can own that reserved name.
+// The migration preserves existing rows via ALTER TABLE ... RENAME.
+model WaitlistVerificationToken {
   id        String    @id @default(cuid())
   email     String
   tokenHash String    @unique
@@ -245,4 +248,161 @@ model AgentHeartbeat {
   createdAt  DateTime @default(now())
 
   @@index([agentId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Identity, subscriptions, audit (Auth.js v5)
+//
+// Field/model names for User, Account, Session and VerificationToken follow the
+// Auth.js PrismaAdapter contract (it binds to these exact names: e.g.
+// `emailVerified`, `Account.refresh_token`, the model `VerificationToken`).
+// Domain fields the product needs (locale, region, kycStatus, rgFlags, …) are
+// added on top. Do not rename adapter-bound fields without a custom adapter.
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum KycStatus {
+  NONE
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum SubscriptionTier {
+  FREE
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+}
+
+enum SubscriptionProvider {
+  PAYSTACK
+  FLUTTERWAVE
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique @db.Citext
+  // Auth.js adapter field (email-verification timestamp).
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  // Null for OAuth-only users. argon2id hash for credential users.
+  passwordHash  String?
+  locale        String        @default("en")
+  region        String?
+  kycStatus     KycStatus     @default(NONE)
+  rgFlags       Json          @default("{}")
+  preferences   Json          @default("{}")
+  disabledAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  subscription  Subscription?
+
+  @@index([kycStatus])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Auth.js verification token (magic-link / email). Distinct from
+// WaitlistVerificationToken above.
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Subscription {
+  id               String               @id @default(cuid())
+  userId           String               @unique
+  tier             SubscriptionTier     @default(FREE)
+  status           SubscriptionStatus   @default(TRIALING)
+  provider         SubscriptionProvider @default(PAYSTACK)
+  providerCustomer String
+  providerSub      String?
+  currentPeriodEnd DateTime?
+  cancelAt         DateTime?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actor     String
+  action    String
+  target    String
+  meta      Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([actor, createdAt])
+  @@index([action, createdAt])
+}
+
+enum PickResult {
+  WIN
+  LOSS
+  VOID
+  PENDING
+}
+
+// A user's tracked bet on a fixture/market. UI lands in S3; this is the model +
+// read helpers only.
+model UserPick {
+  id         String     @id @default(cuid())
+  userId     String
+  fixtureId  String
+  market     String
+  stake      Float
+  bookCode   String?
+  price      Float?
+  result     PickResult @default(PENDING)
+  createdAt  DateTime   @default(now())
+  settledAt  DateTime?
+
+  @@index([userId, createdAt])
+  @@index([fixtureId])
 }

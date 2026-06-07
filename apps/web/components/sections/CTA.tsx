@@ -1,15 +1,17 @@
 import { WaitlistForm } from './WaitlistForm';
 
-interface CTAProps { waitlistCount: number; }
+interface CTAProps { waitlistCount?: number | null; }
 
 export function CTA({ waitlistCount }: CTAProps) {
   return (
     <section id="cta" className="relative overflow-hidden border-b border-white/5">
       <div className="mx-auto max-w-3xl px-6 py-24 text-center">
         <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Join the Inner Circle</h2>
-        <p className="mt-3 text-mute-1">
-          <span className="font-semibold text-white">{waitlistCount.toLocaleString()}</span> analysts and bettors are on the waitlist.
-        </p>
+        {typeof waitlistCount === 'number' && (
+          <p className="mt-3 text-mute-1">
+            <span className="font-semibold text-white">{waitlistCount.toLocaleString()}</span> analysts and bettors are on the waitlist.
+          </p>
+        )}
         <div className="mt-8 rounded-2xl bg-ink-1 p-6 ring-1 ring-white/10">
           <WaitlistForm />
           <p className="mt-3 text-xs text-mute-2">

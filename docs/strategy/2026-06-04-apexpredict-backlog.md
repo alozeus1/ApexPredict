@@ -3,10 +3,29 @@
 **Kickoff:** Tuesday 2026-06-09
 **Public Nigeria launch target:** Monday 2026-08-04 (60 days)
 **Owner:** CTO Office, Web Forx Global Inc.
-**Version:** v1.0 · 2026-06-04
-**Status:** Approved — start S0 prep Friday 2026-06-05
+**Version:** v1.1 · 2026-06-05
+**Status:** Approved — S0 execution in progress
 
 > **Self-contained spec.** Every task below includes description, acceptable deliverables, expectations / edge cases, dependencies, estimate, and acceptance criteria. Engineers should not need to ping the user for clarification before starting work.
+
+---
+
+## Sprint S0 — execution status (agent, 2026-06-05)
+
+Per-task status lives in the XLSX `Backlog` sheet (`Status` column). Labels:
+`Done` · `In flight (agent)` · `In flight (human)` · `Not started` · `Deferred to v1.1`.
+Summary of what the five Sprint-S0 PRs delivered (all branched off `develop`):
+
+| PR | Branch | Tickets → status |
+|----|--------|------------------|
+| 1 | `chore/ci-cd-and-scanners` | **Done:** E00-S2-T1..T5. **In flight (human):** E00-S2-T6 (branch protection is a Forgejo UI action). |
+| 2 | `chore/repo-hygiene` | Locale gate, fabricated-count removal, `HASH_SECRET_SECONDARY` rotation, `/api/health/deep` (repo-hygiene; the `E00-S1-T8` rotation *runbook* remains **In flight (human)**). |
+| 3 | `feat/copy-repositioning` | **Done:** E04-S3-T4 + repositioning-copy list. |
+| 4 | `feat/identity-foundation` | **Done:** E01-S1-T1..T7, E01-S3-T1..T3, E01-S4-T1, E01-S4-T4. |
+| 5 | `feat/data-and-prediction-scaffolds` | **Done:** E03-S1-T8, E03-S2-T1, E03-S3-T3 (partial), E04-S4-T1, E05-S2-T1. |
+
+**In flight (human)** — vendor signups, KYC, DNS, billing alerts: `E00-S1-T1..T8`, `E00-S2-T6`.
+Everything else remains **Not started**. Migrations in PRs 4 & 5 are generated SQL only — not yet applied to Neon.
 
 ---
 

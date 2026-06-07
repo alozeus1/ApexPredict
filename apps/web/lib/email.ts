@@ -1,7 +1,7 @@
 import 'server-only';
 import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
-import { WaitlistVerify, WaitlistWelcome } from '@apexpredix/email';
+import { WaitlistVerify, WaitlistWelcome, AuthVerify, AuthReset } from '@apexpredix/email';
 import type { ReactElement } from 'react';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
@@ -50,3 +50,9 @@ export const sendVerifyEmail = (to: string, verifyUrl: string, locale: string) =
 
 export const sendWelcomeEmail = (to: string, referralUrl: string, locale: string) =>
   send(to, 'You are on the ApexPredix AI list', WaitlistWelcome({ referralUrl, locale }));
+
+export const sendAuthVerifyEmail = (to: string, verifyUrl: string, locale: string) =>
+  send(to, 'Verify your ApexPredix AI email', AuthVerify({ verifyUrl, locale }));
+
+export const sendAuthResetEmail = (to: string, resetUrl: string, locale: string) =>
+  send(to, 'Reset your ApexPredix AI password', AuthReset({ resetUrl, locale }));

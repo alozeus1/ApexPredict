@@ -4,11 +4,14 @@ import { useLocale } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 import type { Route } from 'next';
 import { ChevronDown } from 'lucide-react';
-import { LOCALES } from '@apexpredix/types';
+import { ENABLED_LOCALES } from '@/i18n/locales';
 
-const LABELS: Record<string, string> = { en: 'English', es: 'Español', yo: 'Yorùbá', ha: 'Hausa', zu: 'Zulu' };
+const LABELS: Record<string, string> = { en: 'English', yo: 'Yorùbá', ha: 'Hausa', ig: 'Igbo' };
 
-export function LanguageSwitcher() {
+// `locales` defaults to ENABLED_LOCALES. In the client bundle that resolves to
+// ['en'] (server-only flags are undefined there), so the switcher shows only
+// English by default; server components pass the authoritative gated list.
+export function LanguageSwitcher({ locales = ENABLED_LOCALES }: { locales?: readonly string[] } = {}) {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -35,7 +38,7 @@ export function LanguageSwitcher() {
       </button>
       {open && (
         <ul role="listbox" className="absolute right-0 z-40 mt-2 w-48 rounded-xl bg-ink-2 p-1 ring-1 ring-white/10">
-          {LOCALES.map((l) => (
+          {locales.map((l) => (
             <li key={l}>
               <button
                 role="option"

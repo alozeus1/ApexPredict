@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added — Sprint S0 foundation (PRs branched off `develop`)
+
+#### CI / security (`chore/ci-cd-and-scanners`)
+- Real CI pipeline on PR + push to `main`/`develop`: install → generate → typecheck → lint → test → build → e2e smoke, plus parallel CodeQL (fails on high/critical) and gitleaks
+- Forgejo CI mirror (`.forgejo/workflows/ci.yaml`); `.gitleaks.toml`; `e2e/00-smoke.spec.ts` + `e2e:smoke` script; PR template; `CONTRIBUTING.md`
+
+#### Auth & identity (`feat/identity-foundation`)
+- Auth.js v5 (Credentials + Resend email + Google), Prisma adapter, database sessions, argon2id passwords
+- Prisma models: `User`, `Account`, `Session`, `VerificationToken`, `Subscription`, `AuditLog` (+ enums); waitlist token renamed to `WaitlistVerificationToken` (data preserved)
+- Auth pages (signup, login, verify-email, forgot/reset-password, account); signup with anti-enumeration + lockout; `lib/audit.ts`, `lib/entitlements.ts` (Zod-validated matrix), `lib/auth-guards.tsx`
+
+#### Data & prediction scaffolds (`feat/data-and-prediction-scaffolds`)
+- `FixturesProvider` / `OddsProvider` interfaces (FootballData live; Sportmonks / TheOddsApi stubs); `runWorker` + heartbeat helpers
+- Widened market set + Zod `MarketSchema`; `UserPick` model + read helpers; synthetic model prices (`MODEL_FAIR_PRICE`) never persisted
+
+### Changed
+- Repositioned all marketing/UI copy as a calibrated value-bet signal service (`feat/copy-repositioning`); removed fabricated waitlist count and demo dashboard KPIs (`chore/repo-hygiene`)
+- Locale gate: removed `es`/`zu`, added `ig` (English fallback), gated `yo`/`ha`/`ig` behind env flags — English-only at launch (`chore/repo-hygiene`)
+- `HASH_SECRET_SECONDARY` verify-on-read rotation in `lib/hash.ts`; added `/api/health/deep` (`chore/repo-hygiene`)
+
+### Security
+- `.gitignore` now excludes `apps/web/.vercelrc.json` and `docs/strategy/*.{docx,pptx,pdf}`
+
 ## [0.1.0] - 2026-05-21
 
 ### Added — Foundation + Marketing Rebuild (sub-project 1 of 8)

@@ -5,15 +5,14 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const revalidate = 300;
 
-const BASELINE = 14203;
-
 export async function GET() {
-  if (!process.env.DATABASE_URL) return NextResponse.json({ ok: true, count: BASELINE });
+  // Always return the real verified-signup count — never a fabricated baseline.
+  if (!process.env.DATABASE_URL) return NextResponse.json({ ok: true, count: 0 });
 
   try {
     const count = await prisma.waitlistSignup.count({ where: { verifiedAt: { not: null } } });
-    return NextResponse.json({ ok: true, count: BASELINE + count });
+    return NextResponse.json({ ok: true, count });
   } catch {
-    return NextResponse.json({ ok: true, count: BASELINE });
+    return NextResponse.json({ ok: true, count: 0 });
   }
 }

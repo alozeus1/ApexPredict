@@ -13,7 +13,7 @@ export const runtime = 'nodejs';
 const Body = z.object({
   email: z.string().email().max(254),
   region: z.string().length(2).optional(),
-  locale: z.enum(['en', 'es', 'yo', 'ha', 'zu']),
+  locale: z.enum(['en', 'yo', 'ha', 'ig']),
   premiumIntent: z.boolean().default(false),
   referredBy: z.string().optional(),
   turnstileToken: z.string().min(10),
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
 
     const raw = crypto.randomBytes(32).toString('base64url');
     const tokenHash = crypto.createHash('sha256').update(raw).digest('hex');
-    await prisma.verificationToken.create({
+    await prisma.waitlistVerificationToken.create({
       data: {
         email,
         tokenHash,
