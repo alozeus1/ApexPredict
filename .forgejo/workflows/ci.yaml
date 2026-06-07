@@ -1,0 +1,85 @@
+name: CI
+
+# Forgejo mirror of .github/workflows/ci.yml so Forgejo PRs run the same gate.
+# `develop` is the integration branch on this remote; `deploy.yaml` (prod deploy
+# on push to main) is intentionally left untouched.
+#
+# CodeQL is omitted here: github/codeql-action depends on GitHub-hosted tooling
+# and the Security tab, which Forgejo does not provide. CodeQL runs on the GitHub
+# mirror. The secret scan and full quality gate run on both.
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: typecheck · lint · test · smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.18.1
+
+      - name: Resolve pnpm store path
+        id: pnpm-store
+        run: echo "dir=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.dir }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm -F @apexpredix/db generate
+
+      - name: Typecheck
+        run: pnpm -F @apexpredix/web typecheck
+
+      - name: Lint
+        run: pnpm -F @apexpredix/web lint
+
+      - name: Unit tests
+        run: pnpm -F @apexpredix/web test
+
+      - name: Build web (required for the smoke server)
+        run: pnpm -F @apexpredix/web build
+
+      - name: Install Playwright chromium
+        run: pnpm -F @apexpredix/web exec playwright install --with-deps chromium
+
+      - name: E2E smoke
+        run: pnpm -F @apexpredix/web e2e:smoke
+
+  gitleaks:
+    name: gitleaks secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: ${{ github.workspace }}/.gitleaks.toml
