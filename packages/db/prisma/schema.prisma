@@ -381,3 +381,28 @@ model AuditLog {
   @@index([actor, createdAt])
   @@index([action, createdAt])
 }
+
+enum PickResult {
+  WIN
+  LOSS
+  VOID
+  PENDING
+}
+
+// A user's tracked bet on a fixture/market. UI lands in S3; this is the model +
+// read helpers only.
+model UserPick {
+  id         String     @id @default(cuid())
+  userId     String
+  fixtureId  String
+  market     String
+  stake      Float
+  bookCode   String?
+  price      Float?
+  result     PickResult @default(PENDING)
+  createdAt  DateTime   @default(now())
+  settledAt  DateTime?
+
+  @@index([userId, createdAt])
+  @@index([fixtureId])
+}

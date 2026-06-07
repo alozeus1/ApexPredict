@@ -9,6 +9,9 @@
     "test": "vitest run",
     "lint": "eslint src"
   },
+  "dependencies": {
+    "zod": "3.24.1"
+  },
   "devDependencies": {
     "@apexpredix/config": "workspace:*",
     "vitest": "2.1.8",

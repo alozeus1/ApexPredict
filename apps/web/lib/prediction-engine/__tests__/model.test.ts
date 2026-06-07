@@ -46,4 +46,22 @@ describe('generatePrediction', () => {
     expect(prediction.edge).toBeGreaterThan(0);
     expect(prediction.odds[0]).toMatchObject({ bookCode: 'BK', market: '1', price: 2.25 });
   });
+
+  it('uses a synthetic MODEL_FAIR_PRICE and is never a value bet when no real odds exist', () => {
+    const prediction = generatePrediction({
+      match,
+      homeStats: {
+        position: 1, team: match.homeTeam, playedGames: 20, won: 15, draw: 3, lost: 2,
+        points: 48, goalsFor: 44, goalsAgainst: 15, goalDifference: 29,
+      },
+      awayStats: {
+        position: 18, team: match.awayTeam, playedGames: 20, won: 3, draw: 3, lost: 14,
+        points: 12, goalsFor: 14, goalsAgainst: 40, goalDifference: -26,
+      },
+      // no marketOdds → synthetic fair price
+    });
+
+    expect(prediction.odds[0]?.bookCode).toBe('MODEL_FAIR_PRICE');
+    expect(prediction.valueBet).toBe(false);
+  });
 });

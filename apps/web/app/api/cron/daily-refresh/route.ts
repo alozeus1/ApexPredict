@@ -11,15 +11,15 @@ import {
 } from '@/lib/live-data/football-data';
 import { generatePrediction } from '@/lib/prediction-engine/model';
 import { runBacktest } from '@/lib/prediction-engine/backtest';
+import { runWorker } from '@/lib/workers/runWorker';
+import { writeHeartbeat } from '@/lib/workers/heartbeat';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
 
-async function heartbeat(agentId: string, status: string, message: string, started: number) {
-  await prisma.agentHeartbeat.create({
-    data: { agentId, status, message, durationMs: Date.now() - started },
-  });
-}
+// Per-agent status write, routed through the shared worker module.
+const heartbeat = (agentId: string, status: string, message: string, started: number) =>
+  writeHeartbeat(agentId, status, message, Date.now() - started);
 
 function statsByTeam(rows: FootballDataStandingRow[]) {
   return new Map(rows.map((row) => [row.team.id, row]));
@@ -41,13 +41,14 @@ export async function GET(request: Request) {
   if (unauthorized) return unauthorized;
 
   const started = Date.now();
-  let fixturesWritten = 0;
-  let predictionsWritten = 0;
-  let resultsWritten = 0;
-  let statsWritten = 0;
-  let evaluatedNow = 0;
 
-  try {
+  const outcome = await runWorker('daily-refresh', async () => {
+    let fixturesWritten = 0;
+    let predictionsWritten = 0;
+    let resultsWritten = 0;
+    let statsWritten = 0;
+    let evaluatedNow = 0;
+
     for (const code of configuredCompetitions()) {
       const bundle = await fetchCompetitionBundle(code);
       const competition = bundle.competition;
@@ -155,8 +156,14 @@ export async function GET(request: Request) {
         });
         predictionsWritten += 1;
 
+        // Never persist synthetic model prices — only real bookmaker odds.
+        const realOdds = prediction.odds.filter(
+          (odd) => odd.bookCode !== 'MODEL_FAIR_PRICE' && odd.bookCode !== 'MODEL',
+        );
         await prisma.odds.deleteMany({ where: { fixtureId: fixture.id } });
-        await prisma.odds.createMany({ data: prediction.odds.map((odd) => ({ ...odd, fixtureId: fixture.id })) });
+        if (realOdds.length > 0) {
+          await prisma.odds.createMany({ data: realOdds.map((odd) => ({ ...odd, fixtureId: fixture.id })) });
+        }
 
         const homeScore = match.score?.fullTime?.home;
         const awayScore = match.score?.fullTime?.away;
@@ -191,10 +198,11 @@ export async function GET(request: Request) {
         .map((agent) => heartbeat(agent.id, agent.status, `${agent.name} daily refresh tick`, started)),
     ]);
 
-    return NextResponse.json({ ok: true, fixturesWritten, predictionsWritten, resultsWritten, statsWritten, evaluatedNow });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown daily refresh error';
-    await heartbeat('daily-refresh', 'error', message, started).catch(() => undefined);
-    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    return { fixturesWritten, predictionsWritten, resultsWritten, statsWritten, evaluatedNow };
+  }, { message: (r) => `${r.fixturesWritten} fixtures, ${r.predictionsWritten} predictions, ${r.evaluatedNow} evaluated` });
+
+  if (!outcome.ok) {
+    return NextResponse.json({ ok: false, error: outcome.message, errorClass: outcome.errorClass }, { status: 500 });
   }
+  return NextResponse.json({ ok: true, ...outcome.result });
 }

@@ -71,9 +71,13 @@ export function generatePrediction(input: PredictionInput): EnginePrediction {
 
   const markets = (['1', 'X', '2'] as const).map((market) => {
     const probability = probabilities[market];
-    const odds = bestPrice(market, input.marketOdds) ?? { bookCode: 'MODEL', market, price: fairPrice(probability) };
+    const realOdds = bestPrice(market, input.marketOdds);
+    const synthetic = !realOdds;
+    // Synthetic fair price is an in-memory placeholder only — it is never written
+    // to the Odds table (the cron filters MODEL_FAIR_PRICE out before persisting).
+    const odds = realOdds ?? { bookCode: 'MODEL_FAIR_PRICE', market, price: fairPrice(probability) };
     const impliedProbability = 1 / odds.price;
-    return { market, probability, odds, edge: probability - impliedProbability };
+    return { market, probability, odds, synthetic, edge: probability - impliedProbability };
   });
 
   const firstPick = markets[0];
@@ -95,7 +99,8 @@ export function generatePrediction(input: PredictionInput): EnginePrediction {
   );
   const ensemble = clamp((elo + poisson + xgProxy) / 3, 0.08, 0.86);
   const topPick = pickLabel(pick.market, match);
-  const valueBet = pick.edge >= 0.03 && confidence >= 0.58;
+  // No value claim without a real market price — synthetic odds cannot be a value bet.
+  const valueBet = !pick.synthetic && pick.edge >= 0.03 && confidence >= 0.58;
 
   return {
     market: pick.market,
