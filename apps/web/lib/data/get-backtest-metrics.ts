@@ -10,15 +10,20 @@ export interface BacktestMetrics {
   tiles: BacktestMetricTile[];
 }
 
+// Shown until we cross the publication threshold. No real numbers with a tiny n —
+// tiles are dashed placeholders, not zeros presented as performance.
+const MIN_SAMPLE = 100;
 const FALLBACK: BacktestMetrics = {
-  summary: 'Awaiting settled live predictions. Past performance does not guarantee future results.',
+  summary:
+    'Sample size below 100 picks — figures will display once we cross that threshold. ' +
+    'Past performance does not guarantee future results.',
   tiles: [
-    { label: 'Total Staked', value: '$0.00' },
-    { label: 'Total Returned', value: '$0.00' },
-    { label: 'Net Profit', value: '$0.00' },
-    { label: 'ROI', value: '0.0%' },
-    { label: 'Hit Rate', value: '0.0%' },
-    { label: 'Calibration Error', value: '0.0%' },
+    { label: 'Total Staked', value: '—' },
+    { label: 'Total Returned', value: '—' },
+    { label: 'Net Profit', value: '—' },
+    { label: 'ROI', value: '—' },
+    { label: 'Hit Rate', value: '—' },
+    { label: 'Calibration Error', value: '—' },
   ],
 };
 
@@ -35,7 +40,7 @@ export async function getBacktestMetrics(): Promise<BacktestMetrics> {
 
   try {
     const latest = await prisma.predictionBacktestRun.findFirst({ orderBy: { createdAt: 'desc' } });
-    if (!latest || latest.sampleSize === 0) return FALLBACK;
+    if (!latest || latest.sampleSize < MIN_SAMPLE) return FALLBACK;
 
     return {
       summary:

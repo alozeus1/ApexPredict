@@ -1,12 +1,18 @@
 import Link from 'next/link';
 import { Button } from '@apexpredix/ui';
+import { entitlementsFor, entitlementsForTier } from '@/lib/entitlements';
+
+// Tier-aware comparison sourced from the entitlements matrix. Free = no
+// authenticated user; Premium column shown from a representative paid tier.
+const free = entitlementsFor(null);
+const premium = entitlementsForTier('MONTHLY');
 
 const FEATURES: ReadonlyArray<{ label: string; free: string; premium: string }> = [
-  { label: 'Daily predictions', free: '4 predictions/day', premium: '10 predictions/day' },
+  { label: 'Daily predictions', free: `${free.picksPerDay} predictions/day`, premium: `${premium.picksPerDay} predictions/day` },
   { label: 'Analysis depth', free: 'Basic', premium: 'Deep narrative + line movement' },
-  { label: 'Value bet alerts', free: '—', premium: 'Real-time' },
-  { label: 'Kelly staking calculator', free: '—', premium: 'Included' },
-  { label: 'Telegram / email alerts', free: '—', premium: 'Included' },
+  { label: 'Value bet alerts', free: free.valueBets ? 'Included' : '—', premium: premium.valueBets ? 'Real-time' : '—' },
+  { label: 'Kelly staking calculator', free: free.kelly ? 'Included' : '—', premium: premium.kelly ? 'Included' : '—' },
+  { label: 'Telegram / email alerts', free: free.telegram ? 'Included' : '—', premium: premium.telegram ? 'Included' : '—' },
   { label: 'Regional pricing', free: 'USD', premium: 'PPP-adjusted' },
 ];
 
@@ -14,7 +20,8 @@ export function Premium() {
   return (
     <section id="premium" className="border-b border-white/5">
       <div className="mx-auto max-w-6xl px-6 py-20">
-        <h2 className="mb-10 text-3xl font-semibold tracking-tight md:text-4xl">Premium Features</h2>
+        <h2 className="mb-3 text-3xl font-semibold tracking-tight md:text-4xl">Edge subscriptions — for punters who care about EV.</h2>
+        <p className="mb-10 max-w-prose text-mute-1">Decision support, priced by what you need. Every tier is about expected value — we don&rsquo;t promise wins.</p>
         <div className="overflow-hidden rounded-2xl ring-1 ring-white/10">
           <table className="w-full text-left text-sm">
             <thead className="bg-ink-2 text-mute-1">

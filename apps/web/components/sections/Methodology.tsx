@@ -8,9 +8,16 @@ export function Methodology() {
   return (
     <section id="methodology" className="border-b border-white/5 bg-ink-1/60">
       <div className="mx-auto max-w-6xl px-6 py-20">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tight md:text-4xl">Our Approach</h2>
-        <p className="mb-12 max-w-prose text-mute-1">
-          Three independent models. One ensemble verdict. ¼ Kelly for bankroll safety.
+        <h2 className="mb-3 text-3xl font-semibold tracking-tight md:text-4xl">How we measure ourselves</h2>
+        <p className="mb-6 max-w-prose text-mute-1">
+          Every pick we publish is later evaluated against the real result. We track Brier score,
+          log-loss, and calibration error per probability bucket — and we show the scoreboard so you
+          can judge our edge yourself.
+        </p>
+        <p className="mb-12 max-w-prose text-sm text-mute-2">
+          Live calibration figures publish once we cross 100 settled picks. Until then, this is how
+          the model is built: three independent models, one ensemble verdict, ¼ Kelly for bankroll
+          safety. Past performance does not guarantee future results.
         </p>
         <div className="grid gap-4 md:grid-cols-3">
           {PILLARS.map((p) => (
