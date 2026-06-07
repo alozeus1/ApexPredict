@@ -1,72 +1,44 @@
-/**
- * Tier entitlements. SCAFFOLD for PR feat/copy-repositioning: returns static tier
- * defaults so the Premium UI can render tier-aware. The full implementation —
- * sourcing the matrix from data/pricing.json with a Zod schema and mapping a real
- * `User`/`Subscription` to a tier — lands in feat/identity-foundation (PR 4).
- */
+import matrixJson from '@/data/entitlements.json';
+import {
+  TierMatrixSchema,
+  type Entitlements,
+  type SubscriptionTier,
+} from '@/data/pricing.schema';
 
-export type SubscriptionTier = 'FREE' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+export type { Entitlements, SubscriptionTier };
 
-export interface Entitlements {
-  picksPerDay: number;
-  valueBets: boolean;
-  alerts: 'email' | 'push' | 'priority' | null;
-  kelly: boolean;
-  warRoom: 'none' | 'partial' | 'full';
-  telegram: boolean;
-  whatsapp: boolean;
-  calibrationDepthDays: number;
+// Validate the matrix once at module load — a malformed data/entitlements.json
+// fails fast rather than silently shipping wrong entitlements.
+const MATRIX = TierMatrixSchema.parse(matrixJson);
+
+/** Tiers whose entitlements are actually granted (others fall back to FREE). */
+const ACTIVE_STATUSES = new Set(['TRIALING', 'ACTIVE']);
+
+/** Minimal user shape this resolver needs — compatible with the Prisma User + Subscription. */
+export interface EntitlementUser {
+  subscription?: { tier?: SubscriptionTier | null; status?: string | null } | null;
+  disabledAt?: Date | null;
 }
 
-const MATRIX: Record<SubscriptionTier, Entitlements> = {
-  FREE: {
-    picksPerDay: 4,
-    valueBets: false,
-    alerts: null,
-    kelly: false,
-    warRoom: 'none',
-    telegram: false,
-    whatsapp: false,
-    calibrationDepthDays: 7,
-  },
-  WEEKLY: {
-    picksPerDay: 10,
-    valueBets: true,
-    alerts: 'email',
-    kelly: true,
-    warRoom: 'partial',
-    telegram: true,
-    whatsapp: false,
-    calibrationDepthDays: 30,
-  },
-  MONTHLY: {
-    picksPerDay: 10,
-    valueBets: true,
-    alerts: 'push',
-    kelly: true,
-    warRoom: 'partial',
-    telegram: true,
-    whatsapp: true,
-    calibrationDepthDays: 90,
-  },
-  YEARLY: {
-    picksPerDay: 10,
-    valueBets: true,
-    alerts: 'priority',
-    kelly: true,
-    warRoom: 'full',
-    telegram: true,
-    whatsapp: true,
-    calibrationDepthDays: 365,
-  },
-};
-
-/** Entitlements for the given tier. A null/absent input resolves to the FREE tier. */
-export function entitlementsFor(input?: { tier?: SubscriptionTier } | null): Entitlements {
-  return MATRIX[input?.tier ?? 'FREE'];
+function resolveTier(input?: EntitlementUser | { tier?: SubscriptionTier } | null): SubscriptionTier {
+  if (!input) return 'FREE';
+  // Bare { tier } form (used by tier-comparison UI).
+  if ('tier' in input && input.tier && !('subscription' in input)) return input.tier;
+  const sub = (input as EntitlementUser).subscription;
+  if ((input as EntitlementUser).disabledAt) return 'FREE';
+  if (sub?.tier && sub.status && ACTIVE_STATUSES.has(sub.status)) return sub.tier;
+  return 'FREE';
 }
 
-/** Convenience accessor for a specific tier (used by tier-comparison UI). */
+/** Entitlements for a given tier. */
 export function entitlementsForTier(tier: SubscriptionTier): Entitlements {
   return MATRIX[tier];
+}
+
+/**
+ * Entitlements for a user (or null). A null/absent/disabled user, or one without
+ * an active/trialing subscription, resolves to the FREE tier.
+ */
+export function entitlementsFor(input?: EntitlementUser | { tier?: SubscriptionTier } | null): Entitlements {
+  return MATRIX[resolveTier(input)];
 }

@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   if (!raw) return NextResponse.redirect(new URL('/en/thank-you?status=invalid', req.url));
   try {
     const tokenHash = crypto.createHash('sha256').update(raw).digest('hex');
-    const tok = await prisma.verificationToken.findUnique({ where: { tokenHash } });
+    const tok = await prisma.waitlistVerificationToken.findUnique({ where: { tokenHash } });
     if (!tok || tok.usedAt || tok.expiresAt < new Date()) {
       return NextResponse.redirect(new URL('/en/thank-you?status=invalid', req.url));
     }
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       where: { email: tok.email },
       data: { verifiedAt: new Date() },
     });
-    await prisma.verificationToken.update({ where: { tokenHash }, data: { usedAt: new Date() } });
+    await prisma.waitlistVerificationToken.update({ where: { tokenHash }, data: { usedAt: new Date() } });
     const base = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(req.url).origin;
     const referralUrl = `${base}/?r=${signup.referralToken}`;
     await sendWelcomeEmail(signup.email, referralUrl, signup.locale);
