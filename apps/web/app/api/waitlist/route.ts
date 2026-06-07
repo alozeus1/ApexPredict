@@ -13,7 +13,7 @@ export const runtime = 'nodejs';
 const Body = z.object({
   email: z.string().email().max(254),
   region: z.string().length(2).optional(),
-  locale: z.enum(['en', 'es', 'yo', 'ha', 'zu']),
+  locale: z.enum(['en', 'yo', 'ha', 'ig']),
   premiumIntent: z.boolean().default(false),
   referredBy: z.string().optional(),
   turnstileToken: z.string().min(10),

@@ -14,9 +14,19 @@ const renderWithIntl = (node: React.ReactNode) =>
 
 describe('CTA', () => {
   it('renders email input and submit button with 18+ checkbox', () => {
-    renderWithIntl(<CTA waitlistCount={14203} />);
+    renderWithIntl(<CTA waitlistCount={5234} />);
     expect(screen.getByPlaceholderText(/you@example/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /reserve my seat/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/18\+/)).toBeInTheDocument();
+  });
+
+  it('shows the waitlist counter only when a count is provided', () => {
+    renderWithIntl(<CTA waitlistCount={5234} />);
+    expect(screen.getByText(/on the waitlist/i)).toBeInTheDocument();
+  });
+
+  it('hides the counter when no count is available', () => {
+    renderWithIntl(<CTA waitlistCount={null} />);
+    expect(screen.queryByText(/on the waitlist/i)).not.toBeInTheDocument();
   });
 });

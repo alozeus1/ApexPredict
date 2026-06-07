@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
-import { LOCALES } from '@apexpredix/types';
+import { ENABLED_LOCALES } from '@/i18n/locales';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://apexpredix.ai';
 
 export function hrefLang(path: string): Record<string, string> {
+  // Only advertise locales that are actually routable — gated-off locales 404.
   const out: Record<string, string> = { 'x-default': `${SITE}/en${path}` };
-  for (const l of LOCALES) out[l] = `${SITE}/${l}${path}`;
+  for (const l of ENABLED_LOCALES) out[l] = `${SITE}/${l}${path}`;
   return out;
 }
 

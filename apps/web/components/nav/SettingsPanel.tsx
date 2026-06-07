@@ -4,11 +4,12 @@ import { Settings, X } from 'lucide-react';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { ThemeToggle } from './ThemeToggle';
 import { RegionPicker } from './RegionPicker';
+import { ENABLED_LOCALES } from '@/i18n/locales';
 import type { RegionCode } from '@apexpredix/types';
 
-interface Props { initialRegion: RegionCode; }
+interface Props { initialRegion: RegionCode; enabledLocales?: readonly string[]; }
 
-export function SettingsPanel({ initialRegion }: Props) {
+export function SettingsPanel({ initialRegion, enabledLocales = ENABLED_LOCALES }: Props) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -31,7 +32,7 @@ export function SettingsPanel({ initialRegion }: Props) {
             <div className="space-y-6">
               <div>
                 <h3 className="mb-2 text-sm font-medium text-mute-1">Language</h3>
-                <LanguageSwitcher />
+                <LanguageSwitcher locales={enabledLocales} />
               </div>
               <div>
                 <h3 className="mb-2 text-sm font-medium text-mute-1">Region</h3>
