@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { LOCALES, DEFAULT_LOCALE, isLocale, CONSENT_VERSION } from '../index';
 
 describe('types', () => {
-  it('LOCALES has 5 entries', () => {
-    expect(LOCALES).toHaveLength(5);
+  it('LOCALES is the gated set (en, yo, ha, ig)', () => {
+    expect(LOCALES).toEqual(['en', 'yo', 'ha', 'ig']);
   });
   it('DEFAULT_LOCALE is en', () => {
     expect(DEFAULT_LOCALE).toBe('en');
