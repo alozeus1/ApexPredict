@@ -1,10 +1,10 @@
 ---
-title: ApexPredix AI — Sub-project 1 · Foundation + Marketing Rebuild
+title: ApexPredict AI — Sub-project 1 · Foundation + Marketing Rebuild
 status: draft
 version: 0.1.0
 date: 2026-05-21
 authors: Claude (assistant) + ocheme
-parent_project: ApexPredix AI (by Maralito Labs)
+parent_project: ApexPredict AI (by Maralito Labs)
 parent_program_decomposition:
   - 1. Foundation + Marketing Rebuild  ← this spec
   - 2. Data Platform
@@ -20,7 +20,7 @@ parent_program_decomposition:
 
 ## 0. Context
 
-ApexPredix AI is a sports prediction intelligence platform built on an ensemble engine (ELO + Poisson + xG) operated by Maralito Labs. The existing artifact in this repository is only a compiled Vite/React SPA bundle (`app/dist/`) with no source. This sub-project rebuilds the foundation in Next.js 15 with a faithful-in-soul refresh of the existing visual language, ships a deployable waitlist + marketing site with a working canned-data predictions surface, and sets the architectural seams for the seven downstream sub-projects.
+ApexPredict AI is a sports prediction intelligence platform built on an ensemble engine (ELO + Poisson + xG) operated by Maralito Labs. The existing artifact in this repository is only a compiled Vite/React SPA bundle (`app/dist/`) with no source. This sub-project rebuilds the foundation in Next.js 15 with a faithful-in-soul refresh of the existing visual language, ships a deployable waitlist + marketing site with a working canned-data predictions surface, and sets the architectural seams for the seven downstream sub-projects.
 
 The earlier brainstorming session (this conversation) reverse-engineered the original feature surface from the bundle's preserved `code-path` props and locked the major decisions. This spec consolidates those decisions and adds the implementation contract.
 
@@ -345,7 +345,7 @@ Authoritative types live in `packages/types` so sub-project 2 can swap JSON for 
 - `hreflang` for all 5 locales + `x-default → /en`.
 - Dynamic OG: `opengraph-image.tsx` per segment; match-detail OG renders the actual confidence card to PNG (CTR win).
 - JSON-LD:
-  - `Organization` (root layout): name "ApexPredix AI", parent "Maralito Labs", logo, sameAs socials, contactPoints `help@`/`billing@`/`legal@`/`privacy@apexpredix.ai`
+  - `Organization` (root layout): name "ApexPredict AI", parent "Maralito Labs", logo, sameAs socials, contactPoints `help@`/`billing@`/`legal@`/`privacy@apexpredix.ai`
   - `WebSite` + `SearchAction` (predictions search)
   - `BreadcrumbList` per inner page
   - `SportsEvent` per `/predictions/[matchId]`
@@ -353,7 +353,7 @@ Authoritative types live in `packages/types` so sub-project 2 can swap JSON for 
   - `Article` on `/methodology`
 - `sitemap.ts`: dynamic, locale × route × matchId from fixtures.
 - `robots.ts`: allow all, block `/api/*`, `/blocked`, `/under-age`, `/dev/*`. Sitemap referenced.
-- `manifest.ts`: PWA-ready, theme `#0A0A0A`, name "ApexPredix AI", icons 192 / 512 / maskable.
+- `manifest.ts`: PWA-ready, theme `#0A0A0A`, name "ApexPredict AI", icons 192 / 512 / maskable.
 
 ## 9. Performance budget
 
@@ -407,7 +407,7 @@ Tactics:
 
 ### 11.1 Seedance prompt (10s, 1:1, with audio)
 
-> A premium 10-second cinematic product reel for ApexPredix AI, a sports prediction intelligence platform. Square 1:1, 1080×1080, 30 fps, deep-black background (#0A0A0A), glowing electric-cyan and amber accents.
+> A premium 10-second cinematic product reel for ApexPredict AI, a sports prediction intelligence platform. Square 1:1, 1080×1080, 30 fps, deep-black background (#0A0A0A), glowing electric-cyan and amber accents.
 >
 > 0.0–1.5s — black screen, a single pulsing cyan dot in the center; soft sub-bass hit; the dot expands into a holographic globe with thin lat/long lines and tiny golden nodes lighting up across Africa, Europe, the Americas; whisper-soft synth pad rises.
 >
@@ -421,7 +421,7 @@ Tactics:
 >
 > 7.5–9.0s — interface zooms out into a phone-sized dashboard with "Win Rate 89.3%", "ROI +8.5%", three predictions ticking from Pending → Win with green check marks; rising tonal scale.
 >
-> 9.0–10.0s — wordmark "ApexPredix AI" types in (cyan glow), tagline "Built on Mathematical Edge" fades under it; final low cinematic boom + sub-bass tail.
+> 9.0–10.0s — wordmark "ApexPredict AI" types in (cyan glow), tagline "Built on Mathematical Edge" fades under it; final low cinematic boom + sub-bass tail.
 >
 > Style: dark fintech meets sports broadcast, glass and neon, motion-design feel like Stripe / Linear / Apple keynote reels. No human faces. No real team logos — use "Team A vs Team B" if any text rendering risk. UI text in clean sans (Inter / SF Pro). Sound mix: cinematic synth pad bed, two impact hits at 0.0s and 9.5s, soft UI ticks, no voiceover.
 
@@ -475,7 +475,7 @@ export function HeroReel({
           <img src={poster} alt="" className="h-full w-full object-cover" />
           <button
             type="button"
-            aria-label="Play ApexPredix AI product preview"
+            aria-label="Play ApexPredict AI product preview"
             onClick={() => {
               setPlaying(true);
               videoRef.current?.play();
@@ -497,7 +497,7 @@ export function HeroReel({
           loop
           playsInline
           preload="metadata"
-          aria-label="ApexPredix AI product preview"
+          aria-label="ApexPredict AI product preview"
           className="h-full w-full object-cover"
         >
           <track kind="captions" srcLang="en" src={captionsSrc} default />

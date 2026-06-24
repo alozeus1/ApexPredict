@@ -59,7 +59,7 @@ S0 already shipped (see CHANGELOG `[Unreleased]` and strategy doc Appendix A):
 
 S0 leftovers the agent surfaced — DO NOT solve all of them in this run; pick only the ones in scope below:
 - ⚠️ Live Vercel token leaked into `apps/web/.vercelrc.json` (now gitignored, never committed). **You will NOT rotate the token (that's an SRE/UI action), but you WILL add `apps/web/.vercelrc.json` to a documented "never commit" checklist in `CONTRIBUTING.md` and add a `pre-commit` guard via gitleaks rule.**
-- Brand spelling mismatch: code renders `ApexPredix`, docs say `ApexPredict`. **PR 1 fixes this.**
+- Brand spelling mismatch: code renders `ApexPredict`, docs say `ApexPredict`. **PR 1 fixes this.**
 
 ==================
 2. STRATEGIC GUARDRAILS (carry from S0 — these apply to every change)
@@ -100,13 +100,13 @@ Branch: chore/brand-and-security-hygiene off develop
 Goal: Unify brand spelling. Add tooling to prevent the `.vercelrc.json` leak recurring.
 
 Concrete deliverables:
-  a) Global-replace `ApexPredix` → `ApexPredict` across:
+  a) Global-replace `ApexPredict` → `ApexPredict` across:
        - all files under `apps/web/{app,components,messages,content,emails,public,scripts}`
        - all files under `packages/{config,types,db,ui,email}`
        - all JSON-LD strings + OG image renderer + sitemap + robots
        - all email subject lines + Telegram bot copy (carry the disclaimer module too)
        - README.md, CHANGELOG.md, CONTRIBUTING.md
-     Verify with: `grep -ri "ApexPredix" .` returns zero matches OUTSIDE of historical CHANGELOG entries for [0.1.0] (which is past, leave alone).
+     Verify with: `grep -ri "ApexPredict" .` returns zero matches OUTSIDE of historical CHANGELOG entries for [0.1.0] (which is past, leave alone).
   b) Update `package.json` and `apps/web/package.json` `name` field if they reference the old spelling.
   c) Update `prisma/schema.prisma` brand string if present.
   d) Add `apps/web/.vercelrc.json` to `.gitignore` if missing (verify) AND add an explicit `.gitleaks.toml` rule that fails CI if any file matching `*.vercelrc.json` ever gets staged. Test that the rule fires by creating a sample file in a temp branch (delete the test commit before pushing).
@@ -115,7 +115,7 @@ Concrete deliverables:
 
 Acceptance:
   - Quality gate green.
-  - `grep -ri "ApexPredix" .` returns zero non-historical hits.
+  - `grep -ri "ApexPredict" .` returns zero non-historical hits.
   - gitleaks rule for `.vercelrc.json` fires on a synthetic test.
   - PR body explicitly notes: "Vercel token rotation is still a manual SRE action (see runbook); this PR only prevents recurrence."
 

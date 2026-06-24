@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: '',
-    title: 'ApexPredix AI — Sports Prediction Intelligence',
+    title: 'ApexPredict AI — Sports Prediction Intelligence',
     description: 'AI sports prediction intelligence by Maralito Labs — ELO + Poisson + xG ensemble engine.',
   });
 }

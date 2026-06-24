@@ -33,7 +33,7 @@ A follow-up test fix (`89375d9 test(types): align LOCALES test with the gated lo
 ### Two follow-ups the agent surfaced — handle before Sprint S1 user-facing work
 
 1. **Rotate the Vercel token.** Live token was found in `apps/web/.vercelrc.json`. File is now gitignored; token must still be rotated in Vercel. Owner: SRE. **Add as task `OPS-T1`.**
-2. **Unify brand spelling.** Code renders `ApexPredix`; docs say `ApexPredict`. Pick `ApexPredict` and global-replace. Owner: FE + DES. **Add as task `OPS-T2`.**
+2. **Unify brand spelling.** Code renders `ApexPredict`; docs say `ApexPredict`. Pick `ApexPredict` and global-replace. Owner: FE + DES. **Add as task `OPS-T2`.**
 
 ### S1 readiness gate
 
@@ -61,7 +61,7 @@ Sprint S1 (Identity + Subscription + Payments user flows) needs these gates gree
 These are not Epic-scoped — drop into the appropriate sprint:
 
 - **OPS-T1** — Rotate Vercel token leaked into `apps/web/.vercelrc.json`. `XS` · SRE · **In flight (human)**.
-- **OPS-T2** — Global-replace `ApexPredix` → `ApexPredict` across code, copy, emails, JSON-LD, OG, README, CHANGELOG. `S` · FE + DES · **Not started**.
+- **OPS-T2** — Global-replace `ApexPredict` → `ApexPredict` across code, copy, emails, JSON-LD, OG, README, CHANGELOG. `S` · FE + DES · **Not started**.
 - **OPS-T3** — Apply Prisma migrations on Neon: `pnpm -F @apexpredix/db migrate deploy`. Validate against staging branch first. `S` · SRE · **In flight (human)**.
 - **OPS-T4** — Configure Forgejo branch protection on `main` (E00-S2-T6 in UI). `XS` · SRE · **In flight (human)**.
 - **OPS-T5** — Verify Auth.js v5 + Email provider works end-to-end in Vercel preview deploy (set `AUTH_SECRET`, `AUTH_RESEND_KEY`, etc.). `S` · SRE.

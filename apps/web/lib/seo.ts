@@ -27,7 +27,7 @@ export function pageMetadata(opts: {
       title: opts.title,
       description: opts.description,
       images: opts.ogImage ? [opts.ogImage] : [`${SITE}/opengraph-image`],
-      siteName: 'ApexPredix AI',
+      siteName: 'ApexPredict AI',
     },
     twitter: { card: 'summary_large_image', title: opts.title, description: opts.description },
   };

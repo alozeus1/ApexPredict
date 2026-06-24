@@ -15,7 +15,7 @@ export function CTA({ waitlistCount }: CTAProps) {
         <div className="mt-8 rounded-2xl bg-ink-1 p-6 ring-1 ring-white/10">
           <WaitlistForm />
           <p className="mt-3 text-xs text-mute-2">
-            We never share your email. ApexPredix AI is an analytics service, not a gambling operator.
+            We never share your email. ApexPredict AI is an analytics service, not a gambling operator.
           </p>
         </div>
       </div>

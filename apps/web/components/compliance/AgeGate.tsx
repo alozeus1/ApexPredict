@@ -28,7 +28,7 @@ export function AgeGate() {
           Are you 18 or older?
         </h2>
         <p className="mt-2 text-sm text-mute-1">
-          ApexPredix AI is intended for adults only. We are an analytics service, not a gambling operator.
+          ApexPredict AI is intended for adults only. We are an analytics service, not a gambling operator.
         </p>
         <div className="mt-6 flex gap-3">
           <button

@@ -15,7 +15,7 @@ export function Hero() {
             The math behind your next bet.
           </h1>
           <p className="max-w-prose text-mute-1 md:text-lg">
-            ApexPredix computes calibrated probabilities for upcoming football matches and flags where the market is mispriced. We publish our scoreboard openly — see how we score before you trust a pick.
+            ApexPredict computes calibrated probabilities for upcoming football matches and flags where the market is mispriced. We publish our scoreboard openly — see how we score before you trust a pick.
           </p>
           <div className="flex flex-wrap gap-3">
             <Button asChild variant="primary" size="lg">

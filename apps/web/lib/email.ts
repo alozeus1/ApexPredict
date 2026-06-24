@@ -25,7 +25,7 @@ const smtpTransport = process.env.SMTP_URL
 const from =
   process.env.RESEND_FROM_ADDRESS ??
   process.env.SMTP_FROM_ADDRESS ??
-  'ApexPredix AI <noreply@mail.apexpredix.ai>';
+  'ApexPredict AI <noreply@mail.apexpredix.ai>';
 
 async function send(to: string, subject: string, react: ReactElement) {
   const { renderToStaticMarkup } = await import('react-dom/server');
@@ -46,13 +46,13 @@ async function send(to: string, subject: string, react: ReactElement) {
 }
 
 export const sendVerifyEmail = (to: string, verifyUrl: string, locale: string) =>
-  send(to, 'Confirm your seat on the ApexPredix AI waitlist', WaitlistVerify({ verifyUrl, locale }));
+  send(to, 'Confirm your seat on the ApexPredict AI waitlist', WaitlistVerify({ verifyUrl, locale }));
 
 export const sendWelcomeEmail = (to: string, referralUrl: string, locale: string) =>
-  send(to, 'You are on the ApexPredix AI list', WaitlistWelcome({ referralUrl, locale }));
+  send(to, 'You are on the ApexPredict AI list', WaitlistWelcome({ referralUrl, locale }));
 
 export const sendAuthVerifyEmail = (to: string, verifyUrl: string, locale: string) =>
-  send(to, 'Verify your ApexPredix AI email', AuthVerify({ verifyUrl, locale }));
+  send(to, 'Verify your ApexPredict AI email', AuthVerify({ verifyUrl, locale }));
 
 export const sendAuthResetEmail = (to: string, resetUrl: string, locale: string) =>
-  send(to, 'Reset your ApexPredix AI password', AuthReset({ resetUrl, locale }));
+  send(to, 'Reset your ApexPredict AI password', AuthReset({ resetUrl, locale }));

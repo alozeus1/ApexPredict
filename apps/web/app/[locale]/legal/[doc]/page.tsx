@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     privacy: 'Privacy Policy', terms: 'Terms of Use', cookies: 'Cookie Policy', disclaimer: 'Responsible Use Disclaimer',
   };
   if (!(DOCS as readonly string[]).includes(doc)) return {};
-  return pageMetadata({ locale, path: `/legal/${doc}`, title: `${titles[doc as Doc]} — ApexPredix AI`, description: `${titles[doc as Doc]} for ApexPredix AI by Maralito Labs.` });
+  return pageMetadata({ locale, path: `/legal/${doc}`, title: `${titles[doc as Doc]} — ApexPredict AI`, description: `${titles[doc as Doc]} for ApexPredict AI by Maralito Labs.` });
 }
 
 export default async function LegalPage({ params }: { params: Promise<{ locale: string; doc: string }> }) {

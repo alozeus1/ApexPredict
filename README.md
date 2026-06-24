@@ -1,4 +1,4 @@
-# ApexPredix AI
+# ApexPredict AI
 
 Sports prediction intelligence platform by Maralito Labs.
 

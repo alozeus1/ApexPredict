@@ -32,7 +32,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
     Resend({
       apiKey: process.env.AUTH_RESEND_KEY ?? process.env.RESEND_API_KEY ?? '',
-      from: process.env.RESEND_FROM_ADDRESS ?? 'ApexPredix AI <noreply@mail.apexpredix.ai>',
+      from: process.env.RESEND_FROM_ADDRESS ?? 'ApexPredict AI <noreply@mail.apexpredix.ai>',
     }),
     Credentials({
       credentials: {

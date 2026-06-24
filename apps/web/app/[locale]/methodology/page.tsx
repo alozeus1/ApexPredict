@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: '/methodology',
-    title: 'Methodology — ApexPredix AI',
+    title: 'Methodology — ApexPredict AI',
     description: 'Our approach: ELO + Poisson + xG ensemble, with ¼ Kelly criterion staking for bankroll safety.',
   });
 }

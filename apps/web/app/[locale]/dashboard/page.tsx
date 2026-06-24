@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: '/dashboard',
-    title: 'Dashboard — ApexPredix AI',
+    title: 'Dashboard — ApexPredict AI',
     description: 'Your tracked-pick performance during open beta. Decision support, not a sportsbook.',
   });
 }
@@ -141,7 +141,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
           </div>
 
           <p className="mt-12 text-xs text-mute-2">
-            ApexPredix AI is an analytics service, not a gambling operator. 18+ only. Past performance ≠ future results.
+            ApexPredict AI is an analytics service, not a gambling operator. 18+ only. Past performance ≠ future results.
           </p>
         </section>
         <Footer />

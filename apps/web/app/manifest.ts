@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'ApexPredix AI',
-    short_name: 'ApexPredix',
+    name: 'ApexPredict AI',
+    short_name: 'ApexPredict',
     description: 'AI sports prediction intelligence — ELO + Poisson + xG.',
     start_url: '/',
     display: 'standalone',

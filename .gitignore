@@ -21,6 +21,7 @@ docs/strategy/*.pdf
 
 # Vercel CLI token cache — never commit (holds a live access token).
 .vercelrc.json
+apps/web/.vercelrc.json
 
 # TypeScript incremental build cache
 *.tsbuildinfo

@@ -731,7 +731,7 @@ links once opened from the Forgejo compare URLs.
   never auto-applied against Neon.
 - A live Vercel token was found in `apps/web/.vercelrc.json` (now gitignored, never
   committed) — **rotate it**.
-- Brand spelling is inconsistent: code renders `ApexPredix`, docs say `ApexPredict` —
+- Brand spelling is inconsistent: code renders `ApexPredict`, docs say `ApexPredict` —
   unify before launch.
 
 — *Sprint S0 execution log · 2026-06-05*
@@ -759,7 +759,7 @@ A follow-up test fix (`89375d9 test(types): align LOCALES test with the gated lo
 ### Two follow-ups surfaced by the agent — schedule before S1 user-facing work
 
 1. **Rotate the Vercel token.** The agent found a live token in `apps/web/.vercelrc.json`. It's now gitignored and never committed, but it must be **rotated in Vercel** before any subsequent deploy. Owner: SRE. Estimate: XS.
-2. **Unify brand spelling.** Code currently renders `ApexPredix`; all docs use `ApexPredict`. Pick one (recommendation: `ApexPredict`) and global-replace in code, copy, emails, JSON-LD, and OG. Owner: FE + DES. Estimate: S.
+2. **Unify brand spelling.** Code currently renders `ApexPredict`; all docs use `ApexPredict`. Pick one (recommendation: `ApexPredict`) and global-replace in code, copy, emails, JSON-LD, and OG. Owner: FE + DES. Estimate: S.
 
 ### Sprint S1 readiness gate — what must be true before Sprint-S1 user-facing work starts
 

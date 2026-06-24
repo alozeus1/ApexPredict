@@ -7,7 +7,7 @@ export function GeoBlockedScreen({ reason }: { reason: string }) {
       <div className="max-w-md text-center">
         <h1 className="text-3xl font-semibold tracking-tight">Unavailable in your region</h1>
         <p className="mt-3 text-mute-1">
-          ApexPredix AI is not available where you are. Region detected:{' '}
+          ApexPredict AI is not available where you are. Region detected:{' '}
           <code className="rounded bg-ink-2 px-1 text-xs">{reason}</code>.
         </p>
         <p className="mt-3 text-mute-1">
