@@ -12,6 +12,7 @@ import { RGSBanner } from '@/components/compliance/RGSBanner';
 import { CookieConsent } from '@/components/compliance/CookieConsent';
 import type { RegionCode } from '@apexpredix/types';
 import { pageMetadata } from '@/lib/seo';
+import { HreflangTags } from '@/lib/seo/hreflang';
 import { JsonLd, organizationLD, websiteLD } from '@/components/seo/JsonLd';
 import { ConsentedAnalytics } from '@/components/analytics/ConsentedAnalytics';
 import { MotionProvider } from '@/components/motion/MotionProvider';
@@ -56,6 +57,7 @@ export default async function LocaleLayout({
     <html lang={locale} className={inter.variable}>
       <head>
         <ThemeScript />
+        <HreflangTags />
         <JsonLd data={organizationLD} />
         <JsonLd data={websiteLD} />
       </head>
