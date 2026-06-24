@@ -3,8 +3,8 @@
 **Kickoff:** Tuesday 2026-06-09
 **Public Nigeria launch target:** Monday 2026-08-04 (60 days)
 **Owner:** CTO Office, Web Forx Global Inc.
-**Version:** v1.2 · 2026-06-07 — S0 complete; S1 awaiting human gates
-**Status:** S0 shipped on `develop` + `main`; Sprint S1 blocked on vendor-key gates (see §S1 readiness)
+**Version:** v1.3 · 2026-06-24 — S1 no-vendor-key foundation complete; remaining gates are human/vendor actions
+**Status:** S0 shipped on `develop` + `main`; S1 no-vendor-key foundation PRs merged to `develop`; vendor-key gates remain tracked below.
 
 > **Self-contained spec.** Every task below includes description, acceptable deliverables, expectations / edge cases, dependencies, estimate, and acceptance criteria. Engineers should not need to ping the user for clarification before starting work.
 
@@ -33,7 +33,7 @@ A follow-up test fix (`89375d9 test(types): align LOCALES test with the gated lo
 ### Two follow-ups the agent surfaced — handle before Sprint S1 user-facing work
 
 1. **Rotate the Vercel token.** Live token was found in `apps/web/.vercelrc.json`. File is now gitignored; token must still be rotated in Vercel. Owner: SRE. **Add as task `OPS-T1`.**
-2. **Unify brand spelling.** Code renders `ApexPredict`; docs say `ApexPredict`. Pick `ApexPredict` and global-replace. Owner: FE + DES. **Add as task `OPS-T2`.**
+2. **Unify brand spelling.** Legacy user-visible spelling was normalized to `ApexPredict`. Owner: FE + DES. **Add as task `OPS-T2`.**
 
 ### S1 readiness gate
 
@@ -61,10 +61,23 @@ Sprint S1 (Identity + Subscription + Payments user flows) needs these gates gree
 These are not Epic-scoped — drop into the appropriate sprint:
 
 - **OPS-T1** — Rotate Vercel token leaked into `apps/web/.vercelrc.json`. `XS` · SRE · **In flight (human)**.
-- **OPS-T2** — Global-replace `ApexPredict` → `ApexPredict` across code, copy, emails, JSON-LD, OG, README, CHANGELOG. `S` · FE + DES · **Not started**.
+- **OPS-T2** — Normalize legacy brand spelling to `ApexPredict` across code, copy, emails, JSON-LD, OG, README, CHANGELOG. `S` · FE + DES · **Done**.
 - **OPS-T3** — Apply Prisma migrations on Neon: `pnpm -F @apexpredix/db migrate deploy`. Validate against staging branch first. `S` · SRE · **In flight (human)**.
 - **OPS-T4** — Configure Forgejo branch protection on `main` (E00-S2-T6 in UI). `XS` · SRE · **In flight (human)**.
 - **OPS-T5** — Verify Auth.js v5 + Email provider works end-to-end in Vercel preview deploy (set `AUTH_SECRET`, `AUTH_RESEND_KEY`, etc.). `S` · SRE.
+
+### Sprint S1 no-vendor-key foundation status — merged 2026-06-24
+
+| PR | Branch | Tickets | Status |
+|---|---|---|---|
+| 1 | `chore/brand-and-security-hygiene` | OPS-T2 | Done |
+| 1 | `chore/brand-and-security-hygiene` | OPS-T1 | In flight (human) |
+| 2 | `feat/payments-scaffold` | E02-S1-T1, E02-S1-T2, E02-S1-T3, E02-S1-T4, E02-S2-T1, E02-S2-T2, E02-S2-T3, E02-S2-T5, E02-S4-T1 | Done |
+| 3 | `feat/data-failover-and-admin-tools` | E03-S2-T3, E03-S2-T4, E03-S3-T2 | Done |
+| 4 | `feat/compliance-rg-and-rls-draft` | E07-S2-T1, E07-S2-T2, E07-S2-T3, E07-S3-T2, E07-S4-T1 | Done |
+| 5 | `feat/seo-foundation` | E08-S1-T1, E08-S1-T6, E08-S2-T1, E08-S2-T2 | Done |
+
+The XLSX `Backlog` sheet Status column now mirrors these rows and adds OPS-T1/OPS-T2 as cross-cutting follow-up tasks.
 
 ---
 
