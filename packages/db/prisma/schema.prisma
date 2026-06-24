@@ -286,6 +286,11 @@ enum SubscriptionProvider {
   FLUTTERWAVE
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id            String        @id @default(cuid())
   email         String        @unique @db.Citext
@@ -300,6 +305,7 @@ model User {
   kycStatus     KycStatus     @default(NONE)
   rgFlags       Json          @default("{}")
   preferences   Json          @default("{}")
+  role          UserRole      @default(USER)
   disabledAt    DateTime?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -309,6 +315,7 @@ model User {
   subscription  Subscription?
 
   @@index([kycStatus])
+  @@index([role])
 }
 
 model Account {
@@ -368,6 +375,7 @@ model Subscription {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([status])
+  @@index([userId, status])
 }
 
 model AuditLog {
@@ -380,6 +388,19 @@ model AuditLog {
 
   @@index([actor, createdAt])
   @@index([action, createdAt])
+}
+
+model WebhookDelivery {
+  id          String   @id @default(cuid())
+  provider    String
+  eventId     String   @unique
+  eventType   String
+  payload     Json
+  processedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([provider, createdAt])
+  @@index([eventType, createdAt])
 }
 
 enum PickResult {

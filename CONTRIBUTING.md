@@ -98,7 +98,7 @@ Before every commit, run through this checklist:
 - **No secrets in the repo.** Secrets live in the 1Password / Doppler vault
   (`docs/runbooks/`). `apps/web/.env.example` documents every key by name only.
 - **Positioning.** ApexPredict is a value-bet signal service, not an oracle.
-  Never add copy that claims outcome certainty, guaranteed results, or future
+  Never add copy that claims outcome certainty, assured results, or future
   returns. Calibrated probabilities and edge-vs-market only.
 - **18+ / responsible gambling** language stays intact wherever it exists.
 - **Don't add a new vendor SDK** or large dependency without justifying its
