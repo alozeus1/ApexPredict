@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
+import { withFailover } from '@/lib/providers/failover';
 import { writeHeartbeat } from './heartbeat';
 
 export interface WorkerSuccess<T> {
@@ -13,6 +14,14 @@ export interface WorkerFailure {
   durationMs: number;
 }
 export type WorkerOutcome<T> = WorkerSuccess<T> | WorkerFailure;
+
+export function runWorkerWithFailover<T>(
+  name: string,
+  primary: () => Promise<T>,
+  secondary: () => Promise<T>,
+): Promise<T> {
+  return withFailover(name, primary, secondary);
+}
 
 /**
  * Run a named unit of work: time it, persist an AgentHeartbeat (live on success,

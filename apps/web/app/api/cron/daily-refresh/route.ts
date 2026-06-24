@@ -3,19 +3,17 @@ import { prisma } from '@apexpredix/db';
 import agents from '@/data/agents.json';
 import type { AgentJSON } from '@/data/agents.schema';
 import { requireCronAuth } from '@/lib/cron-auth';
-import {
-  configuredCompetitions,
-  fetchCompetitionBundle,
-  type FootballDataStandingRow,
-  type FootballDataTeam,
-} from '@/lib/live-data/football-data';
+import { configuredCompetitions, type FootballDataStandingRow, type FootballDataTeam } from '@/lib/live-data/football-data';
 import { generatePrediction } from '@/lib/prediction-engine/model';
 import { runBacktest } from '@/lib/prediction-engine/backtest';
-import { runWorker } from '@/lib/workers/runWorker';
+import { FootballDataProvider, SportmonksProvider } from '@/lib/providers/fixtures/football-data-provider';
+import { runWorker, runWorkerWithFailover } from '@/lib/workers/runWorker';
 import { writeHeartbeat } from '@/lib/workers/heartbeat';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
+const primaryFixturesProvider = new FootballDataProvider();
+const secondaryFixturesProvider = new SportmonksProvider();
 
 // Per-agent status write, routed through the shared worker module.
 const heartbeat = (agentId: string, status: string, message: string, started: number) =>
@@ -50,7 +48,11 @@ export async function GET(request: Request) {
     let evaluatedNow = 0;
 
     for (const code of configuredCompetitions()) {
-      const bundle = await fetchCompetitionBundle(code);
+      const bundle = await runWorkerWithFailover(
+        'fixtures',
+        () => primaryFixturesProvider.fetchCompetitionBundle(code),
+        () => secondaryFixturesProvider.fetchCompetitionBundle(code),
+      );
       const competition = bundle.competition;
       const standings = statsByTeam(bundle.standings);
 
