@@ -16,7 +16,7 @@ export function RGSBanner({ region }: Props) {
     <div role="region" aria-label="Responsible gambling notice" className="border-b border-white/5 bg-ink-2/80 text-mute-1">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2 text-xs">
         <p>
-          🔞 ApexPredix AI is an analytics service, not a gambling operator. 18+. Bet responsibly —{' '}
+          🔞 ApexPredict AI is an analytics service, not a gambling operator. 18+. Bet responsibly —{' '}
           <a href={helpline.href} rel="noopener noreferrer" target="_blank" className="text-edge-cyan hover:underline">
             {helpline.label}
           </a>

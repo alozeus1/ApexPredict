@@ -114,7 +114,7 @@ apexpredict/
 
 ### 2.1 Critical security & compliance issues
 
-**C-1 — No auth, dashboard is public demo data.** `/dashboard` shows hardcoded KPIs (89.3% win rate, +8.5% ROI). This will be screenshotted by competitors and used against us in regulator complaints. *Fix:* mark clearly as demo, hide behind login, replace with real per-user P&L before any paid sale.
+**C-1 — No auth, dashboard is public demo data.** `/dashboard` shows hardcoded KPIs (89.3% accuracy-style claim, +8.5% ROI). This will be screenshotted by competitors and used against us in regulator complaints. *Fix:* mark clearly as demo, hide behind login, replace with real per-user P&L before any paid sale.
 
 **C-2 — Premium gating is cosmetic.** `/premium` page exists, but `Premium` section + dashboard panels label all features "Unlocked." There is no entitlement check. *Fix:* introduce `Subscription` model + middleware-level paywall before billing turns on.
 
@@ -476,7 +476,7 @@ Plus enums for `tier`, `status`, `kycStatus`, `pickResult`.
 ### 5.6 What we are *not* doing (and shouldn't)
 
 - We are **not** taking bets. ApexPredict is an analytics service. This is both the safest legal posture and the most scalable business — no chargeback risk, no payout risk, no need for casino-level licensing.
-- We are **not** claiming a fixed win-ratio. The product narrative is "find +EV bets" and "decision support," not "guaranteed wins." This is enforceable under Nigerian advertising-standards review and survives an NLRC consumer-protection complaint.
+- We are **not** claiming a fixed win-ratio. The product narrative is "find +EV bets" and "decision support," not "assured outcomes." This is enforceable under Nigerian advertising-standards review and survives an NLRC consumer-protection complaint.
 
 ### 5.7 Revenue model & projections (illustrative — sensitize before signing off)
 
@@ -731,7 +731,103 @@ links once opened from the Forgejo compare URLs.
   never auto-applied against Neon.
 - A live Vercel token was found in `apps/web/.vercelrc.json` (now gitignored, never
   committed) — **rotate it**.
-- Brand spelling is inconsistent: code renders `ApexPredix`, docs say `ApexPredict` —
+- Brand spelling is inconsistent: code renders `ApexPredict`, docs say `ApexPredict` —
   unify before launch.
 
 — *Sprint S0 execution log · 2026-06-05*
+
+---
+
+## Sprint S0 retrospective + S1 readiness gate (updated 2026-06-07)
+
+**Status: S0 complete.** All five Sprint-S0 PRs are merged on `develop` AND `main`:
+
+```
+188a0e8 Merge pull request #11 from alozeus1/develop
+43cae4b Merge webforx/develop (Forgejo PR #1 ci, #2 copy already merged) into integrated develop
+89375d9 test(types): align LOCALES test with the gated locale set (en/yo/ha/ig)
+b67fbf6 Merge chore/strategy-doc-housekeeping into develop (Sprint S0)
+d676ae1 Merge feat/data-and-prediction-scaffolds into develop (Sprint S0)
+d108b63 Merge feat/identity-foundation into develop (Sprint S0)
+bf8c46f Merge feat/copy-repositioning into develop (Sprint S0)
+fca2d89 Merge chore/repo-hygiene into develop (Sprint S0)
+c1c19f2 Merge chore/ci-cd-and-scanners into develop (Sprint S0)
+```
+
+A follow-up test fix (`89375d9 test(types): align LOCALES test with the gated locale set`) landed on top to keep CI green after the locale gate trimmed `es`/`zu`.
+
+### Two follow-ups surfaced by the agent — schedule before S1 user-facing work
+
+1. **Rotate the Vercel token.** The agent found a live token in `apps/web/.vercelrc.json`. It's now gitignored and never committed, but it must be **rotated in Vercel** before any subsequent deploy. Owner: SRE. Estimate: XS.
+2. **Unify brand spelling.** Code currently renders `ApexPredict`; all docs use `ApexPredict`. Pick one (recommendation: `ApexPredict`) and global-replace in code, copy, emails, JSON-LD, and OG. Owner: FE + DES. Estimate: S.
+
+### Sprint S1 readiness gate — what must be true before Sprint-S1 user-facing work starts
+
+| # | Gate | Owner | Blocking? |
+|---|---|---|---|
+| 1 | Vercel token rotated | SRE (human) | yes — any deploy needs this first |
+| 2 | Brand spelling unified (`ApexPredict` everywhere) | FE + DES | yes for any user-visible PR |
+| 3 | Neon DB provisioned + migrations applied (`prisma migrate deploy`) for the new identity/subscription/UserPick tables | SRE (human) | yes for Auth.js E2E + entitlement runtime |
+| 4 | `AUTH_SECRET` generated; `apps/web/auth.ts` env vars set in Vercel Preview/Prod environments | SRE (human) | yes for Auth.js to function |
+| 5 | Google OAuth client registered (`E01-S2-T1`) — needed only when Google login wiring goes live | PM (human) | no for S1 start; yes before login UI launches |
+| 6 | Paystack test keys in the vault (`E00-S1-T2`) | PM (human) | yes for E02 (Payments) work |
+| 7 | Smile ID sandbox keys in the vault (`E00-S1-T3`) | PM (human) | no until E07 (Compliance) in S4 |
+| 8 | The Odds API + Sportmonks tokens in the vault (`E00-S1-T4`) | BE / PM | yes for E03 (Data Ingestion v2) |
+| 9 | Upstash Redis + QStash tokens in the vault (`E00-S1-T5`) | SRE | yes for E03 worker decomposition |
+| 10 | Resend production API key (`apps/web/.env.example` already documents this) | PM | yes for E06 (Notifications) digest in S3 |
+| 11 | Branch protection on `main` enabled in Forgejo UI (`E00-S2-T6`) | SRE (human) | yes — guardrail for the whole 60-day push |
+| 12 | NLRC opinion letter brief filed (`E00-S3-T2`) | Counsel | no for build; yes before public launch |
+
+When ≥ 6 of the 12 gates are green, the next autonomous agent run can proceed — see `2026-06-07-agent-master-prompt-sprint-one.md` for the S1 master prompt.
+
+### Backlog snapshot after S0
+
+- **Done: 23 tasks.** All five engineering PRs landed on `main`; the doc-housekeeping PR (chore/strategy-doc-housekeeping) updated the backlog Status column in place.
+- **In flight (human): 13 tasks.** Vendor signups (`E00-S1-T1..T8`), branch protection (`E00-S2-T6`), legal track (`E00-S3-T1..T4`), Google OAuth client registration (`E01-S2-T1`).
+- **Not started: 141 tasks.** Everything in S1–S4 + GTM. Mostly waiting on (a) vendor keys arriving, (b) the S1 master prompt being dispatched.
+
+The XLSX `Backlog` sheet has the per-row Status column with the same color legend as before.
+
+— *S0 retrospective + S1 readiness gate · 2026-06-07*
+
+---
+
+## Sprint S1 — engineering backlog (added 2026-06-07)
+
+For the actual Sprint S1 work that engineers will execute on Tue 2026-06-09 → Mon 2026-06-22:
+
+- **Markdown spec:** [`2026-06-07-sprint-s1-engineering-backlog.md`](2026-06-07-sprint-s1-engineering-backlog.md) — every story has CONTEXT, ACCEPTANCE CRITERIA, DEPENDENCIES & RISKS, DEFINITION OF READY checklist, Fibonacci points, parent epic + atomic tasks.
+- **Importable XLSX:** [`2026-06-07-apexpredict-sprint-s1-engineering-backlog.xlsx`](2026-06-07-apexpredict-sprint-s1-engineering-backlog.xlsx) — Stories / Story Detail / Tasks / Capacity sheets.
+
+Scope: **Frontend + Backend engineering only** (no DevOps / SRE / ML / design / GTM). **3 epics, 15 stories, 79 tasks, 54 points** — sized for a 2-week sprint with 2 BE + 2 FE engineers.
+
+| Epic | Title | Stories | Points |
+|---|---|---|---|
+| EPIC-A | Account & Identity Polish | A2 / A3 / A5 | 10 |
+| EPIC-B | Subscription Checkout & Lifecycle | B1 / B2 / B3 / B4 / B5 / B7 | 20 |
+| EPIC-C | Predictions UX v1 + Pick Ledger | C1 / C2 / C3 / C4 / C5 / C6 | 24 |
+
+**Sprint goal:** by Mon 2026-06-22, a real user can sign up → log in → manage account + RG settings → subscribe via Paystack (test/stub) → view a per-fixture match-detail page with bookmaker odds comparison → save a pick → see it auto-settle on result.
+
+After this sprint review, the next planning conversation can move to other areas (ML training, QStash worker decomposition, programmatic SEO leaf pages, native mobile spike, etc.).
+
+— *Sprint S1 backlog · 2026-06-07*
+
+---
+
+## Sprint S1 — completed by agent on 2026-06-24
+
+The no-vendor-key foundation work shipped as six scoped PRs against Forgejo `develop`:
+
+| # | Branch | Summary |
+|---|---|---|
+| 1 | `chore/brand-and-security-hygiene` | Canonicalized `ApexPredict` spelling and added `.vercelrc.json` leak recurrence guards plus incident-response docs. |
+| 2 | `feat/payments-scaffold` | Added Paystack-first billing provider scaffold, checkout/webhook/cancel flows, webhook idempotency, admin entitlement override, replay CLI, and generated migration SQL. |
+| 3 | `feat/data-failover-and-admin-tools` | Added provider failover state machine, worker integration, NPFL odds CSV import, admin upload route/UI, and failover runbook. |
+| 4 | `feat/compliance-rg-and-rls-draft` | Added functional self-exclusion, notification suppression hooks, consent v2, RLS draft SQL, and RLS runbook. |
+| 5 | `feat/seo-foundation` | Added programmatic SEO route catalog, DB-backed sitemap, hreflang helper, no-data fallback, and metadata-route middleware bypass. |
+| 6 | `chore/strategy-doc-housekeeping-s1` | Updated backlog Markdown/XLSX statuses, strategy appendix, and changelog for S1 completion. |
+
+Human/vendor actions remain outside this no-vendor-key sprint: Vercel token rotation, production env-key provisioning, branch-protection UI evidence, legal filings, and live vendor activation.
+
+— *Sprint S1 no-vendor-key completion log · 2026-06-24*

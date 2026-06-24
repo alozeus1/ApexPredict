@@ -6,7 +6,7 @@ import { isBlocked } from './lib/compliance/blocklist';
 const intlMiddleware = createIntlMiddleware(routing);
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|media|dev|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|mp4|webm|vtt|css|js|json|woff2?)).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|media|dev|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|mp4|webm|vtt|css|js|json|xml|txt|webmanifest|woff2?)).*)'],
 };
 
 function buildCsp(nonce: string): string {

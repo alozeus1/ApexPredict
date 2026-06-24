@@ -24,8 +24,12 @@ export function CookieConsent() {
   });
 
   useEffect(() => {
-    const has = document.cookie.split('; ').some((p) => p.startsWith('cookie-consent='));
-    if (!has) setOpen(true);
+    fetch('/api/consent')
+      .then((response) => response.json())
+      .then((body: { choices?: ConsentChoices | null }) => {
+        if (!body.choices) setOpen(true);
+      })
+      .catch(() => setOpen(true));
     const onOpen = () => setOpen(true);
     window.addEventListener('apexpredix:open-cookie-consent', onOpen);
     return () => window.removeEventListener('apexpredix:open-cookie-consent', onOpen);

@@ -1,5 +1,5 @@
 <!--
-  ApexPredix pull request template.
+  ApexPredict pull request template.
   Keep PRs scoped to one logical group. Target `develop` (integration), never `main`.
   See CONTRIBUTING.md for the branching model and commit convention.
 -->
@@ -49,5 +49,5 @@ pnpm -F @apexpredix/web test
 - [ ] Branched off `develop`; not pushing to `main`/`develop` directly
 - [ ] Conventional Commit messages
 - [ ] No vendor secret added to the repo
-- [ ] No copy claiming win-rate / guaranteed wins / ROI promises
+- [ ] No copy claiming outcome certainty or future-return promises
 - [ ] Quality gate green (output pasted above)

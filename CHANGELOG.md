@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Sprint S1 no-vendor-key foundation
+- Paystack-first billing scaffold with stub-mode checkout, webhook signature verification, webhook idempotency, subscription lifecycle handlers, cancel scheduling, admin entitlement override, and replay CLI
+- Provider failover wrapper with in-memory + Redis health state, worker integration, NPFL odds CSV import, admin upload route/UI, and provider-failover runbook
+- Functional self-exclusion API and modal, notification-suppression helper wiring, draft user-scoped RLS SQL, RLS runbook, and consent v2 categories
+- Programmatic SEO route catalog, DB-backed sitemap with static fallback, locale-gated hreflang helper, and no-data SEO fallback component
+
+### Changed
+- Canonicalized user-visible brand spelling to `ApexPredict`
+- `/sitemap.xml` now bypasses locale middleware and returns XML directly
+- Sprint S1 backlog Markdown/XLSX statuses now reflect merged PRs 1–5
+
+### Security
+- Added `.vercelrc.json` recurrence guardrails via gitleaks config, `.gitignore`, contributor checklist, and secrets incident-response runbook
+
+### Compliance
+- Cookie consent version bumped with updated categories for strictly necessary, analytics, marketing-future, and Telegram notifications
+- Counsel sign-off and live secret rotations remain human-owned follow-up tasks
+
 ### Added — Sprint S0 foundation (PRs branched off `develop`)
 
 #### CI / security (`chore/ci-cd-and-scanners`)

@@ -11,7 +11,7 @@ export function isSuspended(user: SuspendableUser | null | undefined): boolean {
   if (!user) return false;
   if (user.disabledAt) return true;
   const until = user.rgFlags?.selfExcludedUntil ? new Date(user.rgFlags.selfExcludedUntil) : null;
-  return until !== null && until.getTime() > Date.now();
+  return until !== null && !Number.isNaN(until.getTime()) && until.getTime() > Date.now();
 }
 
 /**

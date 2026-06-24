@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test';
  *   3. the health probe is green.
  *
  * Wired into CI via the `e2e:smoke` script (chromium-only). The canonical brand
- * string is "ApexPredix" — sourced from the document <title> in
+ * string is "ApexPredict" — sourced from the document <title> in
  * apps/web/app/[locale]/layout.tsx, which renders into the /en HTML.
  */
 test.describe('smoke', () => {
@@ -18,7 +18,7 @@ test.describe('smoke', () => {
     const res = await request.get('/en');
     expect(res.status()).toBe(200);
     const html = await res.text();
-    expect(html).toContain('ApexPredix');
+    expect(html).toContain('ApexPredict');
   });
 
   test('POST /api/waitlist with empty body returns 202 (anti-enumeration)', async ({ request }) => {

@@ -1,10 +1,10 @@
 ---
-title: ApexPredix AI — Sub-project 2 · Data Platform
+title: ApexPredict AI — Sub-project 2 · Data Platform
 status: draft
 version: 0.2.0
 date: 2026-05-21
 authors: Claude (assistant) + ocheme
-parent_project: ApexPredix AI (by Maralito Labs)
+parent_project: ApexPredict AI (by Maralito Labs)
 prior_subproject: 1 — Foundation + Marketing Rebuild (v0.1.0, shipped)
 parent_program_decomposition:
   - 1. Foundation + Marketing Rebuild  (shipped v0.1.0)

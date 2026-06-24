@@ -5,4 +5,4 @@ export interface ConsentChoices {
   marketing: boolean;
 }
 
-export const CONSENT_VERSION = 1;
+export const CONSENT_VERSION = 2;

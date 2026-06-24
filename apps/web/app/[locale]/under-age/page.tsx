@@ -8,7 +8,7 @@ export default async function UnderAge({ params }: { params: Promise<{ locale: s
       <div className="max-w-md">
         <h1 className="text-3xl font-semibold tracking-tight">Come back when you are 18+</h1>
         <p className="mt-3 text-mute-1">
-          ApexPredix AI is intended for adults only. If you or someone you know has a gambling problem, help is
+          ApexPredict AI is intended for adults only. If you or someone you know has a gambling problem, help is
           available at{' '}
           <a
             className="text-edge-cyan hover:underline"

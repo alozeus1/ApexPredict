@@ -1,8 +1,8 @@
-# ApexPredix AI — Foundation + Marketing Rebuild — Implementation Plan
+# ApexPredict AI — Foundation + Marketing Rebuild — Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Ship a deployable v0.1.0 of ApexPredix AI — Next.js 15 landing site + canned predictions surface + waitlist + compliance shell + Seedance hero embed — meeting Lighthouse mobile ≥95 and the 21-item DoD in the spec.
+**Goal:** Ship a deployable v0.1.0 of ApexPredict AI — Next.js 15 landing site + canned predictions surface + waitlist + compliance shell + Seedance hero embed — meeting Lighthouse mobile ≥95 and the 21-item DoD in the spec.
 
 **Architecture:** pnpm + Turborepo monorepo. `apps/web` is a Next.js 15 App Router site, RSC-by-default, statically rendered where possible with ISR for fixture-driven pages. Edge middleware handles geo-fence and locale negotiation. Postgres (Neon) via Prisma stores waitlist signups + cookie consent + verification tokens. Resend transactional email. Vercel KV for rate limiting. Five shared packages (`ui`, `db`, `email`, `config`, `types`) keep seams for the seven downstream sub-projects.
 
@@ -184,7 +184,7 @@ trim_trailing_whitespace = true
 - [ ] **Step 7: Write `README.md` skeleton**
 
 ```markdown
-# ApexPredix AI
+# ApexPredict AI
 
 Sports prediction intelligence platform by Maralito Labs.
 
@@ -740,7 +740,7 @@ DIRECT_URL=postgres://user:pass@host/db?sslmode=require
 
 # Email
 RESEND_API_KEY=
-RESEND_FROM_ADDRESS=ApexPredix AI <noreply@mail.apexpredix.ai>
+RESEND_FROM_ADDRESS=ApexPredict AI <noreply@mail.apexpredix.ai>
 
 # Anti-bot
 TURNSTILE_SITE_KEY=
@@ -794,7 +794,7 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'ApexPredix AI — Sports Prediction Intelligence',
+  title: 'ApexPredict AI — Sports Prediction Intelligence',
   description: 'AI sports prediction intelligence by Maralito Labs — ELO + Poisson + xG ensemble engine.',
 };
 
@@ -820,7 +820,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 export default function Home() {
   return (
     <main className="grid min-h-dvh place-items-center">
-      <h1 className="text-3xl font-semibold tracking-tight">ApexPredix AI — scaffold up.</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">ApexPredict AI — scaffold up.</h1>
     </main>
   );
 }
@@ -1193,10 +1193,10 @@ export default function WaitlistVerify({ verifyUrl, locale }: WaitlistVerifyProp
   return (
     <Html lang={locale}>
       <Head />
-      <Preview>Confirm your seat on the ApexPredix AI waitlist</Preview>
+      <Preview>Confirm your seat on the ApexPredict AI waitlist</Preview>
       <Body style={{ background: '#0A0A0A', color: '#FAFAFA', fontFamily: 'Inter, sans-serif' }}>
         <Container style={{ padding: 32, maxWidth: 520 }}>
-          <Heading as="h1" style={{ color: '#22D3EE' }}>Welcome to ApexPredix AI</Heading>
+          <Heading as="h1" style={{ color: '#22D3EE' }}>Welcome to ApexPredict AI</Heading>
           <Text>One click confirms your seat on the waitlist.</Text>
           <Section style={{ margin: '32px 0' }}>
             <Link href={verifyUrl} style={{ background: '#22D3EE', color: '#0A0A0A', padding: '14px 24px', borderRadius: 12, fontWeight: 600, textDecoration: 'none' }}>
@@ -1207,7 +1207,7 @@ export default function WaitlistVerify({ verifyUrl, locale }: WaitlistVerifyProp
             If the button does not work, paste this link into your browser: {verifyUrl}
           </Text>
           <Text style={{ color: '#A1A1AA', fontSize: 12 }}>
-            ApexPredix AI is an analytics service, not a gambling operator. 18+ only.
+            ApexPredict AI is an analytics service, not a gambling operator. 18+ only.
           </Text>
         </Container>
       </Body>
@@ -1236,7 +1236,7 @@ export default function WaitlistWelcome({ referralUrl, locale }: WaitlistWelcome
             <Link href={referralUrl} style={{ color: '#22D3EE' }}>{referralUrl}</Link>
           </Section>
           <Text style={{ color: '#A1A1AA', fontSize: 12 }}>
-            ApexPredix AI is an analytics service, not a gambling operator. 18+ only.
+            ApexPredict AI is an analytics service, not a gambling operator. 18+ only.
           </Text>
         </Container>
       </Body>
@@ -1438,7 +1438,7 @@ import { SkipToContent } from '@/components/nav/SkipToContent';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'ApexPredix AI — Sports Prediction Intelligence',
+  title: 'ApexPredict AI — Sports Prediction Intelligence',
   description: 'AI sports prediction intelligence by Maralito Labs — ELO + Poisson + xG ensemble engine.',
 };
 
@@ -2240,7 +2240,7 @@ export function HowToUse() {
   return (
     <section id="how-to-use" className="border-b border-white/5 bg-ink-1/60">
       <div className="mx-auto max-w-6xl px-6 py-20">
-        <h2 className="mb-10 text-3xl font-semibold tracking-tight md:text-4xl">How to Use ApexPredix</h2>
+        <h2 className="mb-10 text-3xl font-semibold tracking-tight md:text-4xl">How to Use ApexPredict</h2>
         <ol className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s) => (
             <li key={s.n} data-testid="step-card" className="rounded-2xl bg-ink-2 p-6 ring-1 ring-white/10">
@@ -2357,7 +2357,7 @@ export function CTA({ waitlistCount }: CTAProps) {
         <div className="mt-8 rounded-2xl bg-ink-1 p-6 ring-1 ring-white/10">
           <WaitlistForm />
           <p className="mt-3 text-xs text-mute-2">
-            We never share your email. ApexPredix AI is an analytics service, not a gambling operator.
+            We never share your email. ApexPredict AI is an analytics service, not a gambling operator.
           </p>
         </div>
       </div>
@@ -2728,7 +2728,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'sw
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
-  title: 'ApexPredix AI — Sports Prediction Intelligence',
+  title: 'ApexPredict AI — Sports Prediction Intelligence',
   description: 'AI sports prediction intelligence by Maralito Labs — ELO + Poisson + xG ensemble engine.',
 };
 
@@ -2798,12 +2798,12 @@ export default async function LocaleLayout({
   "stats": { "heading": "Numbers That Speak" },
   "network": { "heading": "Live Intelligence Grid", "intro": "14 autonomous agents. 2.4M events/hr. Self-update every 2 hours. No human intervention needed." },
   "premium": { "heading": "Premium Features", "regionNote": "Special African pricing applied via PPP adjustment.", "ctaReserve": "Reserve Premium Seat", "ctaFree": "Start Free" },
-  "howToUse": { "heading": "How to Use ApexPredix", "step1Title": "Pick your region", "step1Body": "We tailor pricing and bookmaker recommendations to where you are.", "step2Title": "Browse predictions", "step2Body": "Live forecasts updated every two hours by autonomous agents.", "step3Title": "See value bets", "step3Body": "When the market disagrees with the model, the chip lights up.", "step4Title": "Stake responsibly", "step4Body": "We use ¼ Kelly. Set deposit limits. Take breaks. 18+." },
-  "cta": { "heading": "Join the Inner Circle", "counter": "{count} analysts and bettors are on the waitlist.", "emailLabel": "Email", "emailPlaceholder": "you@example.com", "eighteen": "I am 18+", "submit": "Reserve my seat", "footnote": "We never share your email. ApexPredix AI is an analytics service, not a gambling operator." },
+  "howToUse": { "heading": "How to Use ApexPredict", "step1Title": "Pick your region", "step1Body": "We tailor pricing and bookmaker recommendations to where you are.", "step2Title": "Browse predictions", "step2Body": "Live forecasts updated every two hours by autonomous agents.", "step3Title": "See value bets", "step3Body": "When the market disagrees with the model, the chip lights up.", "step4Title": "Stake responsibly", "step4Body": "We use ¼ Kelly. Set deposit limits. Take breaks. 18+." },
+  "cta": { "heading": "Join the Inner Circle", "counter": "{count} analysts and bettors are on the waitlist.", "emailLabel": "Email", "emailPlaceholder": "you@example.com", "eighteen": "I am 18+", "submit": "Reserve my seat", "footnote": "We never share your email. ApexPredict AI is an analytics service, not a gambling operator." },
   "footer": { "powered": "Powered by Maralito Labs", "rgs": "Responsible gambling resources" },
   "settings": { "title": "Settings", "language": "Language", "theme": "Theme", "region": "Region", "manageCookies": "Manage cookies", "close": "Close" },
-  "ageGate": { "heading": "Are you 18 or older?", "subtitle": "ApexPredix AI is intended for adults only.", "yes": "I am 18 or older", "no": "I am under 18" },
-  "blocked": { "heading": "Unavailable in your region", "body": "We're not able to offer ApexPredix AI here. Please contact legal@apexpredix.ai for jurisdictional inquiries." }
+  "ageGate": { "heading": "Are you 18 or older?", "subtitle": "ApexPredict AI is intended for adults only.", "yes": "I am 18 or older", "no": "I am under 18" },
+  "blocked": { "heading": "Unavailable in your region", "body": "We're not able to offer ApexPredict AI here. Please contact legal@apexpredix.ai for jurisdictional inquiries." }
 }
 ```
 
@@ -2872,12 +2872,12 @@ describe('dictionary coverage', () => {
   "stats": { "heading": "Números que hablan" },
   "network": { "heading": "Red de inteligencia en vivo", "intro": "14 agentes autónomos. 2.4M eventos/hora. Se actualizan cada 2 horas. Sin intervención humana." },
   "premium": { "heading": "Funciones premium", "regionNote": "Precio especial africano aplicado vía ajuste PPA.", "ctaReserve": "Reservar Premium", "ctaFree": "Empezar gratis" },
-  "howToUse": { "heading": "Cómo usar ApexPredix", "step1Title": "Elige tu región", "step1Body": "Adaptamos precios y recomendaciones de casas a tu ubicación.", "step2Title": "Explora las predicciones", "step2Body": "Pronósticos en vivo actualizados cada dos horas por agentes autónomos.", "step3Title": "Detecta value bets", "step3Body": "Cuando el mercado se separa del modelo, el chip se ilumina.", "step4Title": "Apuesta con responsabilidad", "step4Body": "Usamos ¼ Kelly. Pon límites. Toma pausas. +18." },
-  "cta": { "heading": "Únete al círculo interno", "counter": "{count} analistas y apostadores están en la lista.", "emailLabel": "Email", "emailPlaceholder": "tu@ejemplo.com", "eighteen": "Tengo 18 o más", "submit": "Reservar mi lugar", "footnote": "Nunca compartimos tu email. ApexPredix AI es un servicio analítico, no un operador de apuestas." },
+  "howToUse": { "heading": "Cómo usar ApexPredict", "step1Title": "Elige tu región", "step1Body": "Adaptamos precios y recomendaciones de casas a tu ubicación.", "step2Title": "Explora las predicciones", "step2Body": "Pronósticos en vivo actualizados cada dos horas por agentes autónomos.", "step3Title": "Detecta value bets", "step3Body": "Cuando el mercado se separa del modelo, el chip se ilumina.", "step4Title": "Apuesta con responsabilidad", "step4Body": "Usamos ¼ Kelly. Pon límites. Toma pausas. +18." },
+  "cta": { "heading": "Únete al círculo interno", "counter": "{count} analistas y apostadores están en la lista.", "emailLabel": "Email", "emailPlaceholder": "tu@ejemplo.com", "eighteen": "Tengo 18 o más", "submit": "Reservar mi lugar", "footnote": "Nunca compartimos tu email. ApexPredict AI es un servicio analítico, no un operador de apuestas." },
   "footer": { "powered": "Desarrollado por Maralito Labs", "rgs": "Recursos de juego responsable" },
   "settings": { "title": "Ajustes", "language": "Idioma", "theme": "Tema", "region": "Región", "manageCookies": "Gestionar cookies", "close": "Cerrar" },
-  "ageGate": { "heading": "¿Tienes 18 años o más?", "subtitle": "ApexPredix AI es solo para adultos.", "yes": "Tengo 18 o más", "no": "Soy menor de 18" },
-  "blocked": { "heading": "No disponible en tu región", "body": "No podemos ofrecer ApexPredix AI aquí. Escribe a legal@apexpredix.ai para consultas jurisdiccionales." }
+  "ageGate": { "heading": "¿Tienes 18 años o más?", "subtitle": "ApexPredict AI es solo para adultos.", "yes": "Tengo 18 o más", "no": "Soy menor de 18" },
+  "blocked": { "heading": "No disponible en tu región", "body": "No podemos ofrecer ApexPredict AI aquí. Escribe a legal@apexpredix.ai para consultas jurisdiccionales." }
 }
 ```
 
@@ -2894,12 +2894,12 @@ describe('dictionary coverage', () => {
   "stats": { "heading": "Àwọn Nọ́mbà Tó Sọrọ̀" },
   "network": { "heading": "Àkànṣe Olóye Laaye", "intro": "14 aṣojú adáṣe. 2.4M iṣẹlẹ/wákàtí. Ní gbogbo wákàtí 2." },
   "premium": { "heading": "Àwọn Èròjà Premium", "regionNote": "Iye owó Áfríkà ní pàtàkì.", "ctaReserve": "Fi Premium pamọ́", "ctaFree": "Bẹ̀rẹ̀ Ọ̀fẹ́" },
-  "howToUse": { "heading": "Bí a ṣe ń lò ApexPredix", "step1Title": "Yan agbègbè rẹ", "step1Body": "A ṣe àtúnṣe iye-owó àti àwọn ìmọ̀ràn fún ibi tó wà.", "step2Title": "Lọ wo asọtẹlẹ", "step2Body": "Asọtẹlẹ laaye, tí a tún ṣe ní gbogbo wákàtí 2.", "step3Title": "Wo Value Bet", "step3Body": "Nígbà tí ọjà ò bá àwòṣe, chip náà yóò tan.", "step4Title": "Tẹtẹ pẹlu ojúse", "step4Body": "A lo ¼ Kelly. Ṣètò àwọn ààlà. 18+." },
-  "cta": { "heading": "Darapọ̀ mọ́ ìbálẹ̀rì", "counter": "{count} ọmọ-ẹgbẹ́ wà nínú àkójọ ìdúró.", "emailLabel": "Email", "emailPlaceholder": "iwo@apẹẹrẹ.com", "eighteen": "Mo ti pé ọmọ ọdún 18+", "submit": "Fi ààyè mi pamọ́", "footnote": "A kì í pín email rẹ. ApexPredix AI jẹ́ iṣẹ́ ìtúpalẹ̀." },
+  "howToUse": { "heading": "Bí a ṣe ń lò ApexPredict", "step1Title": "Yan agbègbè rẹ", "step1Body": "A ṣe àtúnṣe iye-owó àti àwọn ìmọ̀ràn fún ibi tó wà.", "step2Title": "Lọ wo asọtẹlẹ", "step2Body": "Asọtẹlẹ laaye, tí a tún ṣe ní gbogbo wákàtí 2.", "step3Title": "Wo Value Bet", "step3Body": "Nígbà tí ọjà ò bá àwòṣe, chip náà yóò tan.", "step4Title": "Tẹtẹ pẹlu ojúse", "step4Body": "A lo ¼ Kelly. Ṣètò àwọn ààlà. 18+." },
+  "cta": { "heading": "Darapọ̀ mọ́ ìbálẹ̀rì", "counter": "{count} ọmọ-ẹgbẹ́ wà nínú àkójọ ìdúró.", "emailLabel": "Email", "emailPlaceholder": "iwo@apẹẹrẹ.com", "eighteen": "Mo ti pé ọmọ ọdún 18+", "submit": "Fi ààyè mi pamọ́", "footnote": "A kì í pín email rẹ. ApexPredict AI jẹ́ iṣẹ́ ìtúpalẹ̀." },
   "footer": { "powered": "Maralito Labs ló pèsè", "rgs": "Àwọn ohun ìrànlọ́wọ́ tẹtẹ tó ní ojúse" },
   "settings": { "title": "Ìṣètò", "language": "Èdè", "theme": "Awọ̀ rojú-ìwò", "region": "Agbègbè", "manageCookies": "Ṣakoso kuki", "close": "Tì" },
-  "ageGate": { "heading": "Ṣe ọmọ ọdún 18 tàbí jù lọ ni ọ?", "subtitle": "ApexPredix AI jẹ́ fún àwọn agbalagba nìkan.", "yes": "Mo ti pé 18", "no": "Mi ò tíì pé 18" },
-  "blocked": { "heading": "Kò sí láàrín agbègbè rẹ", "body": "A kò lè pèsè ApexPredix AI níbí. Kàn sí legal@apexpredix.ai." }
+  "ageGate": { "heading": "Ṣe ọmọ ọdún 18 tàbí jù lọ ni ọ?", "subtitle": "ApexPredict AI jẹ́ fún àwọn agbalagba nìkan.", "yes": "Mo ti pé 18", "no": "Mi ò tíì pé 18" },
+  "blocked": { "heading": "Kò sí láàrín agbègbè rẹ", "body": "A kò lè pèsè ApexPredict AI níbí. Kàn sí legal@apexpredix.ai." }
 }
 ```
 
@@ -2916,12 +2916,12 @@ describe('dictionary coverage', () => {
   "stats": { "heading": "Lambobi Da Suke Magana" },
   "network": { "heading": "Cibiyar Hankali Kai Tsaye", "intro": "Wakilai 14 masu sarrafa kansu. 2.4M abubuwa/awa. Sun sabunta kowace awa 2." },
   "premium": { "heading": "Abubuwan Premium", "regionNote": "Farashin Afrika na musamman.", "ctaReserve": "Ajiye Premium", "ctaFree": "Fara Kyauta" },
-  "howToUse": { "heading": "Yadda Ake Amfani Da ApexPredix", "step1Title": "Zaɓi yankinka", "step1Body": "Muna saita farashi da shawarwarin caca don wurin da kake.", "step2Title": "Duba tsinkaya", "step2Body": "Tsinkaya kai tsaye, ana sabuntawa kowace awa 2.", "step3Title": "Ga value bet", "step3Body": "Lokacin da kasuwa ba ta yarda da model ba, chip yana haskakawa.", "step4Title": "Caca da nauyi", "step4Body": "Muna amfani da ¼ Kelly. Saita iyaka. 18+." },
-  "cta": { "heading": "Shiga Cikin Da'irar Ciki", "counter": "Masu nazari da masu caca {count} suna kan jerin jira.", "emailLabel": "Email", "emailPlaceholder": "kai@misali.com", "eighteen": "Ina da shekara 18+", "submit": "Ajiye kujera ta", "footnote": "Ba mu raba email ɗinka. ApexPredix AI sabis ne na nazari." },
+  "howToUse": { "heading": "Yadda Ake Amfani Da ApexPredict", "step1Title": "Zaɓi yankinka", "step1Body": "Muna saita farashi da shawarwarin caca don wurin da kake.", "step2Title": "Duba tsinkaya", "step2Body": "Tsinkaya kai tsaye, ana sabuntawa kowace awa 2.", "step3Title": "Ga value bet", "step3Body": "Lokacin da kasuwa ba ta yarda da model ba, chip yana haskakawa.", "step4Title": "Caca da nauyi", "step4Body": "Muna amfani da ¼ Kelly. Saita iyaka. 18+." },
+  "cta": { "heading": "Shiga Cikin Da'irar Ciki", "counter": "Masu nazari da masu caca {count} suna kan jerin jira.", "emailLabel": "Email", "emailPlaceholder": "kai@misali.com", "eighteen": "Ina da shekara 18+", "submit": "Ajiye kujera ta", "footnote": "Ba mu raba email ɗinka. ApexPredict AI sabis ne na nazari." },
   "footer": { "powered": "Maralito Labs ne ya samar", "rgs": "Albarkatun caca masu nauyi" },
   "settings": { "title": "Saituna", "language": "Harshe", "theme": "Jigo", "region": "Yanki", "manageCookies": "Sarrafa kukis", "close": "Rufe" },
-  "ageGate": { "heading": "Kana da shekaru 18 ko fiye?", "subtitle": "ApexPredix AI na manya ne kawai.", "yes": "Ina da shekara 18+", "no": "Ina karkashin 18" },
-  "blocked": { "heading": "Ba ya nan a yankinka", "body": "Ba mu iya bayar da ApexPredix AI a nan. Tuntubi legal@apexpredix.ai." }
+  "ageGate": { "heading": "Kana da shekaru 18 ko fiye?", "subtitle": "ApexPredict AI na manya ne kawai.", "yes": "Ina da shekara 18+", "no": "Ina karkashin 18" },
+  "blocked": { "heading": "Ba ya nan a yankinka", "body": "Ba mu iya bayar da ApexPredict AI a nan. Tuntubi legal@apexpredix.ai." }
 }
 ```
 
@@ -2938,12 +2938,12 @@ describe('dictionary coverage', () => {
   "stats": { "heading": "Izinombolo Ezikhulumayo" },
   "network": { "heading": "Igridi Yobuhlakani Bukhoma", "intro": "Ama-ejenti azimele angu-14. Izehlakalo ezingu-2.4M/ihora. Ayazivuselela njalo emahoreni amabili." },
   "premium": { "heading": "Izici ze-Premium", "regionNote": "Intengo ye-Afrika ekhethekile isetshenzisiwe.", "ctaReserve": "Gcina i-Premium", "ctaFree": "Qala Mahhala" },
-  "howToUse": { "heading": "Indlela Yokusebenzisa i-ApexPredix", "step1Title": "Khetha isifunda sakho", "step1Body": "Silungiselela intengo nezincomo zezindlu ezilingana nawe.", "step2Title": "Bheka iziphrofetho", "step2Body": "Iziphrofetho ezivuseleleka njalo emahoreni amabili.", "step3Title": "Bona ama-value bet", "step3Body": "Lapho imakethe ingavumelani nemodeli, i-chip iyakhanya.", "step4Title": "Bheja ngokuzibophezela", "step4Body": "Sisebenzisa ¼ Kelly. Beka imikhawulo. 18+." },
-  "cta": { "heading": "Joyina Indilinga Yangaphakathi", "counter": "Abahlaziyi nababhejayo abangu-{count} bakwiwaitlist.", "emailLabel": "I-imeyili", "emailPlaceholder": "wena@isibonelo.com", "eighteen": "Nginezikhathi ezingu-18+", "submit": "Gcina isihlalo sami", "footnote": "Asiyabelani i-imeyili yakho. I-ApexPredix AI iyinkonzo yokuhlaziya." },
+  "howToUse": { "heading": "Indlela Yokusebenzisa i-ApexPredict", "step1Title": "Khetha isifunda sakho", "step1Body": "Silungiselela intengo nezincomo zezindlu ezilingana nawe.", "step2Title": "Bheka iziphrofetho", "step2Body": "Iziphrofetho ezivuseleleka njalo emahoreni amabili.", "step3Title": "Bona ama-value bet", "step3Body": "Lapho imakethe ingavumelani nemodeli, i-chip iyakhanya.", "step4Title": "Bheja ngokuzibophezela", "step4Body": "Sisebenzisa ¼ Kelly. Beka imikhawulo. 18+." },
+  "cta": { "heading": "Joyina Indilinga Yangaphakathi", "counter": "Abahlaziyi nababhejayo abangu-{count} bakwiwaitlist.", "emailLabel": "I-imeyili", "emailPlaceholder": "wena@isibonelo.com", "eighteen": "Nginezikhathi ezingu-18+", "submit": "Gcina isihlalo sami", "footnote": "Asiyabelani i-imeyili yakho. I-ApexPredict AI iyinkonzo yokuhlaziya." },
   "footer": { "powered": "Inikezwe yi-Maralito Labs", "rgs": "Izinsiza zokubheja ngokuzibophezela" },
   "settings": { "title": "Izilungiselelo", "language": "Ulimi", "theme": "Itimu", "region": "Isifunda", "manageCookies": "Phatha amakhukhi", "close": "Vala" },
-  "ageGate": { "heading": "Uneminyaka engu-18 noma ngaphezulu?", "subtitle": "I-ApexPredix AI ingeyabantu abadala kuphela.", "yes": "Ngineminyaka engu-18+", "no": "Ngingaphansi kuka-18" },
-  "blocked": { "heading": "Ayitholakali esifundeni sakho", "body": "Asikwazi ukunikeza i-ApexPredix AI lapha. Thinta legal@apexpredix.ai." }
+  "ageGate": { "heading": "Uneminyaka engu-18 noma ngaphezulu?", "subtitle": "I-ApexPredict AI ingeyabantu abadala kuphela.", "yes": "Ngineminyaka engu-18+", "no": "Ngingaphansi kuka-18" },
+  "blocked": { "heading": "Ayitholakali esifundeni sakho", "body": "Asikwazi ukunikeza i-ApexPredict AI lapha. Thinta legal@apexpredix.ai." }
 }
 ```
 
@@ -4033,7 +4033,7 @@ export function MatchDetail({ match, locale, region }: Props) {
       </section>
 
       <p className="text-xs text-mute-2">
-        ApexPredix AI is an analytics service, not a gambling operator. 18+ only. Past performance ≠ future results.
+        ApexPredict AI is an analytics service, not a gambling operator. 18+ only. Past performance ≠ future results.
       </p>
     </article>
   );
@@ -4458,7 +4458,7 @@ export function GeoBlockedScreen({ reason }: { reason: string }) {
       <div className="max-w-md text-center">
         <h1 className="text-3xl font-semibold tracking-tight">Unavailable in your region</h1>
         <p className="mt-3 text-mute-1">
-          ApexPredix AI is not available where you are. Region detected: <code className="rounded bg-ink-2 px-1 text-xs">{reason}</code>.
+          ApexPredict AI is not available where you are. Region detected: <code className="rounded bg-ink-2 px-1 text-xs">{reason}</code>.
         </p>
         <p className="mt-3 text-mute-1">
           For jurisdictional inquiries write to{' '}
@@ -4530,7 +4530,7 @@ export function AgeGate() {
       <div className="m-6 w-full max-w-md rounded-2xl bg-ink-1 p-6 ring-1 ring-white/10 animate-rise">
         <h2 id="age-h" className="text-xl font-semibold">Are you 18 or older?</h2>
         <p className="mt-2 text-sm text-mute-1">
-          ApexPredix AI is intended for adults only. We are an analytics service, not a gambling operator.
+          ApexPredict AI is intended for adults only. We are an analytics service, not a gambling operator.
         </p>
         <div className="mt-6 flex gap-3">
           <button
@@ -4567,7 +4567,7 @@ export default async function UnderAge({ params }: { params: Promise<{ locale: s
       <div className="max-w-md">
         <h1 className="text-3xl font-semibold tracking-tight">Come back when you are 18+</h1>
         <p className="mt-3 text-mute-1">
-          ApexPredix AI is intended for adults only. If you or someone you know has a gambling problem, help is available at{' '}
+          ApexPredict AI is intended for adults only. If you or someone you know has a gambling problem, help is available at{' '}
           <a className="text-edge-cyan hover:underline" href="https://www.begambleaware.org/" rel="noopener noreferrer" target="_blank">BeGambleAware</a>.
         </p>
       </div>
@@ -4635,7 +4635,7 @@ export function RGSBanner({ region }: Props) {
     <div role="region" aria-label="Responsible gambling notice" className="border-b border-white/5 bg-ink-2/80 text-mute-1">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2 text-xs">
         <p>
-          🔞 ApexPredix AI is an analytics service, not a gambling operator. 18+. Bet responsibly —{' '}
+          🔞 ApexPredict AI is an analytics service, not a gambling operator. 18+. Bet responsibly —{' '}
           <a href={helpline.href} rel="noopener noreferrer" target="_blank" className="text-edge-cyan hover:underline">{helpline.label}</a>.
         </p>
         <button aria-label="Dismiss" onClick={() => setDismissed(true)} className="rounded p-1 hover:bg-white/5"><X size={12} /></button>
@@ -4866,7 +4866,7 @@ import { WaitlistVerify, WaitlistWelcome } from '@apexpredix/email';
 import type { ReactElement } from 'react';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const from = process.env.RESEND_FROM_ADDRESS ?? 'ApexPredix AI <noreply@mail.apexpredix.ai>';
+const from = process.env.RESEND_FROM_ADDRESS ?? 'ApexPredict AI <noreply@mail.apexpredix.ai>';
 
 async function send(to: string, subject: string, react: ReactElement) {
   if (!resend) {
@@ -4878,10 +4878,10 @@ async function send(to: string, subject: string, react: ReactElement) {
 }
 
 export const sendVerifyEmail = (to: string, verifyUrl: string, locale: string) =>
-  send(to, 'Confirm your seat on the ApexPredix AI waitlist', WaitlistVerify({ verifyUrl, locale }));
+  send(to, 'Confirm your seat on the ApexPredict AI waitlist', WaitlistVerify({ verifyUrl, locale }));
 
 export const sendWelcomeEmail = (to: string, referralUrl: string, locale: string) =>
-  send(to, 'You are on the ApexPredix AI list', WaitlistWelcome({ referralUrl, locale }));
+  send(to, 'You are on the ApexPredict AI list', WaitlistWelcome({ referralUrl, locale }));
 ```
 
 - [ ] **Step 2: Write `apps/web/app/api/waitlist/route.ts`**
@@ -5272,7 +5272,7 @@ export function HeroReel({
           <img src={poster} alt="" className="h-full w-full object-cover" />
           <button
             type="button"
-            aria-label="Play ApexPredix AI product preview"
+            aria-label="Play ApexPredict AI product preview"
             onClick={() => {
               setPlaying(true);
               videoRef.current?.play();
@@ -5294,7 +5294,7 @@ export function HeroReel({
           loop
           playsInline
           preload="metadata"
-          aria-label="ApexPredix AI product preview"
+          aria-label="ApexPredict AI product preview"
           className="h-full w-full object-cover"
         >
           <track kind="captions" srcLang="en" src={captionsSrc} default />
@@ -5656,7 +5656,7 @@ export function pageMetadata(opts: {
       title: opts.title,
       description: opts.description,
       images: opts.ogImage ? [opts.ogImage] : [`${SITE}/opengraph-image`],
-      siteName: 'ApexPredix AI',
+      siteName: 'ApexPredict AI',
     },
     twitter: { card: 'summary_large_image', title: opts.title, description: opts.description },
   };
@@ -5675,7 +5675,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://apexpredix.ai';
 export const organizationLD = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'ApexPredix AI',
+  name: 'ApexPredict AI',
   url: SITE,
   logo: `${SITE}/icon.png`,
   parentOrganization: { '@type': 'Organization', name: 'Maralito Labs' },
@@ -5690,7 +5690,7 @@ export const websiteLD = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   url: SITE,
-  name: 'ApexPredix AI',
+  name: 'ApexPredict AI',
   potentialAction: {
     '@type': 'SearchAction',
     target: { '@type': 'EntryPoint', urlTemplate: `${SITE}/en/predictions?q={query}` },
@@ -5741,7 +5741,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: '',
-    title: 'ApexPredix AI — Sports Prediction Intelligence',
+    title: 'ApexPredict AI — Sports Prediction Intelligence',
     description: 'AI sports prediction intelligence by Maralito Labs — ELO + Poisson + xG ensemble engine.',
   });
 }
@@ -5760,7 +5760,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: `/predictions/${match.id}`,
-    title: `${match.home.name} vs ${match.away.name} — ApexPredix AI`,
+    title: `${match.home.name} vs ${match.away.name} — ApexPredict AI`,
     description: `${match.topPick} • Confidence ${Math.round(match.model.confidence * 100)}% • ${match.league}`,
     ogImage: `${process.env.NEXT_PUBLIC_SITE_URL}/api/og/match/${match.id}`,
   });
@@ -5796,7 +5796,7 @@ import { ImageResponse } from 'next/og';
 export const runtime = 'edge';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
-export const alt = 'ApexPredix AI — Sports Prediction Intelligence';
+export const alt = 'ApexPredict AI — Sports Prediction Intelligence';
 
 export default function OG() {
   return new ImageResponse(
@@ -5935,8 +5935,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'ApexPredix AI',
-    short_name: 'ApexPredix',
+    name: 'ApexPredict AI',
+    short_name: 'ApexPredict',
     description: 'AI sports prediction intelligence — ELO + Poisson + xG.',
     start_url: '/',
     display: 'standalone',
@@ -6187,7 +6187,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     privacy: 'Privacy Policy', terms: 'Terms of Use', cookies: 'Cookie Policy', disclaimer: 'Responsible Use Disclaimer',
   };
   if (!(DOCS as readonly string[]).includes(doc)) return {};
-  return pageMetadata({ locale, path: `/legal/${doc}`, title: `${titles[doc as Doc]} — ApexPredix AI`, description: `${titles[doc as Doc]} for ApexPredix AI by Maralito Labs.` });
+  return pageMetadata({ locale, path: `/legal/${doc}`, title: `${titles[doc as Doc]} — ApexPredict AI`, description: `${titles[doc as Doc]} for ApexPredict AI by Maralito Labs.` });
 }
 
 export default async function LegalPage({ params }: { params: Promise<{ locale: string; doc: string }> }) {
@@ -6714,7 +6714,7 @@ Tick each item and attach the named proof. CI artifacts are acceptable for items
 - [ ] **Step 2: Expand root `README.md`**
 
 ````markdown
-# ApexPredix AI
+# ApexPredict AI
 
 Sports prediction intelligence platform by Maralito Labs.
 

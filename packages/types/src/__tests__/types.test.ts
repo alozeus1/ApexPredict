@@ -13,7 +13,7 @@ describe('types', () => {
     expect(isLocale('xx')).toBe(false);
     expect(isLocale(42)).toBe(false);
   });
-  it('CONSENT_VERSION is 1', () => {
-    expect(CONSENT_VERSION).toBe(1);
+  it('CONSENT_VERSION is 2', () => {
+    expect(CONSENT_VERSION).toBe(2);
   });
 });

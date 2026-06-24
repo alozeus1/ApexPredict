@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: '/how-it-works',
-    title: 'How to Use — ApexPredix AI',
+    title: 'How to Use — ApexPredict AI',
     description: 'Four steps: pick your region, browse predictions, see value bets, stake responsibly.',
   });
 }

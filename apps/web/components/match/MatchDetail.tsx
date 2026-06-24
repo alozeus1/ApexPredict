@@ -41,7 +41,7 @@ export function MatchDetail({ match, locale, region }: Props) {
       </section>
 
       <p className="text-xs text-mute-2">
-        ApexPredix AI is an analytics service, not a gambling operator. 18+ only. Past performance ≠ future results.
+        ApexPredict AI is an analytics service, not a gambling operator. 18+ only. Past performance ≠ future results.
       </p>
     </article>
   );

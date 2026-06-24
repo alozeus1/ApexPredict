@@ -7,7 +7,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://apexpredix.ai';
 export const organizationLD = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'ApexPredix AI',
+  name: 'ApexPredict AI',
   url: SITE,
   logo: `${SITE}/icon.png`,
   parentOrganization: { '@type': 'Organization', name: 'Maralito Labs' },
@@ -22,7 +22,7 @@ export const websiteLD = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   url: SITE,
-  name: 'ApexPredix AI',
+  name: 'ApexPredict AI',
   potentialAction: {
     '@type': 'SearchAction',
     target: { '@type': 'EntryPoint', urlTemplate: `${SITE}/en/predictions?q={query}` },

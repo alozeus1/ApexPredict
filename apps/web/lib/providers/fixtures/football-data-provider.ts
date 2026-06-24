@@ -24,7 +24,7 @@ export class SportmonksProvider implements FixturesProvider {
   readonly name = 'sportmonks';
   readonly priority = 90;
 
-  fetchCompetitionBundle(): Promise<CompetitionBundle> {
+  fetchCompetitionBundle(_code: string, _daysAhead = 14): Promise<CompetitionBundle> {
     throw new Error('SportmonksProvider not implemented — wired in S2');
   }
 }

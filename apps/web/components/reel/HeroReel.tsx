@@ -29,7 +29,7 @@ export function HeroReel({
           <img src={poster} alt="" className="h-full w-full object-cover" />
           <button
             type="button"
-            aria-label="Play ApexPredix AI product preview"
+            aria-label="Play ApexPredict AI product preview"
             onClick={() => {
               setPlaying(true);
               videoRef.current?.play();
@@ -51,7 +51,7 @@ export function HeroReel({
           loop
           playsInline
           preload="metadata"
-          aria-label="ApexPredix AI product preview"
+          aria-label="ApexPredict AI product preview"
           className="h-full w-full object-cover"
         >
           <track kind="captions" srcLang="en" src={captionsSrc} default />
