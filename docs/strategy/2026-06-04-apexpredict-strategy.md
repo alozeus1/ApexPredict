@@ -114,7 +114,7 @@ apexpredict/
 
 ### 2.1 Critical security & compliance issues
 
-**C-1 — No auth, dashboard is public demo data.** `/dashboard` shows hardcoded KPIs (89.3% win rate, +8.5% ROI). This will be screenshotted by competitors and used against us in regulator complaints. *Fix:* mark clearly as demo, hide behind login, replace with real per-user P&L before any paid sale.
+**C-1 — No auth, dashboard is public demo data.** `/dashboard` shows hardcoded KPIs (89.3% accuracy-style claim, +8.5% ROI). This will be screenshotted by competitors and used against us in regulator complaints. *Fix:* mark clearly as demo, hide behind login, replace with real per-user P&L before any paid sale.
 
 **C-2 — Premium gating is cosmetic.** `/premium` page exists, but `Premium` section + dashboard panels label all features "Unlocked." There is no entitlement check. *Fix:* introduce `Subscription` model + middleware-level paywall before billing turns on.
 
@@ -476,7 +476,7 @@ Plus enums for `tier`, `status`, `kycStatus`, `pickResult`.
 ### 5.6 What we are *not* doing (and shouldn't)
 
 - We are **not** taking bets. ApexPredict is an analytics service. This is both the safest legal posture and the most scalable business — no chargeback risk, no payout risk, no need for casino-level licensing.
-- We are **not** claiming a fixed win-ratio. The product narrative is "find +EV bets" and "decision support," not "guaranteed wins." This is enforceable under Nigerian advertising-standards review and survives an NLRC consumer-protection complaint.
+- We are **not** claiming a fixed win-ratio. The product narrative is "find +EV bets" and "decision support," not "assured outcomes." This is enforceable under Nigerian advertising-standards review and survives an NLRC consumer-protection complaint.
 
 ### 5.7 Revenue model & projections (illustrative — sensitize before signing off)
 
