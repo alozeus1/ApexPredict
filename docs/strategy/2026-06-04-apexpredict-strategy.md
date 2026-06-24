@@ -812,3 +812,22 @@ Scope: **Frontend + Backend engineering only** (no DevOps / SRE / ML / design / 
 After this sprint review, the next planning conversation can move to other areas (ML training, QStash worker decomposition, programmatic SEO leaf pages, native mobile spike, etc.).
 
 — *Sprint S1 backlog · 2026-06-07*
+
+---
+
+## Sprint S1 — completed by agent on 2026-06-24
+
+The no-vendor-key foundation work shipped as six scoped PRs against Forgejo `develop`:
+
+| # | Branch | Summary |
+|---|---|---|
+| 1 | `chore/brand-and-security-hygiene` | Canonicalized `ApexPredict` spelling and added `.vercelrc.json` leak recurrence guards plus incident-response docs. |
+| 2 | `feat/payments-scaffold` | Added Paystack-first billing provider scaffold, checkout/webhook/cancel flows, webhook idempotency, admin entitlement override, replay CLI, and generated migration SQL. |
+| 3 | `feat/data-failover-and-admin-tools` | Added provider failover state machine, worker integration, NPFL odds CSV import, admin upload route/UI, and failover runbook. |
+| 4 | `feat/compliance-rg-and-rls-draft` | Added functional self-exclusion, notification suppression hooks, consent v2, RLS draft SQL, and RLS runbook. |
+| 5 | `feat/seo-foundation` | Added programmatic SEO route catalog, DB-backed sitemap, hreflang helper, no-data fallback, and metadata-route middleware bypass. |
+| 6 | `chore/strategy-doc-housekeeping-s1` | Updated backlog Markdown/XLSX statuses, strategy appendix, and changelog for S1 completion. |
+
+Human/vendor actions remain outside this no-vendor-key sprint: Vercel token rotation, production env-key provisioning, branch-protection UI evidence, legal filings, and live vendor activation.
+
+— *Sprint S1 no-vendor-key completion log · 2026-06-24*
