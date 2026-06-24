@@ -19,3 +19,15 @@ export async function logAudit(
     data: { actor, action, target, meta: meta as Prisma.InputJsonValue },
   });
 }
+
+export interface NotificationSuppressibleUser {
+  disabledAt?: Date | string | null;
+  rgFlags?: { selfExcludedUntil?: string | null } | null;
+}
+
+export function isNotificationSuppressed(user: NotificationSuppressibleUser | null | undefined): boolean {
+  if (!user) return false;
+  if (user.disabledAt) return true;
+  const until = user.rgFlags?.selfExcludedUntil ? new Date(user.rgFlags.selfExcludedUntil) : null;
+  return Boolean(until && until.getTime() > Date.now());
+}

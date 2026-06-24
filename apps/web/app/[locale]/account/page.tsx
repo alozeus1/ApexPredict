@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@apexpredix/db';
 import { auth, signOut } from '@/auth';
 import { assertNotSuspended, type SuspendableUser } from '@/lib/auth-guards';
+import { SelfExcludeModal } from '@/components/compliance/SelfExcludeModal';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,6 +80,7 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
           Self-exclude or set a cool-off from our{' '}
           <a className="underline" href="/legal/responsible-gaming">responsible-gaming page</a>. 18+ only.
         </p>
+        <SelfExcludeModal />
       </section>
     </main>
   );
