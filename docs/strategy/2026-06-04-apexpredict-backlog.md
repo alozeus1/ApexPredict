@@ -3,18 +3,19 @@
 **Kickoff:** Tuesday 2026-06-09
 **Public Nigeria launch target:** Monday 2026-08-04 (60 days)
 **Owner:** CTO Office, Web Forx Global Inc.
-**Version:** v1.1 · 2026-06-05
-**Status:** Approved — S0 execution in progress
+**Version:** v1.2 · 2026-06-07 — S0 complete; S1 awaiting human gates
+**Status:** S0 shipped on `develop` + `main`; Sprint S1 blocked on vendor-key gates (see §S1 readiness)
 
 > **Self-contained spec.** Every task below includes description, acceptable deliverables, expectations / edge cases, dependencies, estimate, and acceptance criteria. Engineers should not need to ping the user for clarification before starting work.
 
 ---
 
-## Sprint S0 — execution status (agent, 2026-06-05)
+## Sprint S0 — shipped 2026-06-05 → merged to `main` 2026-06-07
 
 Per-task status lives in the XLSX `Backlog` sheet (`Status` column). Labels:
 `Done` · `In flight (agent)` · `In flight (human)` · `Not started` · `Deferred to v1.1`.
-Summary of what the five Sprint-S0 PRs delivered (all branched off `develop`):
+
+Summary of the five Sprint-S0 PRs (all branched off `develop`, all merged into `develop`, `develop` then merged into `main`):
 
 | PR | Branch | Tickets → status |
 |----|--------|------------------|
@@ -23,9 +24,47 @@ Summary of what the five Sprint-S0 PRs delivered (all branched off `develop`):
 | 3 | `feat/copy-repositioning` | **Done:** E04-S3-T4 + repositioning-copy list. |
 | 4 | `feat/identity-foundation` | **Done:** E01-S1-T1..T7, E01-S3-T1..T3, E01-S4-T1, E01-S4-T4. |
 | 5 | `feat/data-and-prediction-scaffolds` | **Done:** E03-S1-T8, E03-S2-T1, E03-S3-T3 (partial), E04-S4-T1, E05-S2-T1. |
+| 6 | `chore/strategy-doc-housekeeping` | Status column populated on `Backlog` sheet; CHANGELOG appended; strategy appendix written. |
 
-**In flight (human)** — vendor signups, KYC, DNS, billing alerts: `E00-S1-T1..T8`, `E00-S2-T6`.
-Everything else remains **Not started**. Migrations in PRs 4 & 5 are generated SQL only — not yet applied to Neon.
+A follow-up test fix (`89375d9 test(types): align LOCALES test with the gated locale set`) landed on top to keep CI green after `es`/`zu` were dropped.
+
+**Totals as of 2026-06-07:** Done **23** · In flight (human) **13** · Not started **141**.
+
+### Two follow-ups the agent surfaced — handle before Sprint S1 user-facing work
+
+1. **Rotate the Vercel token.** Live token was found in `apps/web/.vercelrc.json`. File is now gitignored; token must still be rotated in Vercel. Owner: SRE. **Add as task `OPS-T1`.**
+2. **Unify brand spelling.** Code renders `ApexPredix`; docs say `ApexPredict`. Pick `ApexPredict` and global-replace. Owner: FE + DES. **Add as task `OPS-T2`.**
+
+### S1 readiness gate
+
+Sprint S1 (Identity + Subscription + Payments user flows) needs these gates green before the next autonomous run dispatches:
+
+| # | Gate | Blocks | Owner |
+|---|---|---|---|
+| 1 | Vercel token rotated | any deploy | SRE |
+| 2 | Brand spelling unified | any user-visible PR | FE + DES |
+| 3 | Neon: apply Prisma migrations from PRs 4 & 5 | Auth.js runtime, entitlements, UserPick | SRE |
+| 4 | `AUTH_SECRET` set in Vercel envs | Auth.js sessions | SRE |
+| 5 | Google OAuth client registered (E01-S2-T1) | Google login wiring | PM |
+| 6 | Paystack test keys in vault (E00-S1-T2) | E02 Payments work | PM |
+| 7 | Upstash Redis + QStash tokens in vault (E00-S1-T5) | E03 worker decomposition | SRE |
+| 8 | The Odds API + Sportmonks tokens in vault (E00-S1-T4) | E03 odds + secondary fixtures | PM |
+| 9 | Resend production key | E06 email digest (S3) | PM |
+| 10 | Smile ID sandbox keys (E00-S1-T3) | E07 KYC (S4) | PM |
+| 11 | Branch protection on `main` (E00-S2-T6) | guardrail for whole 60-day push | SRE |
+| 12 | NLRC opinion letter filed (E00-S3-T2) | public launch | Counsel |
+
+≥ 6 green = next autonomous run can proceed. See `2026-06-07-agent-master-prompt-sprint-one.md`.
+
+### Post-S0 cross-cutting follow-ups (track these inline)
+
+These are not Epic-scoped — drop into the appropriate sprint:
+
+- **OPS-T1** — Rotate Vercel token leaked into `apps/web/.vercelrc.json`. `XS` · SRE · **In flight (human)**.
+- **OPS-T2** — Global-replace `ApexPredix` → `ApexPredict` across code, copy, emails, JSON-LD, OG, README, CHANGELOG. `S` · FE + DES · **Not started**.
+- **OPS-T3** — Apply Prisma migrations on Neon: `pnpm -F @apexpredix/db migrate deploy`. Validate against staging branch first. `S` · SRE · **In flight (human)**.
+- **OPS-T4** — Configure Forgejo branch protection on `main` (E00-S2-T6 in UI). `XS` · SRE · **In flight (human)**.
+- **OPS-T5** — Verify Auth.js v5 + Email provider works end-to-end in Vercel preview deploy (set `AUTH_SECRET`, `AUTH_RESEND_KEY`, etc.). `S` · SRE.
 
 ---
 
@@ -687,4 +726,4 @@ Everything else remains **Not started**. Migrations in PRs 4 & 5 are generated S
 
 ---
 
-— *Backlog v1 · Web Forx Global Inc. · Confidential*
+— *Backlog v1.2 · Web Forx Global Inc. · Confidential · S0 shipped 2026-06-07*
