@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: `/predictions/${match.id}`,
-    title: `${match.home.name} vs ${match.away.name} — ApexPredix AI`,
+    title: `${match.home.name} vs ${match.away.name} — ApexPredict AI`,
     description: `${match.topPick} • Confidence ${Math.round(match.model.confidence * 100)}% • ${match.league}`,
     ogImage: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/api/og/match/${match.id}`,
   });

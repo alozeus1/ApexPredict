@@ -1,6 +1,6 @@
-# Contributing to ApexPredix
+# Contributing to ApexPredict
 
-Thanks for working on ApexPredix. This document is the contract for how changes
+Thanks for working on ApexPredict. This document is the contract for how changes
 land. It is intentionally short — read it once, follow it every time.
 
 ## Branching model
@@ -80,13 +80,26 @@ pnpm -F @apexpredix/web test
 All must pass. CI runs the same gate plus an e2e smoke test, CodeQL, and a
 gitleaks secret scan on every PR and on pushes to `main`/`develop`.
 
+## Pre-commit checklist
+
+Before every commit, run through this checklist:
+
+- Do not commit secrets, tokens, private keys, `.env.local`, `.env.*` with real
+  values, or local CLI credential caches.
+- Do not commit `apps/web/.vercelrc.json`; it can contain a live Vercel token.
+- Do not commit generated local artefacts such as `.next/`, `dist/`, coverage
+  reports, Playwright reports, local media renders, or exported strategy decks.
+- Run `git status --short` and inspect every staged path before committing.
+- Run gitleaks locally when touching config, deploy, auth, billing, or provider
+  code: `gitleaks detect --source . --config .gitleaks.toml --no-git`.
+
 ## Guardrails
 
 - **No secrets in the repo.** Secrets live in the 1Password / Doppler vault
   (`docs/runbooks/`). `apps/web/.env.example` documents every key by name only.
-- **Positioning.** ApexPredix is a value-bet signal service, not an oracle.
-  Never add copy claiming a "win rate", "guaranteed wins", or a specific ROI
-  promise. Calibrated probabilities and edge-vs-market only.
+- **Positioning.** ApexPredict is a value-bet signal service, not an oracle.
+  Never add copy that claims outcome certainty, guaranteed results, or future
+  returns. Calibrated probabilities and edge-vs-market only.
 - **18+ / responsible gambling** language stays intact wherever it exists.
 - **Don't add a new vendor SDK** or large dependency without justifying its
   bundle-size and license in the PR body.

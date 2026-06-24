@@ -9,7 +9,7 @@ Current production commit: `b8cb85f`
 
 ## 1. Executive Summary
 
-ApexPredict, deployed publicly as ApexPredix, is a sports prediction intelligence web application being positioned as a subscription product owned and operated by Web Forx Global Inc. The current product is a Next.js web app with a live-data ingestion layer, a prediction engine, a rolling backtest/evaluation loop, compliance gates, multilingual marketing pages, and waitlist capture.
+ApexPredict, deployed publicly as ApexPredict, is a sports prediction intelligence web application being positioned as a subscription product owned and operated by Web Forx Global Inc. The current product is a Next.js web app with a live-data ingestion layer, a prediction engine, a rolling backtest/evaluation loop, compliance gates, multilingual marketing pages, and waitlist capture.
 
 The app is now deployed and responding in Vercel production. The database schema has been migrated in Neon, required production environment variables are configured in Vercel, and the protected daily refresh endpoint has been manually verified.
 

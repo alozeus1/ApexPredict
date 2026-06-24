@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return pageMetadata({
     locale,
     path: '/premium',
-    title: 'Premium — ApexPredix AI',
+    title: 'Premium — ApexPredict AI',
     description: 'Premium features: 10 predictions/day, deep analysis, value-bet alerts, Kelly staking calculator, Telegram alerts, regional PPP pricing.',
   });
 }

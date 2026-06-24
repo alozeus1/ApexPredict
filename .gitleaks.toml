@@ -1,4 +1,4 @@
-# gitleaks configuration for ApexPredix
+# gitleaks configuration for ApexPredict
 # https://github.com/gitleaks/gitleaks
 #
 # Extends the bundled default ruleset (broad secret detection) and layers
@@ -6,7 +6,7 @@
 # do not trip the scanner. Real secrets never live in the repo — they live in
 # the 1Password / Doppler vault (see docs/runbooks/).
 
-title = "ApexPredix gitleaks config"
+title = "ApexPredict gitleaks config"
 
 [extend]
 # Inherit gitleaks' built-in rules (AWS keys, generic API tokens, etc.).
@@ -40,3 +40,10 @@ stopwords = [
   "changeme",
   "replace-with",
 ]
+
+[[rules]]
+id = "apexpredict-vercelrc-json"
+description = "Block Vercel CLI token cache files from entering git history"
+path = '''(^|/)apps/web/\.vercelrc\.json$|(^|/)\.vercelrc\.json$'''
+regex = '''(?s).+'''
+tags = ["secret", "vercel", "local-config"]

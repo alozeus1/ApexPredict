@@ -1,24 +1,24 @@
 /**
  * Canonical compliance + disclaimer copy, reused across email, Telegram, and UI.
  *
- * Positioning is fixed: ApexPredix is a calibrated value-bet signal service, not an
+ * Positioning is fixed: ApexPredict is a calibrated value-bet signal service, not an
  * oracle. No copy here may promise outcomes or an ROI figure as a future result.
  */
 
 /** Short compliance line for UI surfaces (hero, dashboard, cards). */
 export const COMPLIANCE_FOOTER =
-  'ApexPredix is a sports prediction analytics service. We are not a bookmaker. 18+ only. ' +
+  'ApexPredict is a sports prediction analytics service. We are not a bookmaker. 18+ only. ' +
   'Past performance does not guarantee future results.';
 
 /** Email footer. Pairs the analytics-service disclosure with unsubscribe + RG links. */
 export const EMAIL_FOOTER =
-  'ApexPredix is a sports prediction analytics service. We are not a bookmaker. 18+ only. ' +
+  'ApexPredict is a sports prediction analytics service. We are not a bookmaker. 18+ only. ' +
   'If you no longer wish to receive these emails, unsubscribe. ' +
   'Need a break? Visit our responsible-gaming page.';
 
 /** Telegram bot bio. */
 export const TELEGRAM_BIO =
-  'Calibrated football pick signals from ApexPredix. Decision support — we don’t promise wins. 18+.';
+  'Calibrated football pick signals from ApexPredict. Decision support — we don’t promise wins. 18+.';
 
 /** Per-pick disclaimer line — appended to every published pick (Telegram, email, UI). */
 export const PER_PICK_DISCLAIMER = '18+. Decision support only.';
