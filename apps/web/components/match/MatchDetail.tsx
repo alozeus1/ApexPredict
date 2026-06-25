@@ -1,4 +1,5 @@
 import type { Match } from '@apexpredix/types';
+import { safeFormatDate } from '@/lib/format/date';
 import { ConfidenceBar } from './ConfidenceBar';
 import { ValueBetChip } from './ValueBetChip';
 import { OddsCompare } from './OddsCompare';
@@ -7,7 +8,7 @@ import { ModelBreakdown } from './ModelBreakdown';
 interface Props { match: Match; locale: string; region: string; }
 
 export function MatchDetail({ match, locale, region }: Props) {
-  const kickoff = new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeStyle: 'short' }).format(new Date(match.kickoff));
+  const kickoff = safeFormatDate(match.kickoff, locale, { dateStyle: 'full', timeStyle: 'short' });
   return (
     <article className="mx-auto max-w-3xl px-6 py-16 space-y-10">
       <header>
