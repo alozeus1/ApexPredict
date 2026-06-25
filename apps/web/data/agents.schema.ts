@@ -9,5 +9,5 @@ export const AgentSchema = z.object({
   sparkline: z.tuple([z.number(), z.number(), z.number(), z.number(), z.number(), z.number(), z.number()]),
 });
 
-export const AgentsSchema = z.array(AgentSchema).length(14);
+export const AgentsSchema = z.array(AgentSchema).min(14);
 export type AgentJSON = z.infer<typeof AgentSchema>;

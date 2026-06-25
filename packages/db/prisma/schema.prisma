@@ -125,12 +125,29 @@ model Fixture {
   updatedAt   DateTime             @updatedAt
   odds        Odds[]
   result      FixtureResult?
+  enrichment  FixtureEnrichment?
   predictions PredictionSnapshot[]
   evaluations PredictionEvaluation[]
 
   @@index([kickoff])
   @@index([status])
   @@index([competitionId, kickoff])
+}
+
+model FixtureEnrichment {
+  id           String   @id @default(cuid())
+  fixtureId    String   @unique
+  fixture      Fixture  @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  weatherJson  Json?
+  injuriesJson Json?
+  refereeJson  Json?
+  goalsJson    Json?
+  cardsJson    Json?
+  source       String   @default("agentic-enrichment-v0")
+  capturedAt   DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([capturedAt])
 }
 
 model Odds {

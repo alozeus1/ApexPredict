@@ -5,6 +5,7 @@ import type { AgentJSON } from '@/data/agents.schema';
 import { requireCronAuth } from '@/lib/cron-auth';
 import { configuredCompetitions, type FootballDataStandingRow, type FootballDataTeam } from '@/lib/live-data/football-data';
 import { generatePrediction } from '@/lib/prediction-engine/model';
+import { runPredictionGraph } from '@/lib/prediction-engine/orchestrator';
 import { runBacktest } from '@/lib/prediction-engine/backtest';
 import { FootballDataProvider, SportmonksProvider } from '@/lib/providers/fixtures/football-data-provider';
 import { runWorker, runWorkerWithFailover } from '@/lib/workers/runWorker';
@@ -53,6 +54,7 @@ export async function GET(request: Request) {
     let predictionsWritten = 0;
     let resultsWritten = 0;
     let statsWritten = 0;
+    let enrichmentsWritten = 0;
     let evaluatedNow = 0;
     const competitionErrors: string[] = [];
 
@@ -156,11 +158,42 @@ export async function GET(request: Request) {
           });
           fixturesWritten += 1;
 
-          const prediction = generatePrediction({
+          const predictionInput = {
             match,
             homeStats: standings.get(match.homeTeam.id),
             awayStats: standings.get(match.awayTeam.id),
+          };
+          const graphResult = await runPredictionGraph(predictionInput).catch((error) => {
+            competitionErrors.push(`${code}: prediction graph fallback for match ${match.id}: ${errorMessage(error)}`);
+            return undefined;
           });
+          const prediction = graphResult?.prediction ?? generatePrediction(predictionInput);
+
+          if (graphResult?.enrichment) {
+            const enrichment = graphResult.enrichment;
+            await prisma.fixtureEnrichment.upsert({
+              where: { fixtureId: fixture.id },
+              create: {
+                fixtureId: fixture.id,
+                weatherJson: enrichment.weather,
+                injuriesJson: enrichment.injuries,
+                refereeJson: enrichment.referee,
+                goalsJson: enrichment.goals,
+                cardsJson: enrichment.cards,
+                source: 'agentic-enrichment-v0',
+              },
+              update: {
+                weatherJson: enrichment.weather,
+                injuriesJson: enrichment.injuries,
+                refereeJson: enrichment.referee,
+                goalsJson: enrichment.goals,
+                cardsJson: enrichment.cards,
+                source: 'agentic-enrichment-v0',
+                capturedAt: new Date(),
+              },
+            });
+            enrichmentsWritten += 1;
+          }
 
           await prisma.predictionSnapshot.create({
             data: {
@@ -229,6 +262,7 @@ export async function GET(request: Request) {
     await Promise.all([
       heartbeat('fixture-sync', 'live', `${fixturesWritten} fixtures upserted`, started),
       heartbeat('team-stats', 'live', `${statsWritten} team-stat rows captured`, started),
+      heartbeat('match-enrichment', 'live', `${enrichmentsWritten} fixture enrichments captured`, started),
       heartbeat('prediction-engine', 'live', `${predictionsWritten} prediction snapshots generated`, started),
       heartbeat('settlement', 'live', `${resultsWritten} results settled`, started),
       heartbeat('backtest', 'live', `${evaluatedNow} predictions evaluated; ${backtest.run.sampleSize} in 90d window`, started),
@@ -237,7 +271,7 @@ export async function GET(request: Request) {
         .map((agent) => heartbeat(agent.id, agent.status, `${agent.name} daily refresh tick`, started)),
     ]);
 
-    return { fixturesWritten, predictionsWritten, resultsWritten, statsWritten, evaluatedNow, competitionErrors };
+    return { fixturesWritten, predictionsWritten, resultsWritten, statsWritten, enrichmentsWritten, evaluatedNow, competitionErrors };
   }, { message: (r) => `${r.fixturesWritten} fixtures, ${r.predictionsWritten} predictions, ${r.evaluatedNow} evaluated` });
 
   if (!outcome.ok) {
