@@ -34,6 +34,14 @@ function teamData(team: FootballDataTeam, competitionId: string) {
   };
 }
 
+function hasUsableTeam(team: FootballDataTeam) {
+  return Number.isFinite(team.id) && Boolean(team.name);
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'Unknown refresh error';
+}
+
 export async function GET(request: Request) {
   const unauthorized = requireCronAuth(request);
   if (unauthorized) return unauthorized;
@@ -46,144 +54,173 @@ export async function GET(request: Request) {
     let resultsWritten = 0;
     let statsWritten = 0;
     let evaluatedNow = 0;
+    const competitionErrors: string[] = [];
 
     for (const code of configuredCompetitions()) {
-      const bundle = await runWorkerWithFailover(
-        'fixtures',
-        () => primaryFixturesProvider.fetchCompetitionBundle(code),
-        () => secondaryFixturesProvider.fetchCompetitionBundle(code),
-      );
-      const competition = bundle.competition;
-      const standings = statsByTeam(bundle.standings);
+      try {
+        const bundle = await runWorkerWithFailover(
+          'fixtures',
+          () => primaryFixturesProvider.fetchCompetitionBundle(code),
+          () => secondaryFixturesProvider.fetchCompetitionBundle(code),
+        );
+        const competition = bundle.competition;
+        const standings = statsByTeam(bundle.standings);
+        let skippedMatches = 0;
+        let skippedStandings = 0;
 
-      await prisma.competition.upsert({
-        where: { id: competition.code ?? code },
-        create: {
-          id: competition.code ?? code,
-          externalId: competition.id,
-          name: competition.name,
-          country: competition.area?.name ?? 'Unknown',
-        },
-        update: {
-          externalId: competition.id,
-          name: competition.name,
-          country: competition.area?.name ?? 'Unknown',
-        },
-      });
-
-      for (const row of bundle.standings) {
-        const data = teamData(row.team, competition.code ?? code);
-        const team = await prisma.team.upsert({
-          where: { externalId: row.team.id },
-          create: data,
-          update: data,
-        });
-
-        await prisma.teamStat.create({
-          data: {
-            teamId: team.id,
-            competitionId: competition.code ?? code,
-            form: row.form ?? null,
-            position: row.position,
-            played: row.playedGames,
-            won: row.won,
-            drawn: row.draw,
-            lost: row.lost,
-            goalsFor: row.goalsFor,
-            goalsAgainst: row.goalsAgainst,
-            goalDifference: row.goalDifference,
-            points: row.points,
-          },
-        });
-        statsWritten += 1;
-      }
-
-      for (const match of bundle.matches) {
-        const [homeTeam, awayTeam] = await Promise.all([
-          prisma.team.upsert({
-            where: { externalId: match.homeTeam.id },
-            create: teamData(match.homeTeam, competition.code ?? code),
-            update: teamData(match.homeTeam, competition.code ?? code),
-          }),
-          prisma.team.upsert({
-            where: { externalId: match.awayTeam.id },
-            create: teamData(match.awayTeam, competition.code ?? code),
-            update: teamData(match.awayTeam, competition.code ?? code),
-          }),
-        ]);
-
-        const fixture = await prisma.fixture.upsert({
-          where: { externalId: match.id },
+        await prisma.competition.upsert({
+          where: { id: competition.code ?? code },
           create: {
-            externalId: match.id,
-            competitionId: competition.code ?? code,
-            homeTeamId: homeTeam.id,
-            awayTeamId: awayTeam.id,
-            kickoff: new Date(match.utcDate),
-            status: match.status,
-            matchday: match.matchday ?? null,
+            id: competition.code ?? code,
+            externalId: competition.id,
+            name: competition.name,
+            country: competition.area?.name ?? 'Unknown',
           },
           update: {
-            competitionId: competition.code ?? code,
-            homeTeamId: homeTeam.id,
-            awayTeamId: awayTeam.id,
-            kickoff: new Date(match.utcDate),
-            status: match.status,
-            matchday: match.matchday ?? null,
+            externalId: competition.id,
+            name: competition.name,
+            country: competition.area?.name ?? 'Unknown',
           },
         });
-        fixturesWritten += 1;
 
-        const prediction = generatePrediction({
-          match,
-          homeStats: standings.get(match.homeTeam.id),
-          awayStats: standings.get(match.awayTeam.id),
-        });
+        for (const row of bundle.standings) {
+          if (!hasUsableTeam(row.team)) {
+            skippedStandings += 1;
+            continue;
+          }
 
-        await prisma.predictionSnapshot.create({
-          data: {
-            fixtureId: fixture.id,
-            market: prediction.market,
-            probability: prediction.probability,
-            edge: prediction.edge,
-            elo: prediction.elo,
-            poisson: prediction.poisson,
-            xg: prediction.xg,
-            ensemble: prediction.ensemble,
-            confidence: prediction.confidence,
-            topPick: prediction.topPick,
-            valueBet: prediction.valueBet,
-            narrative: prediction.narrative,
-          },
-        });
-        predictionsWritten += 1;
-
-        // Never persist synthetic model prices — only real bookmaker odds.
-        const realOdds = prediction.odds.filter(
-          (odd) => odd.bookCode !== 'MODEL_FAIR_PRICE' && odd.bookCode !== 'MODEL',
-        );
-        await prisma.odds.deleteMany({ where: { fixtureId: fixture.id } });
-        if (realOdds.length > 0) {
-          await prisma.odds.createMany({ data: realOdds.map((odd) => ({ ...odd, fixtureId: fixture.id })) });
-        }
-
-        const homeScore = match.score?.fullTime?.home;
-        const awayScore = match.score?.fullTime?.away;
-        if (match.status === 'FINISHED' && homeScore != null && awayScore != null) {
-          await prisma.fixtureResult.upsert({
-            where: { fixtureId: fixture.id },
-            create: {
-              fixtureId: fixture.id,
-              homeScore,
-              awayScore,
-              finishedAt: new Date(),
-              raw: match as object,
-            },
-            update: { homeScore, awayScore, raw: match as object },
+          const data = teamData(row.team, competition.code ?? code);
+          const team = await prisma.team.upsert({
+            where: { externalId: row.team.id },
+            create: data,
+            update: data,
           });
-          resultsWritten += 1;
+
+          await prisma.teamStat.create({
+            data: {
+              teamId: team.id,
+              competitionId: competition.code ?? code,
+              form: row.form ?? null,
+              position: row.position,
+              played: row.playedGames,
+              won: row.won,
+              drawn: row.draw,
+              lost: row.lost,
+              goalsFor: row.goalsFor,
+              goalsAgainst: row.goalsAgainst,
+              goalDifference: row.goalDifference,
+              points: row.points,
+            },
+          });
+          statsWritten += 1;
         }
+
+        for (const match of bundle.matches) {
+          if (!hasUsableTeam(match.homeTeam) || !hasUsableTeam(match.awayTeam)) {
+            skippedMatches += 1;
+            continue;
+          }
+
+          const [homeTeam, awayTeam] = await Promise.all([
+            prisma.team.upsert({
+              where: { externalId: match.homeTeam.id },
+              create: teamData(match.homeTeam, competition.code ?? code),
+              update: teamData(match.homeTeam, competition.code ?? code),
+            }),
+            prisma.team.upsert({
+              where: { externalId: match.awayTeam.id },
+              create: teamData(match.awayTeam, competition.code ?? code),
+              update: teamData(match.awayTeam, competition.code ?? code),
+            }),
+          ]);
+
+          const fixture = await prisma.fixture.upsert({
+            where: { externalId: match.id },
+            create: {
+              externalId: match.id,
+              competitionId: competition.code ?? code,
+              homeTeamId: homeTeam.id,
+              awayTeamId: awayTeam.id,
+              kickoff: new Date(match.utcDate),
+              status: match.status,
+              matchday: match.matchday ?? null,
+            },
+            update: {
+              competitionId: competition.code ?? code,
+              homeTeamId: homeTeam.id,
+              awayTeamId: awayTeam.id,
+              kickoff: new Date(match.utcDate),
+              status: match.status,
+              matchday: match.matchday ?? null,
+            },
+          });
+          fixturesWritten += 1;
+
+          const prediction = generatePrediction({
+            match,
+            homeStats: standings.get(match.homeTeam.id),
+            awayStats: standings.get(match.awayTeam.id),
+          });
+
+          await prisma.predictionSnapshot.create({
+            data: {
+              fixtureId: fixture.id,
+              market: prediction.market,
+              probability: prediction.probability,
+              edge: prediction.edge,
+              elo: prediction.elo,
+              poisson: prediction.poisson,
+              xg: prediction.xg,
+              ensemble: prediction.ensemble,
+              confidence: prediction.confidence,
+              topPick: prediction.topPick,
+              valueBet: prediction.valueBet,
+              narrative: prediction.narrative,
+            },
+          });
+          predictionsWritten += 1;
+
+          // Never persist synthetic model prices — only real bookmaker odds.
+          const realOdds = prediction.odds.filter(
+            (odd) => odd.bookCode !== 'MODEL_FAIR_PRICE' && odd.bookCode !== 'MODEL',
+          );
+          await prisma.odds.deleteMany({ where: { fixtureId: fixture.id } });
+          if (realOdds.length > 0) {
+            await prisma.odds.createMany({ data: realOdds.map((odd) => ({ ...odd, fixtureId: fixture.id })) });
+          }
+
+          const homeScore = match.score?.fullTime?.home;
+          const awayScore = match.score?.fullTime?.away;
+          if (match.status === 'FINISHED' && homeScore != null && awayScore != null) {
+            await prisma.fixtureResult.upsert({
+              where: { fixtureId: fixture.id },
+              create: {
+                fixtureId: fixture.id,
+                homeScore,
+                awayScore,
+                finishedAt: new Date(),
+                raw: match as object,
+              },
+              update: { homeScore, awayScore, raw: match as object },
+            });
+            resultsWritten += 1;
+          }
+        }
+
+        if (skippedMatches > 0 || skippedStandings > 0) {
+          competitionErrors.push(
+            `${code}: skipped ${skippedMatches} placeholder matches and ${skippedStandings} placeholder standings rows`,
+          );
+        }
+      } catch (error) {
+        const message = `${code}: ${errorMessage(error)}`;
+        competitionErrors.push(message);
+        await heartbeat('fixture-sync', 'error', message, started).catch(() => undefined);
       }
+    }
+
+    if (fixturesWritten === 0 && competitionErrors.length > 0) {
+      throw new Error(`No competitions refreshed. ${competitionErrors.join(' | ')}`);
     }
 
     const backtest = await runBacktest(prisma, { windowDays: 90, stake: 10 });
@@ -200,7 +237,7 @@ export async function GET(request: Request) {
         .map((agent) => heartbeat(agent.id, agent.status, `${agent.name} daily refresh tick`, started)),
     ]);
 
-    return { fixturesWritten, predictionsWritten, resultsWritten, statsWritten, evaluatedNow };
+    return { fixturesWritten, predictionsWritten, resultsWritten, statsWritten, evaluatedNow, competitionErrors };
   }, { message: (r) => `${r.fixturesWritten} fixtures, ${r.predictionsWritten} predictions, ${r.evaluatedNow} evaluated` });
 
   if (!outcome.ok) {
