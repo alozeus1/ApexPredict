@@ -28,6 +28,7 @@ interface XgSignal {
 
 type PredictionGraphValue = {
   input: PredictionInput;
+  inputEnrichment?: PredictionEnrichment;
   context?: PredictionContext;
   enrichment?: PredictionEnrichment;
   marketSignal?: MarketSignal;
@@ -39,6 +40,7 @@ type PredictionGraphValue = {
 
 const PredictionGraphState = Annotation.Root({
   input: Annotation<PredictionInput>(),
+  inputEnrichment: Annotation<PredictionEnrichment | undefined>(),
   context: Annotation<PredictionContext | undefined>(),
   enrichment: Annotation<PredictionEnrichment | undefined>(),
   marketSignal: Annotation<MarketSignal | undefined>(),
@@ -103,7 +105,7 @@ function bestProbabilityMarket(probabilities: Record<PredictionMarket, number>):
 const graph = new StateGraph(PredictionGraphState)
   .addNode('context-agent', async (state: PredictionGraphValue) => ({
     context: buildPredictionContext(state.input),
-    enrichment: buildBaselineEnrichment(state.input.match, state.input.homeStats, state.input.awayStats),
+    enrichment: state.inputEnrichment ?? buildBaselineEnrichment(state.input.match, state.input.homeStats, state.input.awayStats),
   }))
   .addNode('market-agent', async (state: PredictionGraphValue) => {
     if (!state.context) throw new Error('Missing prediction context');
@@ -181,8 +183,8 @@ const graph = new StateGraph(PredictionGraphState)
   .addEdge('ensemble-agent', END)
   .compile();
 
-export async function runPredictionGraph(input: PredictionInput) {
-  const state = await graph.invoke({ input });
+export async function runPredictionGraph(input: PredictionInput, enrichment?: PredictionEnrichment) {
+  const state = await graph.invoke({ input, ...(enrichment ? { inputEnrichment: enrichment } : {}) });
   if (!state.prediction) throw new Error('Prediction graph completed without a prediction');
   return {
     prediction: state.prediction,

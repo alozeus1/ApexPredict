@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@apexpredix/db';
+import { prisma, type Prisma } from '@apexpredix/db';
 import agents from '@/data/agents.json';
 import type { AgentJSON } from '@/data/agents.schema';
 import { requireCronAuth } from '@/lib/cron-auth';
 import { configuredCompetitions, type FootballDataStandingRow, type FootballDataTeam } from '@/lib/live-data/football-data';
 import { generatePrediction } from '@/lib/prediction-engine/model';
+import { buildFixtureEnrichment } from '@/lib/prediction-engine/enrichment';
 import { runPredictionGraph } from '@/lib/prediction-engine/orchestrator';
+import { persistMarketOdds, queueValueBetAlert } from '@/lib/prediction-engine/premium-signals';
 import { runBacktest } from '@/lib/prediction-engine/backtest';
 import { FootballDataProvider, SportmonksProvider } from '@/lib/providers/fixtures/football-data-provider';
+import { TheOddsApiProvider } from '@/lib/providers/odds/types';
 import { runWorker, runWorkerWithFailover } from '@/lib/workers/runWorker';
 import { writeHeartbeat } from '@/lib/workers/heartbeat';
 
@@ -15,10 +18,15 @@ export const runtime = 'nodejs';
 export const maxDuration = 300;
 const primaryFixturesProvider = new FootballDataProvider();
 const secondaryFixturesProvider = new SportmonksProvider();
+const oddsProvider = new TheOddsApiProvider();
 
 // Per-agent status write, routed through the shared worker module.
 const heartbeat = (agentId: string, status: string, message: string, started: number) =>
   writeHeartbeat(agentId, status, message, Date.now() - started);
+
+function jsonValue(value: unknown): Prisma.InputJsonValue {
+  return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+}
 
 function statsByTeam(rows: FootballDataStandingRow[]) {
   return new Map(rows.map((row) => [row.team.id, row]));
@@ -55,6 +63,9 @@ export async function GET(request: Request) {
     let resultsWritten = 0;
     let statsWritten = 0;
     let enrichmentsWritten = 0;
+    let oddsWritten = 0;
+    let movementsWritten = 0;
+    let alertsQueued = 0;
     let evaluatedNow = 0;
     const competitionErrors: string[] = [];
 
@@ -67,6 +78,10 @@ export async function GET(request: Request) {
         );
         const competition = bundle.competition;
         const standings = statsByTeam(bundle.standings);
+        const oddsByMatch = await oddsProvider.fetchCompetitionOdds(code, bundle.matches).catch((error) => {
+          competitionErrors.push(`${code}: odds provider skipped: ${errorMessage(error)}`);
+          return new Map<number, Array<{ bookCode: string; market: string; price: number; source?: string }>>();
+        });
         let skippedMatches = 0;
         let skippedStandings = 0;
 
@@ -158,36 +173,43 @@ export async function GET(request: Request) {
           });
           fixturesWritten += 1;
 
+          const providerOdds = oddsByMatch.get(match.id) ?? [];
+          const homeStats = standings.get(match.homeTeam.id);
+          const awayStats = standings.get(match.awayTeam.id);
+          const enrichment = await buildFixtureEnrichment(match, homeStats, awayStats);
           const predictionInput = {
             match,
-            homeStats: standings.get(match.homeTeam.id),
-            awayStats: standings.get(match.awayTeam.id),
+            homeStats,
+            awayStats,
+            marketOdds: providerOdds,
           };
-          const graphResult = await runPredictionGraph(predictionInput).catch((error) => {
+          const graphResult = await runPredictionGraph(predictionInput, enrichment).catch((error) => {
             competitionErrors.push(`${code}: prediction graph fallback for match ${match.id}: ${errorMessage(error)}`);
             return undefined;
           });
           const prediction = graphResult?.prediction ?? generatePrediction(predictionInput);
 
-          if (graphResult?.enrichment) {
-            const enrichment = graphResult.enrichment;
+          if (graphResult?.enrichment ?? enrichment) {
+            const capturedEnrichment = graphResult?.enrichment ?? enrichment;
             await prisma.fixtureEnrichment.upsert({
               where: { fixtureId: fixture.id },
               create: {
                 fixtureId: fixture.id,
-                weatherJson: enrichment.weather,
-                injuriesJson: enrichment.injuries,
-                refereeJson: enrichment.referee,
-                goalsJson: enrichment.goals,
-                cardsJson: enrichment.cards,
+                weatherJson: jsonValue(capturedEnrichment.weather),
+                injuriesJson: jsonValue(capturedEnrichment.injuries),
+                lineupsJson: jsonValue(capturedEnrichment.lineups),
+                refereeJson: jsonValue(capturedEnrichment.referee),
+                goalsJson: jsonValue(capturedEnrichment.goals),
+                cardsJson: jsonValue(capturedEnrichment.cards),
                 source: 'agentic-enrichment-v0',
               },
               update: {
-                weatherJson: enrichment.weather,
-                injuriesJson: enrichment.injuries,
-                refereeJson: enrichment.referee,
-                goalsJson: enrichment.goals,
-                cardsJson: enrichment.cards,
+                weatherJson: jsonValue(capturedEnrichment.weather),
+                injuriesJson: jsonValue(capturedEnrichment.injuries),
+                lineupsJson: jsonValue(capturedEnrichment.lineups),
+                refereeJson: jsonValue(capturedEnrichment.referee),
+                goalsJson: jsonValue(capturedEnrichment.goals),
+                cardsJson: jsonValue(capturedEnrichment.cards),
                 source: 'agentic-enrichment-v0',
                 capturedAt: new Date(),
               },
@@ -213,13 +235,15 @@ export async function GET(request: Request) {
           });
           predictionsWritten += 1;
 
-          // Never persist synthetic model prices — only real bookmaker odds.
-          const realOdds = prediction.odds.filter(
-            (odd) => odd.bookCode !== 'MODEL_FAIR_PRICE' && odd.bookCode !== 'MODEL',
-          );
-          await prisma.odds.deleteMany({ where: { fixtureId: fixture.id } });
-          if (realOdds.length > 0) {
-            await prisma.odds.createMany({ data: realOdds.map((odd) => ({ ...odd, fixtureId: fixture.id })) });
+          if (providerOdds.length > 0) {
+            const oddsResult = await persistMarketOdds(prisma, fixture.id, providerOdds);
+            oddsWritten += oddsResult.oddsWritten;
+            movementsWritten += oddsResult.movementsWritten;
+            alertsQueued += oddsResult.movementAlertsQueued;
+          }
+
+          if (await queueValueBetAlert(prisma, fixture.id, prediction)) {
+            alertsQueued += 1;
           }
 
           const homeScore = match.score?.fullTime?.home;
@@ -261,17 +285,31 @@ export async function GET(request: Request) {
 
     await Promise.all([
       heartbeat('fixture-sync', 'live', `${fixturesWritten} fixtures upserted`, started),
+      heartbeat('odds-ingest', 'live', `${oddsWritten} odds prices captured`, started),
       heartbeat('team-stats', 'live', `${statsWritten} team-stat rows captured`, started),
       heartbeat('match-enrichment', 'live', `${enrichmentsWritten} fixture enrichments captured`, started),
+      heartbeat('line-movement', 'live', `${movementsWritten} odds movements detected`, started),
+      heartbeat('value-hunter', 'live', `${alertsQueued} premium alerts queued`, started),
       heartbeat('prediction-engine', 'live', `${predictionsWritten} prediction snapshots generated`, started),
       heartbeat('settlement', 'live', `${resultsWritten} results settled`, started),
       heartbeat('backtest', 'live', `${evaluatedNow} predictions evaluated; ${backtest.run.sampleSize} in 90d window`, started),
       ...(agents as AgentJSON[])
-        .filter((agent) => !['fixture-sync', 'team-stats', 'settlement', 'backtest'].includes(agent.id))
+        .filter((agent) => !['fixture-sync', 'odds-ingest', 'team-stats', 'match-enrichment', 'line-movement', 'value-hunter', 'settlement', 'backtest'].includes(agent.id))
         .map((agent) => heartbeat(agent.id, agent.status, `${agent.name} daily refresh tick`, started)),
     ]);
 
-    return { fixturesWritten, predictionsWritten, resultsWritten, statsWritten, enrichmentsWritten, evaluatedNow, competitionErrors };
+    return {
+      fixturesWritten,
+      predictionsWritten,
+      resultsWritten,
+      statsWritten,
+      enrichmentsWritten,
+      oddsWritten,
+      movementsWritten,
+      alertsQueued,
+      evaluatedNow,
+      competitionErrors,
+    };
   }, { message: (r) => `${r.fixturesWritten} fixtures, ${r.predictionsWritten} predictions, ${r.evaluatedNow} evaluated` });
 
   if (!outcome.ok) {

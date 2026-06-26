@@ -1,17 +1,12 @@
 import type { FootballDataMatch, FootballDataStandingRow } from '@/lib/live-data/football-data';
+import { fetchOpenMeteoWeather, type WeatherContext } from '@/lib/providers/enrichment/weather';
 
 export interface PredictionEnrichment {
-  weather: {
-    available: boolean;
-    provider?: string;
-    temperatureC?: number;
-    windKph?: number;
-    precipitationMm?: number;
-    capturedAt?: string;
-  };
+  weather: WeatherContext;
   injuries: {
     available: boolean;
     provider?: string;
+    reason?: string;
     homeUnavailable?: number;
     awayUnavailable?: number;
     capturedAt?: string;
@@ -19,8 +14,17 @@ export interface PredictionEnrichment {
   referee: {
     available: boolean;
     provider?: string;
+    reason?: string;
     name?: string;
     cardsPerMatch?: number;
+    capturedAt?: string;
+  };
+  lineups: {
+    available: boolean;
+    provider?: string;
+    reason?: string;
+    homeConfirmed?: boolean;
+    awayConfirmed?: boolean;
     capturedAt?: string;
   };
   goals: {
@@ -54,9 +58,10 @@ export function buildBaselineEnrichment(
   const awayGoalsAgainst = perGame(awayStats?.goalsAgainst, awayStats?.playedGames, 1.35);
 
   return {
-    weather: { available: false },
-    injuries: { available: false },
-    referee: { available: false },
+    weather: { available: false, provider: 'open-meteo', reason: 'venue-coordinates-not-configured' },
+    injuries: { available: false, reason: 'injury-provider-not-configured' },
+    referee: { available: false, reason: 'referee-provider-not-configured' },
+    lineups: { available: false, reason: 'lineup-provider-not-configured' },
     goals: {
       expectedHomeGoals: Number(clamp((homeGoalsFor * 0.58 + awayGoalsAgainst * 0.42) * 1.05, 0.35, 3.4).toFixed(3)),
       expectedAwayGoals: Number(clamp((awayGoalsFor * 0.58 + homeGoalsAgainst * 0.42) * 0.96, 0.25, 3.1).toFixed(3)),
@@ -69,11 +74,27 @@ export function buildBaselineEnrichment(
   };
 }
 
+export async function buildFixtureEnrichment(
+  match: FootballDataMatch,
+  homeStats: FootballDataStandingRow | undefined,
+  awayStats: FootballDataStandingRow | undefined,
+): Promise<PredictionEnrichment> {
+  const baseline = buildBaselineEnrichment(match, homeStats, awayStats);
+  const weather = await fetchOpenMeteoWeather(match).catch(() => ({
+    available: false,
+    provider: 'open-meteo',
+    reason: 'open-meteo-fetch-failed',
+  }));
+
+  return { ...baseline, weather };
+}
+
 export function enrichmentNarrative(enrichment: PredictionEnrichment) {
   const missing: string[] = [];
   if (!enrichment.weather.available) missing.push('weather');
   if (!enrichment.injuries.available) missing.push('injuries');
   if (!enrichment.referee.available) missing.push('referee');
+  if (!enrichment.lineups.available) missing.push('lineups');
 
   const goalNote = `Expected goals baseline ${enrichment.goals.expectedHomeGoals.toFixed(2)}-${enrichment.goals.expectedAwayGoals.toFixed(2)}.`;
   if (missing.length === 0) return goalNote;

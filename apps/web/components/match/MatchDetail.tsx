@@ -4,6 +4,7 @@ import { ConfidenceBar } from './ConfidenceBar';
 import { ValueBetChip } from './ValueBetChip';
 import { OddsCompare } from './OddsCompare';
 import { ModelBreakdown } from './ModelBreakdown';
+import { PremiumContext } from './PremiumContext';
 
 interface Props { match: Match; locale: string; region: string; }
 
@@ -30,6 +31,8 @@ export function MatchDetail({ match, locale, region }: Props) {
         <h2 id="odds" className="mb-4 text-sm uppercase tracking-wide text-mute-1">Odds comparison · region {region}</h2>
         <OddsCompare odds={match.odds} region={region} />
       </section>
+
+      {match.premiumContext && <PremiumContext context={match.premiumContext} locale={locale} />}
 
       <section aria-labelledby="breakdown">
         <h2 id="breakdown" className="mb-4 text-sm uppercase tracking-wide text-mute-1">Model breakdown</h2>
