@@ -1,4 +1,6 @@
-const BASE_URL = 'https://api.football-data.org/v4';
+const BASE_URL = process.env.FOOTBALL_DATA_BASE_URL ?? 'https://api.football-data.org/v4';
+const DEFAULT_REQUEST_INTERVAL_MS = 6500;
+let nextRequestAt = 0;
 
 export interface FootballDataCompetition {
   id: number;
@@ -54,6 +56,8 @@ async function requestJson<T>(path: string): Promise<T> {
   const apiToken = token();
   if (!apiToken) throw new Error('FOOTBALL_DATA_API_TOKEN is not configured');
 
+  await throttleFootballData();
+
   const response = await fetch(`${BASE_URL}${path}`, {
     headers: { 'X-Auth-Token': apiToken },
     cache: 'no-store',
@@ -72,7 +76,7 @@ function isoDate(date: Date) {
 }
 
 export function configuredCompetitions() {
-  return (process.env.FOOTBALL_DATA_COMPETITIONS ?? 'PL,PD,BL1,SA,FL1,CL')
+  return (process.env.FOOTBALL_DATA_COMPETITIONS ?? 'WC,BSA,PL,PD,BL1,SA,FL1,CL')
     .split(',')
     .map((id) => id.trim())
     .filter(Boolean);
@@ -105,6 +109,25 @@ export async function fetchCompetitionBundle(code: string, daysAhead = 14): Prom
 }
 
 function competitionExternalId(code: string) {
-  const ids: Record<string, number> = { PL: 2021, PD: 2014, BL1: 2002, SA: 2019, FL1: 2015, CL: 2001 };
+  const ids: Record<string, number> = {
+    PL: 2021,
+    PD: 2014,
+    BL1: 2002,
+    SA: 2019,
+    FL1: 2015,
+    CL: 2001,
+    BSA: 2013,
+    WC: 2000,
+  };
   return ids[code] ?? Math.abs([...code].reduce((sum, char) => sum + char.charCodeAt(0), 0));
+}
+
+async function throttleFootballData() {
+  const interval = Number(process.env.FOOTBALL_DATA_REQUEST_INTERVAL_MS ?? DEFAULT_REQUEST_INTERVAL_MS);
+  if (!Number.isFinite(interval) || interval <= 0) return;
+
+  const now = Date.now();
+  const waitMs = Math.max(0, nextRequestAt - now);
+  nextRequestAt = Math.max(now, nextRequestAt) + interval;
+  if (waitMs > 0) await new Promise((resolve) => setTimeout(resolve, waitMs));
 }

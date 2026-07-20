@@ -124,13 +124,33 @@ model Fixture {
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
   odds        Odds[]
+  oddsMovements OddsMovement[]
   result      FixtureResult?
+  enrichment  FixtureEnrichment?
   predictions PredictionSnapshot[]
   evaluations PredictionEvaluation[]
+  alerts      PredictionAlert[]
 
   @@index([kickoff])
   @@index([status])
   @@index([competitionId, kickoff])
+}
+
+model FixtureEnrichment {
+  id           String   @id @default(cuid())
+  fixtureId    String   @unique
+  fixture      Fixture  @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  weatherJson  Json?
+  injuriesJson Json?
+  lineupsJson  Json?
+  refereeJson  Json?
+  goalsJson    Json?
+  cardsJson    Json?
+  source       String   @default("agentic-enrichment-v0")
+  capturedAt   DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([capturedAt])
 }
 
 model Odds {
@@ -146,6 +166,23 @@ model Odds {
   @@index([capturedAt])
 }
 
+model OddsMovement {
+  id            String   @id @default(cuid())
+  fixtureId     String
+  fixture       Fixture  @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  bookCode      String
+  market        String
+  previousPrice Float
+  currentPrice  Float
+  delta         Float
+  movementPct   Float
+  source        String
+  capturedAt    DateTime @default(now())
+
+  @@index([fixtureId, capturedAt])
+  @@index([bookCode, market, capturedAt])
+}
+
 model FixtureResult {
   id         String   @id @default(cuid())
   fixtureId  String   @unique
@@ -154,6 +191,25 @@ model FixtureResult {
   awayScore  Int
   finishedAt DateTime
   raw        Json
+}
+
+model PredictionAlert {
+  id        String   @id @default(cuid())
+  fixtureId String?
+  fixture   Fixture? @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  kind      String
+  severity  String
+  title     String
+  message   String
+  dedupeKey String   @unique
+  channels  Json?
+  status    String   @default("queued")
+  createdAt DateTime @default(now())
+  sentAt    DateTime?
+
+  @@index([kind, createdAt])
+  @@index([status, createdAt])
+  @@index([fixtureId, createdAt])
 }
 
 model PredictionSnapshot {

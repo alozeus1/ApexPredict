@@ -23,6 +23,8 @@ const FALLBACK: BacktestMetrics = {
     { label: 'Net Profit', value: '—' },
     { label: 'ROI', value: '—' },
     { label: 'Hit Rate', value: '—' },
+    { label: 'Brier Score', value: '—' },
+    { label: 'Log Loss', value: '—' },
     { label: 'Calibration Error', value: '—' },
   ],
 };
@@ -52,6 +54,8 @@ export async function getBacktestMetrics(): Promise<BacktestMetrics> {
         { label: 'Net Profit', value: money(latest.netProfit) },
         { label: 'ROI', value: percent(latest.roi) },
         { label: 'Hit Rate', value: percent(latest.hitRate) },
+        { label: 'Brier Score', value: latest.brierScore.toFixed(3) },
+        { label: 'Log Loss', value: latest.logLoss.toFixed(3) },
         { label: 'Calibration Error', value: percent(latest.calibrationError) },
       ],
     };

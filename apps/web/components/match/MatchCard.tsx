@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import type { Match } from '@apexpredix/types';
+import { safeFormatDate } from '@/lib/format/date';
 import { ConfidenceBar } from './ConfidenceBar';
 import { ValueBetChip } from './ValueBetChip';
 
 interface Props { match: Match; locale: string; }
 
 export function MatchCard({ match, locale }: Props) {
-  const kickoff = new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(match.kickoff));
+  const kickoff = safeFormatDate(match.kickoff, locale, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   return (
     <Link
       href={`/predictions/${match.id}` as Route<string>}

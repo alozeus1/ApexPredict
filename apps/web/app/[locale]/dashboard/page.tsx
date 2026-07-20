@@ -9,6 +9,7 @@ import { ValueBetChip } from '@/components/match/ValueBetChip';
 import { pageMetadata } from '@/lib/seo';
 import fixtures from '@/data/fixtures.json';
 import type { Match } from '@apexpredix/types';
+import { safeFormatDate } from '@/lib/format/date';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -105,13 +106,13 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                     <ConfidenceBar value={m.model.confidence} />
                   </div>
                   <div className="text-xs text-mute-2">
-                    {new Intl.DateTimeFormat(locale, {
+                    {safeFormatDate(m.kickoff, locale, {
                       weekday: 'short',
                       day: 'numeric',
                       month: 'short',
                       hour: '2-digit',
                       minute: '2-digit',
-                    }).format(new Date(m.kickoff))}
+                    })}
                   </div>
                   <div>{m.valueBet ? <ValueBetChip /> : <span className="text-xs text-mute-2">—</span>}</div>
                 </li>

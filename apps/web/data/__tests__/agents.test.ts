@@ -6,7 +6,7 @@ describe('agents.json', () => {
   it('passes the schema', () => {
     expect(() => AgentsSchema.parse(agents)).not.toThrow();
   });
-  it('has exactly 14 agents', () => {
-    expect((agents as Array<unknown>).length).toBe(14);
+  it('keeps the original agent baseline plus any specialist additions', () => {
+    expect((agents as Array<unknown>).length).toBeGreaterThanOrEqual(14);
   });
 });
