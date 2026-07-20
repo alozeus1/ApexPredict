@@ -2,6 +2,7 @@ import { prisma } from '@apexpredix/db';
 import cannedFixtures from '@/data/fixtures.json';
 import type { Match, PerformanceContext } from '@apexpredix/types';
 import { normalizeFixture } from './normalize';
+import { isDemoDataEnabled, reportDataSourceFailure, reportEmptyDataSource } from './demo-mode';
 
 async function latestPerformance(): Promise<PerformanceContext | undefined> {
   const latest = await prisma.predictionBacktestRun.findFirst({ orderBy: { createdAt: 'desc' } });
@@ -17,8 +18,20 @@ async function latestPerformance(): Promise<PerformanceContext | undefined> {
   };
 }
 
+/**
+ * Upcoming fixtures with their latest prediction snapshot.
+ *
+ * Returns an EMPTY ARRAY when live data is unavailable. It must never fall back
+ * to `data/fixtures.json` outside explicitly enabled demo mode — that file holds
+ * invented model scores and value-bet flags. See `lib/data/demo-mode.ts`.
+ */
 export async function getFixtures(): Promise<Match[]> {
-  if (!process.env.DATABASE_URL) return cannedFixtures as Match[];
+  if (isDemoDataEnabled()) return cannedFixtures as Match[];
+
+  if (!process.env.DATABASE_URL) {
+    reportDataSourceFailure('fixtures', new Error('DATABASE_URL is not configured'));
+    return [];
+  }
 
   try {
     const [rows, performance] = await Promise.all([prisma.fixture.findMany({
@@ -36,10 +49,14 @@ export async function getFixtures(): Promise<Match[]> {
       },
     }), latestPerformance()]);
 
-    if (rows.length > 0) return rows.map((row, index) => normalizeFixture(row, index, performance));
-  } catch {
-    return cannedFixtures as Match[];
-  }
+    if (rows.length === 0) {
+      reportEmptyDataSource('fixtures');
+      return [];
+    }
 
-  return cannedFixtures as Match[];
+    return rows.map((row, index) => normalizeFixture(row, index, performance));
+  } catch (error) {
+    reportDataSourceFailure('fixtures', error);
+    return [];
+  }
 }

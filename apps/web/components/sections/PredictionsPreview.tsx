@@ -18,9 +18,20 @@ export async function PredictionsPreview({ locale }: Props) {
             Open Full Predictions →
           </Link>
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {featured.map((m) => <MatchCard key={m.id} match={m} locale={locale} />)}
-        </div>
+        {featured.length === 0 ? (
+          // Live data unavailable. Render an empty state rather than demo
+          // fixtures — see lib/data/demo-mode.ts.
+          <div role="status" className="rounded-lg border border-white/10 bg-white/5 px-6 py-10 text-center">
+            <p className="text-lg font-medium">No predictions available right now</p>
+            <p className="mt-2 text-sm text-mute-1">
+              We publish predictions only when the underlying data is complete and current.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {featured.map((m) => <MatchCard key={m.id} match={m} locale={locale} />)}
+          </div>
+        )}
       </div>
     </section>
   );
