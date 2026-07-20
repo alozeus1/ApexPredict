@@ -1,40 +1,37 @@
 import { Annotation, END, START, StateGraph } from '@langchain/langgraph';
-import { assemblePrediction, buildPredictionContext, clamp, type EnginePrediction, type PredictionContext, type PredictionInput, type PredictionMarket } from './model';
+import {
+  assemblePrediction,
+  DEFAULT_MARKET_TYPE,
+  buildPredictionContext,
+  clamp,
+  hasDraw,
+  selectPick,
+  type EnginePrediction,
+  type MarketDistribution,
+  type PredictionContext,
+  type OutcomeMarketType,
+  type PredictionInput,
+  type PredictionMarket,
+} from './model';
+import {
+  blendSignals,
+  eloDistribution,
+  poissonDistribution,
+  signalAgreement,
+  type AgentSignal,
+} from './signals';
 import { buildBaselineEnrichment, enrichmentNarrative, type PredictionEnrichment } from './enrichment';
-
-interface MarketSignal {
-  market: PredictionMarket;
-  probability: number;
-  edge: number;
-  hasRealOdds: boolean;
-}
-
-interface EloSignal {
-  market: PredictionMarket;
-  score: number;
-}
-
-interface PoissonSignal {
-  market: PredictionMarket;
-  score: number;
-  homeGoals: number;
-  awayGoals: number;
-}
-
-interface XgSignal {
-  market: PredictionMarket;
-  score: number;
-}
 
 type PredictionGraphValue = {
   input: PredictionInput;
   inputEnrichment?: PredictionEnrichment;
   context?: PredictionContext;
   enrichment?: PredictionEnrichment;
-  marketSignal?: MarketSignal;
-  eloSignal?: EloSignal;
-  poissonSignal?: PoissonSignal;
-  xgSignal?: XgSignal;
+  eloSignal?: AgentSignal;
+  poissonSignal?: AgentSignal;
+  xgSignal?: AgentSignal;
+  ensembleDistribution?: MarketDistribution;
+  agreement?: number;
   prediction?: EnginePrediction;
 };
 
@@ -43,140 +40,128 @@ const PredictionGraphState = Annotation.Root({
   inputEnrichment: Annotation<PredictionEnrichment | undefined>(),
   context: Annotation<PredictionContext | undefined>(),
   enrichment: Annotation<PredictionEnrichment | undefined>(),
-  marketSignal: Annotation<MarketSignal | undefined>(),
-  eloSignal: Annotation<EloSignal | undefined>(),
-  poissonSignal: Annotation<PoissonSignal | undefined>(),
-  xgSignal: Annotation<XgSignal | undefined>(),
+  eloSignal: Annotation<AgentSignal | undefined>(),
+  poissonSignal: Annotation<AgentSignal | undefined>(),
+  xgSignal: Annotation<AgentSignal | undefined>(),
+  ensembleDistribution: Annotation<MarketDistribution | undefined>(),
+  agreement: Annotation<number | undefined>(),
   prediction: Annotation<EnginePrediction | undefined>(),
 });
-
-function strongestMarket(context: PredictionContext): MarketSignal {
-  const first = context.markets[0];
-  if (!first) throw new Error('Prediction graph produced no candidate markets');
-
-  const pick = context.markets.reduce((best, candidate) => {
-    if (candidate.edge > best.edge) return candidate;
-    if (candidate.edge === best.edge && candidate.probability > best.probability) return candidate;
-    return best;
-  }, first);
-
-  return {
-    market: pick.market,
-    probability: pick.probability,
-    edge: pick.edge,
-    hasRealOdds: !pick.synthetic,
-  };
-}
-
-function poissonProbability(lambda: number, goals: number) {
-  let factorial = 1;
-  for (let i = 2; i <= goals; i += 1) factorial *= i;
-  return (Math.E ** -lambda * lambda ** goals) / factorial;
-}
-
-function poissonMarkets(homeGoals: number, awayGoals: number) {
-  let home = 0;
-  let draw = 0;
-  let away = 0;
-
-  for (let h = 0; h <= 7; h += 1) {
-    for (let a = 0; a <= 7; a += 1) {
-      const probability = poissonProbability(homeGoals, h) * poissonProbability(awayGoals, a);
-      if (h > a) home += probability;
-      else if (h === a) draw += probability;
-      else away += probability;
-    }
-  }
-
-  const total = home + draw + away;
-  return {
-    '1': home / total,
-    X: draw / total,
-    '2': away / total,
-  };
-}
-
-function bestProbabilityMarket(probabilities: Record<PredictionMarket, number>): PredictionMarket {
-  return (['1', 'X', '2'] as const).reduce((best, market) =>
-    probabilities[market] > probabilities[best] ? market : best,
-  );
-}
 
 const graph = new StateGraph(PredictionGraphState)
   .addNode('context-agent', async (state: PredictionGraphValue) => ({
     context: buildPredictionContext(state.input),
-    enrichment: state.inputEnrichment ?? buildBaselineEnrichment(state.input.match, state.input.homeStats, state.input.awayStats),
+    enrichment:
+      state.inputEnrichment ??
+      buildBaselineEnrichment(state.input.match, state.input.homeStats, state.input.awayStats),
   }))
-  .addNode('market-agent', async (state: PredictionGraphValue) => {
-    if (!state.context) throw new Error('Missing prediction context');
-    return { marketSignal: strongestMarket(state.context) };
-  })
   .addNode('elo-agent', async (state: PredictionGraphValue) => {
     if (!state.context) throw new Error('Missing prediction context');
-    const marketSignal = strongestMarket(state.context);
-    return {
-      eloSignal: {
-        market: marketSignal.market,
-        score: clamp(marketSignal.probability * 0.98 + state.context.homeStrength * 0.02, 0.08, 0.86),
-      },
+    const signal: AgentSignal = {
+      name: 'elo',
+      available: true,
+      weight: 0.5,
+      distribution: eloDistribution(
+        state.context.homeStrength,
+        state.context.awayStrength,
+        state.context.marketType,
+      ),
     };
+    return { eloSignal: signal };
   })
   .addNode('poisson-agent', async (state: PredictionGraphValue) => {
-    if (!state.enrichment) throw new Error('Missing fixture enrichment');
-    const probabilities = poissonMarkets(state.enrichment.goals.expectedHomeGoals, state.enrichment.goals.expectedAwayGoals);
-    const market = bestProbabilityMarket(probabilities);
-    return {
-      poissonSignal: {
-        market,
-        score: clamp(probabilities[market], 0.08, 0.86),
-        homeGoals: state.enrichment.goals.expectedHomeGoals,
-        awayGoals: state.enrichment.goals.expectedAwayGoals,
-      },
+    if (!state.enrichment || !state.context) throw new Error('Missing fixture enrichment');
+    const marketType = state.context.marketType;
+
+    // The Poisson goal model is football-specific. Applying it to a two-way
+    // sport would be modelling basketball points as if they were goals, so the
+    // signal declares itself unavailable rather than producing a wrong number.
+    // Sport-specific scoring models arrive with each sport (P5).
+    if (!hasDraw(marketType)) {
+      const signal: AgentSignal = {
+        name: 'poisson',
+        available: false,
+        weight: 0,
+        reason: 'poisson-goal-model-is-football-only',
+      };
+      return { poissonSignal: signal };
+    }
+
+    const { expectedHomeGoals, expectedAwayGoals } = state.enrichment.goals;
+    const signal: AgentSignal = {
+      name: 'poisson',
+      available: true,
+      weight: 0.5,
+      distribution: poissonDistribution(expectedHomeGoals, expectedAwayGoals),
     };
+    return { poissonSignal: signal };
   })
   .addNode('xg-agent', async (state: PredictionGraphValue) => {
-    if (!state.context) throw new Error('Missing prediction context');
-    const marketSignal = state.marketSignal ?? strongestMarket(state.context);
-    const goalDelta =
-      ((state.input.homeStats?.goalsFor ?? 0) - (state.input.awayStats?.goalsAgainst ?? 0)) / 500;
-    return {
-      xgSignal: {
-        market: marketSignal.market,
-        score: clamp(marketSignal.probability * 0.82 + goalDelta, 0.08, 0.86),
-      },
+    if (!state.enrichment) throw new Error('Missing fixture enrichment');
+    // The current xG figure is derived from the same season goal rates the
+    // Poisson branch uses, so it carries no independent information. It is
+    // reported for continuity of the `PredictionSnapshot.xg` column but given
+    // zero ensemble weight — double-counting one signal is not an ensemble.
+    //
+    // This agent re-enters the blend when shot-event data lands (P2), at which
+    // point it becomes genuinely independent.
+    const { expectedHomeGoals, expectedAwayGoals } = state.enrichment.goals;
+    const football = hasDraw(state.context?.marketType ?? DEFAULT_MARKET_TYPE);
+    const signal: AgentSignal = {
+      name: 'xg',
+      available: false,
+      weight: 0,
+      ...(football ? { distribution: poissonDistribution(expectedHomeGoals, expectedAwayGoals) } : {}),
+      reason: football ? 'shot-event-feed-not-connected' : 'xg-model-is-football-only',
     };
+    return { xgSignal: signal };
   })
   .addNode('ensemble-agent', async (state: PredictionGraphValue) => {
-    if (!state.context || !state.marketSignal || !state.eloSignal || !state.poissonSignal || !state.xgSignal) {
+    if (!state.context || !state.eloSignal || !state.poissonSignal || !state.xgSignal) {
       throw new Error('Missing prediction agent signal');
     }
 
+    const marketType: OutcomeMarketType = state.context.marketType;
+    const signals = [state.eloSignal, state.poissonSignal, state.xgSignal];
+    const ensembleDistribution = blendSignals(signals, marketType);
+    if (!ensembleDistribution) throw new Error('No usable agent signal produced a distribution');
+
+    const agreement = signalAgreement(signals, marketType);
+
+    // The ensemble now drives the pick. Previously it was computed, written to
+    // the snapshot and displayed, while the selected market came from the raw
+    // single-signal heuristic — the headline number had no effect on the call.
+    const ensembleContext = buildPredictionContext(state.input, ensembleDistribution, marketType);
+    const pick = selectPick(ensembleContext.markets);
+    const market: PredictionMarket = pick.market;
+
     const confidence = clamp(
-      0.5 + Math.abs(state.context.spread) * 0.42 + Math.max(0, state.marketSignal.edge) * 0.35,
-      0.52,
-      0.86,
-    );
-    const ensemble = clamp(
-      state.eloSignal.score * 0.34 + state.poissonSignal.score * 0.33 + state.xgSignal.score * 0.33,
-      0.08,
+      0.5 + Math.abs(ensembleContext.spread) * 0.3 + Math.max(0, pick.edge) * 0.35 - (1 - agreement) * 0.25,
+      0.5,
       0.86,
     );
 
-    const narrativeSuffix = state.enrichment ? enrichmentNarrative(state.enrichment) : undefined;
+    const disagreementNote =
+      agreement < 0.85 ? ` Model agreement is ${(agreement * 100).toFixed(0)}%, so confidence is damped.` : '';
+    const enrichmentNote = state.enrichment ? enrichmentNarrative(state.enrichment) : '';
+
+    // Every reported signal value is the probability that signal assigns to the
+    // SAME market, so the stored columns are directly comparable.
     return {
-      prediction: assemblePrediction(state.input, state.context, {
-        elo: state.eloSignal.score,
-        poisson: state.poissonSignal.score,
-        xg: state.xgSignal.score,
-        ensemble,
+      ensembleDistribution,
+      agreement,
+      prediction: assemblePrediction(state.input, ensembleContext, {
+        elo: state.eloSignal.distribution?.[market] ?? ensembleDistribution[market],
+        poisson: state.poissonSignal.distribution?.[market] ?? ensembleDistribution[market],
+        xg: state.xgSignal.distribution?.[market] ?? ensembleDistribution[market],
+        ensemble: ensembleDistribution[market],
         confidence,
-        ...(narrativeSuffix ? { narrativeSuffix } : {}),
+        narrativeSuffix: `${enrichmentNote}${disagreementNote}`.trim(),
       }),
     };
   })
   .addEdge(START, 'context-agent')
-  .addEdge('context-agent', 'market-agent')
-  .addEdge('market-agent', 'elo-agent')
+  .addEdge('context-agent', 'elo-agent')
   .addEdge('elo-agent', 'poisson-agent')
   .addEdge('poisson-agent', 'xg-agent')
   .addEdge('xg-agent', 'ensemble-agent')
@@ -189,8 +174,9 @@ export async function runPredictionGraph(input: PredictionInput, enrichment?: Pr
   return {
     prediction: state.prediction,
     enrichment: state.enrichment,
+    ensembleDistribution: state.ensembleDistribution,
+    agreement: state.agreement,
     signals: {
-      market: state.marketSignal,
       elo: state.eloSignal,
       poisson: state.poissonSignal,
       xg: state.xgSignal,

@@ -10,7 +10,7 @@ import { runPredictionGraph } from '@/lib/prediction-engine/orchestrator';
 import { persistMarketOdds, queueValueBetAlert } from '@/lib/prediction-engine/premium-signals';
 import { runBacktest } from '@/lib/prediction-engine/backtest';
 import { FootballDataProvider, SportmonksProvider } from '@/lib/providers/fixtures/football-data-provider';
-import { TheOddsApiProvider } from '@/lib/providers/odds/types';
+import { TheOddsApiProvider } from '@/lib/providers/odds/the-odds-api';
 import { runWorker, runWorkerWithFailover } from '@/lib/workers/runWorker';
 import { writeHeartbeat } from '@/lib/workers/heartbeat';
 
