@@ -61,15 +61,75 @@ model GeoBlockEvent {
   @@index([country, createdAt])
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Multi-sport dimension.
+//
+// The engine was football-shaped: outcome markets were hardcoded to 1/X/2 and
+// nothing carried a sport. Basketball, tennis and NFL moneylines are two-way —
+// there is no draw — so the sport and its market shape must be recorded on the
+// data, not assumed by the code.
+//
+// This lands BEFORE historical backfill on purpose. Backfilling several seasons
+// into a football-shaped schema and migrating afterwards means re-ingesting
+// everything.
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Sport {
+  FOOTBALL
+  BASKETBALL
+  AMERICAN_FOOTBALL
+  BASEBALL
+  HOCKEY
+  RUGBY
+  TENNIS
+  MMA
+}
+
+enum MarketType {
+  MONEYLINE_3WAY // 1 / X / 2 — football, some rugby
+  MONEYLINE_2WAY // home / away — basketball, tennis, NFL, baseball, hockey
+  TOTALS
+  HANDICAP
+  BTTS
+  CARDS
+}
+
+/// Maps our internal entities to a data provider's identifiers.
+///
+/// Runtime fuzzy name matching is unreliable for African and lower-tier
+/// competitions, so matches are resolved through this table. `verifiedBy` is
+/// null for auto-matched rows: consumers must treat those as UNVERIFIED and
+/// degrade to unavailable rather than silently trusting them.
+model ProviderEntityMap {
+  id         String   @id @default(cuid())
+  entityType String // 'team' | 'competition' | 'player'
+  internalId String
+  provider   String // 'api-sports' | 'football-data' | 'the-odds-api' | 'opticodds'
+  providerId String
+  sport      Sport    @default(FOOTBALL)
+  confidence Float    @default(1.0)
+  verifiedBy String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([provider, providerId, entityType])
+  @@index([internalId, provider])
+  @@index([sport, entityType])
+}
+
 model Competition {
   id         String   @id
   name       String
   country    String
   externalId Int      @unique
+  sport      Sport    @default(FOOTBALL)
+  marketType MarketType @default(MONEYLINE_3WAY)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   fixtures   Fixture[]
   teams      Team[]
+
+  @@index([sport])
 }
 
 model Team {
@@ -121,6 +181,7 @@ model Fixture {
   kickoff     DateTime
   status      String
   matchday    Int?
+  sport       Sport                @default(FOOTBALL)
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
   odds        Odds[]
@@ -134,6 +195,7 @@ model Fixture {
   @@index([kickoff])
   @@index([status])
   @@index([competitionId, kickoff])
+  @@index([sport, kickoff])
 }
 
 model FixtureEnrichment {
@@ -159,6 +221,7 @@ model Odds {
   fixture    Fixture  @relation(fields: [fixtureId], references: [id])
   bookCode   String
   market     String
+  marketType MarketType @default(MONEYLINE_3WAY)
   price      Float
   capturedAt DateTime @default(now())
 
@@ -217,6 +280,7 @@ model PredictionSnapshot {
   fixtureId   String
   fixture     Fixture  @relation(fields: [fixtureId], references: [id])
   market      String   @default("1")
+  marketType  MarketType @default(MONEYLINE_3WAY)
   probability Float    @default(0.5)
   edge        Float    @default(0)
   elo         Float
@@ -241,6 +305,7 @@ model PredictionEvaluation {
   fixtureId           String
   fixture             Fixture            @relation(fields: [fixtureId], references: [id])
   market              String
+  marketType          MarketType         @default(MONEYLINE_3WAY)
   resultMarket        String
   probability         Float
   confidence          Float
