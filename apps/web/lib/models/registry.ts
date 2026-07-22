@@ -322,3 +322,54 @@ export async function rollbackProduction(prisma: PrismaClient, family: string, s
   if (!current.supersedesId) throw new Error(`production model ${current.name} has no prior version to roll back to`);
   return promoteToProduction(prisma, current.supersedesId, actor, { rollbackOf: current.id, rollbackAt: new Date().toISOString() });
 }
+
+/**
+ * Returns the live PRODUCTION model for a family+sport, bootstrapping a baseline
+ * one on first run if none exists.
+ *
+ * The prediction pipeline must be able to stamp every snapshot with the model
+ * that produced it from day one — before anyone has manually registered a model.
+ * On a cold registry this fast-tracks a baseline version DRAFT→TRAINING→APPROVED
+ * →PRODUCTION with a full transition audit, so attribution works immediately and
+ * the first real challenger has an incumbent to be compared against. Idempotent:
+ * once a production model exists it is simply returned.
+ */
+export async function ensureProductionModel(
+  prisma: PrismaClient,
+  input: { family: string; sport?: string; name: string; featureSetName?: string; featureSetVersion?: number; gitSha?: string },
+) {
+  const sport = input.sport ?? 'FOOTBALL';
+  const existing = await getProductionModel(prisma, input.family, sport);
+  if (existing) return existing;
+
+  // Name must be unique; a prior half-finished bootstrap may already hold it.
+  const versionName = `${input.name}@baseline-1`;
+  const priorByName = await prisma.modelVersion.findUnique({ where: { name: versionName } });
+  const version =
+    priorByName ??
+    (await registerModel(prisma, {
+      name: versionName,
+      family: input.family,
+      sport,
+      ...(input.gitSha ? { gitSha: input.gitSha } : {}),
+      ...(input.featureSetName ? { featureSetName: input.featureSetName } : {}),
+      ...(input.featureSetVersion !== undefined ? { featureSetVersion: input.featureSetVersion } : {}),
+      actor: 'system:bootstrap',
+    }));
+
+  // Walk the lifecycle only from whatever stage it is actually in, so a partial
+  // prior bootstrap resumes rather than throwing on an illegal transition.
+  const stage = version.stage as ModelStage;
+  if (stage === 'DRAFT') {
+    await transitionStage(prisma, version.id, 'TRAINING', 'system:bootstrap', 'bootstrap baseline');
+    await transitionStage(prisma, version.id, 'APPROVED', 'system:bootstrap', 'bootstrap baseline');
+  } else if (stage === 'TRAINING') {
+    await transitionStage(prisma, version.id, 'APPROVED', 'system:bootstrap', 'bootstrap baseline');
+  }
+
+  const refreshed = await prisma.modelVersion.findUnique({ where: { id: version.id } });
+  if (refreshed && (refreshed.stage as ModelStage) === 'PRODUCTION') return refreshed;
+
+  const { promoted } = await promoteToProduction(prisma, version.id, 'system:bootstrap', { bootstrap: true });
+  return promoted;
+}
