@@ -17,6 +17,8 @@ import { adaptiveEnsembleWeights } from '@/lib/prediction-engine/ensemble-weight
 import { runCalibrationHealth, runFeatureDrift } from '@/lib/monitoring/health';
 import { shotsEnrichment } from '@/lib/prediction-engine/xg';
 import { buildTeamShotProfiles } from '@/lib/prediction-engine/shot-profiles';
+import { createApiSportsShotSource } from '@/lib/prediction-engine/shot-source';
+import { ApiSportsClient } from '@/lib/providers/api-sports/client';
 import { FootballDataProvider, SportmonksProvider } from '@/lib/providers/fixtures/football-data-provider';
 import { TheOddsApiProvider } from '@/lib/providers/odds/the-odds-api';
 import { runWorker, runWorkerWithFailover } from '@/lib/workers/runWorker';
@@ -102,6 +104,11 @@ export async function GET(request: Request) {
 
     const adaptive = await adaptiveEnsembleWeights(prisma, { asOf }).catch(() => null);
     const ensembleWeights = adaptive?.weights;
+
+    // Shot source for xG (gap #4). One instance per run so its call budget and
+    // the API-Sports quota guard accumulate across every fixture. Null when
+    // API-Sports is not configured — xG then stays honestly weight-0.
+    const shotSource = createApiSportsShotSource(new ApiSportsClient({ sport: 'football' }));
 
     for (const code of configuredCompetitions()) {
       try {
@@ -214,11 +221,10 @@ export async function GET(request: Request) {
           // Shots-based xG (gap #4): active once a shot-statistics feed populates
           // profiles. Until then this attaches an honest "unavailable" block and
           // the xg-agent stays at weight 0 rather than inventing a signal.
-          const shotProfiles = await buildTeamShotProfiles({
-            homeExternalId: match.homeTeam.id,
-            awayExternalId: match.awayTeam.id,
-            asOf,
-          }).catch(() => ({ home: undefined, away: undefined }));
+          const shotProfiles = await buildTeamShotProfiles(
+            { prisma, source: shotSource },
+            { homeExternalId: match.homeTeam.id, awayExternalId: match.awayTeam.id, asOf },
+          ).catch(() => ({}) as { home?: undefined; away?: undefined });
           enrichment.shots = shotsEnrichment(shotProfiles.home, shotProfiles.away);
 
           const predictionInput = {

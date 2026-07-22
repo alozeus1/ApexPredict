@@ -1,43 +1,93 @@
+import type { PrismaClient } from '@apexpredix/db';
+import { resolveProviderId } from '@/lib/providers/mapping/resolve';
+import type { ApiSportsShotSource } from './shot-source';
 import type { TeamShotProfile } from './xg';
 
 /**
- * Shot-profile source for the xG model (gap #4 activation seam).
+ * Shot-profile resolution for the xG model (gap #4).
  *
- * The live prediction path currently ingests standings/fixtures from
- * football-data.org, which carries NO shot data. Real shots-based xG therefore
- * needs a shot-statistics feed — API-Sports `fixtures/statistics` aggregated per
- * team over a recent window, or a positional provider. That fetch is quota-
- * sensitive (one call per team per window) and is deliberately kept as a single,
- * explicit integration point here rather than scattered through the cron.
- *
- * Until that fetch is implemented, this returns undefined profiles, so
- * `shotsEnrichment(...)` yields an `available: false` block and the xg-agent
- * stays honestly at weight 0. When the fetch lands, populate `home`/`away` and
- * xG activates with no other change — the orchestrator already consumes it.
+ * The live prediction path uses football-data.org IDs; API-Sports uses its own.
+ * This bridges them through the `ProviderEntityMap` (the same table injuries and
+ * odds resolve through), then delegates the quota-managed fetch to the shot
+ * source. A team resolves only when it is mapped to API-Sports; unmapped or
+ * low-confidence teams return no profile, so `shotsEnrichment` stays honestly
+ * "unavailable" and the xg-agent stays weight-0 rather than scoring off a
+ * possibly-wrong team.
  */
+
+const API_SPORTS_PROVIDER = 'api-sports';
+
+/** Auto-matched mappings are trusted for shots only at/above this confidence. */
+const MIN_MAPPING_CONFIDENCE = Number(process.env.XG_MIN_MAPPING_CONFIDENCE ?? 0.9);
+/** Set true to require a human-verified mapping (strictest; xG waits for verification). */
+const REQUIRE_VERIFIED = process.env.XG_REQUIRE_VERIFIED_MAPPING === 'true';
 
 export interface TeamShotProfiles {
   home?: TeamShotProfile;
   away?: TeamShotProfile;
 }
 
+export interface ShotProfileDeps {
+  prisma: PrismaClient;
+  /** Null when API-Sports is not configured — every team then returns undefined. */
+  source: ApiSportsShotSource | null;
+}
+
 export interface ShotProfileLookup {
+  /** football-data.org external team ids, as carried on the live match. */
   homeExternalId: number;
   awayExternalId: number;
-  /** As-of date; a real source fetches each team's last N games before this. */
   asOf: Date;
-  games?: number;
 }
 
 /**
- * Resolves shot profiles for a fixture. Replace the body with an API-Sports
- * `fixtures/statistics` aggregation (respecting the quota guard) or a positional
- * feed. Must return `undefined` for a team rather than a guessed profile when
- * data is unavailable — an invented shot rate is exactly the fabricated signal
- * the honest weight-0 fallback exists to prevent.
+ * Resolves a football-data external team id to its API-Sports id via the mapping
+ * table. Returns null (skip) when unmapped, or when the only mapping is an
+ * auto-matched one below the confidence bar / unverified under strict mode.
  */
-export async function buildTeamShotProfiles(_lookup: ShotProfileLookup): Promise<TeamShotProfiles> {
-  // No shot-statistics source connected yet — see module docstring. Both keys
-  // are optional and omitted (not set to undefined) to satisfy exactOptionalPropertyTypes.
-  return {};
+async function resolveApiTeamId(prisma: PrismaClient, externalId: number): Promise<number | null> {
+  const team = await prisma.team.findUnique({ where: { externalId }, select: { id: true } });
+  if (!team) return null;
+
+  const outcome = await resolveProviderId(prisma, {
+    internalId: team.id,
+    provider: API_SPORTS_PROVIDER,
+    entityType: 'team',
+  });
+
+  if (outcome.status === 'unmapped') return null;
+  if (outcome.status === 'unverified') {
+    if (REQUIRE_VERIFIED) return null;
+    if (outcome.entity.confidence < MIN_MAPPING_CONFIDENCE) return null;
+  }
+
+  const apiId = Number(outcome.entity.providerId);
+  return Number.isFinite(apiId) ? apiId : null;
+}
+
+/**
+ * Resolves shot profiles for a fixture's two teams. Both sides are attempted
+ * independently — a fixture where only one team maps still yields a partial
+ * result, and the xG estimator withholds unless BOTH are present anyway.
+ */
+export async function buildTeamShotProfiles(
+  deps: ShotProfileDeps,
+  lookup: ShotProfileLookup,
+): Promise<TeamShotProfiles> {
+  if (!deps.source) return {};
+
+  const [homeApiId, awayApiId] = await Promise.all([
+    resolveApiTeamId(deps.prisma, lookup.homeExternalId),
+    resolveApiTeamId(deps.prisma, lookup.awayExternalId),
+  ]);
+
+  const [home, away] = await Promise.all([
+    homeApiId !== null ? deps.source.buildProfile(homeApiId) : Promise.resolve(undefined),
+    awayApiId !== null ? deps.source.buildProfile(awayApiId) : Promise.resolve(undefined),
+  ]);
+
+  return {
+    ...(home ? { home } : {}),
+    ...(away ? { away } : {}),
+  };
 }
