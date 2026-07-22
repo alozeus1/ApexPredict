@@ -1,4 +1,5 @@
 import type { PrismaClient } from '@apexpredix/db';
+import { maxDrawdown, maxLosingStreak } from './backtest-metrics';
 
 const EPSILON = 0.000001;
 
@@ -121,7 +122,10 @@ function calibrationBuckets(evaluations: Array<{ probability: number; hit: boole
   });
 }
 
-export async function runBacktest(prisma: PrismaClient, options: { windowDays?: number; stake?: number } = {}) {
+export async function runBacktest(
+  prisma: PrismaClient,
+  options: { windowDays?: number; stake?: number; modelVersionId?: string } = {},
+) {
   const windowDays = options.windowDays ?? 90;
   const stake = options.stake ?? 10;
   const evaluatedNow = await evaluateSettledPredictions(prisma, stake);
@@ -142,6 +146,17 @@ export async function runBacktest(prisma: PrismaClient, options: { windowDays?: 
     ? buckets.reduce((sum, bucket) => sum + bucket.calibrationError * bucket.sampleSize, 0) / sampleSize
     : 0;
 
+  // Risk metrics require the profit sequence in CHRONOLOGICAL order. The query
+  // returns newest-first for display, so reverse a copy for the equity curve —
+  // computing drawdown on a reversed sequence would report a different, wrong
+  // number.
+  const chronological = [...evaluations].reverse();
+  const drawdown = maxDrawdown(
+    chronological.map((item) => item.profit),
+    totalStaked,
+  );
+  const losingStreak = maxLosingStreak(chronological.map((item) => item.hit));
+
   const run = await prisma.predictionBacktestRun.create({
     data: {
       windowDays,
@@ -156,10 +171,13 @@ export async function runBacktest(prisma: PrismaClient, options: { windowDays?: 
       brierScore: average(evaluations.map((item) => item.brierScore)),
       logLoss: average(evaluations.map((item) => item.logLoss)),
       calibrationError,
+      maxDrawdown: drawdown.fraction,
+      maxLosingStreak: losingStreak,
+      ...(options.modelVersionId ? { modelVersionId: options.modelVersionId } : {}),
       buckets: { create: buckets },
     },
     include: { buckets: true },
   });
 
-  return { run, evaluatedNow };
+  return { run, evaluatedNow, drawdown, losingStreak };
 }

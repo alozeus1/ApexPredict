@@ -25,6 +25,14 @@ import { buildBaselineEnrichment, enrichmentNarrative, type PredictionEnrichment
 type PredictionGraphValue = {
   input: PredictionInput;
   inputEnrichment?: PredictionEnrichment;
+  /**
+   * Adaptive ensemble weights per signal name (gap #5), injected by the caller
+   * from measured performance (`ensemble-weights.ts`). The graph stays pure: it
+   * consumes weights but never reads the database. Absent → each signal falls
+   * back to its historical fixed weight, so behaviour is unchanged until weights
+   * are supplied.
+   */
+  weights?: Record<string, number>;
   context?: PredictionContext;
   enrichment?: PredictionEnrichment;
   eloSignal?: AgentSignal;
@@ -38,6 +46,7 @@ type PredictionGraphValue = {
 const PredictionGraphState = Annotation.Root({
   input: Annotation<PredictionInput>(),
   inputEnrichment: Annotation<PredictionEnrichment | undefined>(),
+  weights: Annotation<Record<string, number> | undefined>(),
   context: Annotation<PredictionContext | undefined>(),
   enrichment: Annotation<PredictionEnrichment | undefined>(),
   eloSignal: Annotation<AgentSignal | undefined>(),
@@ -60,7 +69,7 @@ const graph = new StateGraph(PredictionGraphState)
     const signal: AgentSignal = {
       name: 'elo',
       available: true,
-      weight: 0.5,
+      weight: state.weights?.elo ?? 0.5,
       distribution: eloDistribution(
         state.context.homeStrength,
         state.context.awayStrength,
@@ -91,28 +100,47 @@ const graph = new StateGraph(PredictionGraphState)
     const signal: AgentSignal = {
       name: 'poisson',
       available: true,
-      weight: 0.5,
+      weight: state.weights?.poisson ?? 0.5,
       distribution: poissonDistribution(expectedHomeGoals, expectedAwayGoals),
     };
     return { poissonSignal: signal };
   })
   .addNode('xg-agent', async (state: PredictionGraphValue) => {
     if (!state.enrichment) throw new Error('Missing fixture enrichment');
-    // The current xG figure is derived from the same season goal rates the
-    // Poisson branch uses, so it carries no independent information. It is
-    // reported for continuity of the `PredictionSnapshot.xg` column but given
-    // zero ensemble weight — double-counting one signal is not an ensemble.
-    //
-    // This agent re-enters the blend when shot-event data lands (P2), at which
-    // point it becomes genuinely independent.
-    const { expectedHomeGoals, expectedAwayGoals } = state.enrichment.goals;
     const football = hasDraw(state.context?.marketType ?? DEFAULT_MARKET_TYPE);
+
+    // The xG signal is now driven by SHOT data (gap #4), which is independent of
+    // the season goal rates the Poisson branch uses — so it is a real third
+    // signal, not a re-badged copy. It participates only when shot history was
+    // available; otherwise it stays weight 0 with an honest reason rather than
+    // fabricating a number from goals it does not have.
+    const shots = state.enrichment.shots;
+    const shotsUsable =
+      football &&
+      shots?.available === true &&
+      typeof shots.expectedHomeGoals === 'number' &&
+      typeof shots.expectedAwayGoals === 'number';
+
+    if (shotsUsable) {
+      const signal: AgentSignal = {
+        name: 'xg',
+        available: true,
+        weight: state.weights?.xg ?? 0.3,
+        distribution: poissonDistribution(shots!.expectedHomeGoals!, shots!.expectedAwayGoals!),
+        reason: shots!.method,
+      };
+      return { xgSignal: signal };
+    }
+
+    // Fallback: reported for continuity of the `PredictionSnapshot.xg` column,
+    // but zero weight so a missing shot feed cannot silently sway the ensemble.
+    const { expectedHomeGoals, expectedAwayGoals } = state.enrichment.goals;
     const signal: AgentSignal = {
       name: 'xg',
       available: false,
       weight: 0,
       ...(football ? { distribution: poissonDistribution(expectedHomeGoals, expectedAwayGoals) } : {}),
-      reason: football ? 'shot-event-feed-not-connected' : 'xg-model-is-football-only',
+      reason: football ? (shots?.reason ?? 'shot-feed-not-connected') : 'xg-model-is-football-only',
     };
     return { xgSignal: signal };
   })
@@ -168,8 +196,16 @@ const graph = new StateGraph(PredictionGraphState)
   .addEdge('ensemble-agent', END)
   .compile();
 
-export async function runPredictionGraph(input: PredictionInput, enrichment?: PredictionEnrichment) {
-  const state = await graph.invoke({ input, ...(enrichment ? { inputEnrichment: enrichment } : {}) });
+export async function runPredictionGraph(
+  input: PredictionInput,
+  enrichment?: PredictionEnrichment,
+  weights?: Record<string, number>,
+) {
+  const state = await graph.invoke({
+    input,
+    ...(enrichment ? { inputEnrichment: enrichment } : {}),
+    ...(weights ? { weights } : {}),
+  });
   if (!state.prediction) throw new Error('Prediction graph completed without a prediction');
   return {
     prediction: state.prediction,
@@ -184,9 +220,12 @@ export async function runPredictionGraph(input: PredictionInput, enrichment?: Pr
   };
 }
 
-export async function generatePredictionWithAgents(input: PredictionInput): Promise<EnginePrediction> {
+export async function generatePredictionWithAgents(
+  input: PredictionInput,
+  weights?: Record<string, number>,
+): Promise<EnginePrediction> {
   try {
-    const result = await runPredictionGraph(input);
+    const result = await runPredictionGraph(input, undefined, weights);
     return result.prediction;
   } catch {
     return assemblePrediction(input);

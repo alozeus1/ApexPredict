@@ -32,6 +32,23 @@ export interface PredictionEnrichment {
     expectedAwayGoals: number;
     source: string;
   };
+  /**
+   * Shots-derived expected goals (gap #4). Present and `available` only when both
+   * teams have enough shot history. This is a GENUINELY independent signal from
+   * `goals` above: `goals` comes from goals scored/conceded, `shots` from shot
+   * volume and accuracy, so the ensemble is not double-counting one number.
+   * `method` is 'positional-xg' when a shot-level feed supplied real per-shot xG,
+   * 'shots-based' when derived from aggregate shot counts.
+   */
+  shots?: {
+    available: boolean;
+    source: string;
+    method?: 'positional-xg' | 'shots-based';
+    expectedHomeGoals?: number;
+    expectedAwayGoals?: number;
+    sampleSize?: number;
+    reason?: string;
+  };
   cards: {
     expectedCards: number;
     source: string;
