@@ -51,9 +51,24 @@ function uniform(names: string[]): Record<string, number> {
 
 function applyFloorAndNormalise(weights: Record<string, number>, floor: number): Record<string, number> {
   const names = Object.keys(weights);
-  const floored = Object.fromEntries(names.map((n) => [n, Math.max(weights[n]!, floor)]));
-  const total = Object.values(floored).reduce((s, v) => s + v, 0) || 1;
-  return Object.fromEntries(names.map((n) => [n, floored[n]! / total]));
+  const n = names.length;
+  if (n === 0) return {};
+
+  // Guaranteeing a floor cannot be done by max()-then-normalise: dividing by the
+  // post-floor total pushes a floored weight back BELOW the floor. Instead reserve
+  // `floor * n` of the unit mass for the floors and distribute the remaining
+  // `1 - floor * n` proportionally to the raw weights. Every result is then
+  // >= floor and the set sums to exactly 1, by construction.
+  if (floor * n >= 1) {
+    // Floors cannot all fit under a unit sum -- the floor is ill-specified, so
+    // fall back to equal weights rather than silently violate the constraint.
+    const uniformWeight = 1 / n;
+    return Object.fromEntries(names.map((k) => [k, uniformWeight]));
+  }
+
+  const total = Object.values(weights).reduce((s, v) => s + v, 0) || 1;
+  const reserved = 1 - floor * n;
+  return Object.fromEntries(names.map((k) => [k, floor + reserved * (weights[k]! / total)]));
 }
 
 /**
