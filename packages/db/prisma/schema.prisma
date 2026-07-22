@@ -61,15 +61,76 @@ model GeoBlockEvent {
   @@index([country, createdAt])
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Multi-sport dimension.
+//
+// The engine was football-shaped: outcome markets were hardcoded to 1/X/2 and
+// nothing carried a sport. Basketball, tennis and NFL moneylines are two-way —
+// there is no draw — so the sport and its market shape must be recorded on the
+// data, not assumed by the code.
+//
+// This lands BEFORE historical backfill on purpose. Backfilling several seasons
+// into a football-shaped schema and migrating afterwards means re-ingesting
+// everything.
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Sport {
+  FOOTBALL
+  BASKETBALL
+  AMERICAN_FOOTBALL
+  BASEBALL
+  HOCKEY
+  RUGBY
+  TENNIS
+  MMA
+}
+
+enum MarketType {
+  MONEYLINE_3WAY // 1 / X / 2 — football, some rugby
+  MONEYLINE_2WAY // home / away — basketball, tennis, NFL, baseball, hockey
+  TOTALS
+  HANDICAP
+  BTTS
+  CARDS
+}
+
+/// Maps our internal entities to a data provider's identifiers.
+///
+/// Runtime fuzzy name matching is unreliable for African and lower-tier
+/// competitions, so matches are resolved through this table. `verifiedBy` is
+/// null for auto-matched rows: consumers must treat those as UNVERIFIED and
+/// degrade to unavailable rather than silently trusting them.
+model ProviderEntityMap {
+  id         String   @id @default(cuid())
+  entityType String // 'team' | 'competition' | 'player'
+  internalId String
+  provider   String // 'api-sports' | 'football-data' | 'the-odds-api' | 'opticodds'
+  providerId String
+  sport      Sport    @default(FOOTBALL)
+  confidence Float    @default(1.0)
+  verifiedBy String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([provider, providerId, entityType])
+  @@index([internalId, provider])
+  @@index([sport, entityType])
+}
+
 model Competition {
   id         String   @id
   name       String
   country    String
   externalId Int      @unique
+  sport      Sport    @default(FOOTBALL)
+  marketType MarketType @default(MONEYLINE_3WAY)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   fixtures   Fixture[]
   teams      Team[]
+  teamSeasons TeamSeason[]
+
+  @@index([sport])
 }
 
 model Team {
@@ -79,13 +140,67 @@ model Team {
   shortName     String?
   tla           String?
   crestUrl      String?
+  /// The competition a team was FIRST seen in. Not a season-accurate
+  /// membership — use TeamSeason for "was this club in this league that year".
   competitionId String
   competition   Competition  @relation(fields: [competitionId], references: [id])
   homeFixtures  Fixture[]    @relation("HomeTeam")
   awayFixtures  Fixture[]    @relation("AwayTeam")
   stats         TeamStat[]
+  seasons       TeamSeason[]
+  aliases       TeamAlias[]
 
   @@index([competitionId])
+}
+
+/// Which clubs were in which competition in which season.
+///
+/// `Team.competitionId` is a single value that never changes, so relegated and
+/// promoted clubs accumulate against their original league. Measuring mapping
+/// coverage against that roster counted Hull City, Ipswich and Coventry as
+/// unmatched Premier League teams for a season none of them played in.
+///
+/// Rows are written from the PROVIDER's team list for a season, which is
+/// authoritative, rather than inferred from fixture dates — season boundaries
+/// differ by country (European leagues straddle years, Brazil does not) and
+/// guessing would put clubs in seasons they never played.
+model TeamSeason {
+  id            String      @id @default(cuid())
+  teamId        String
+  team          Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  competitionId String
+  competition   Competition @relation(fields: [competitionId], references: [id])
+  season        Int
+  /// e.g. "provider:api-sports" — never a guess.
+  source        String
+  firstSeenAt   DateTime    @default(now())
+  lastSeenAt    DateTime    @default(now())
+
+  @@unique([teamId, competitionId, season])
+  @@index([competitionId, season])
+}
+
+/// Alternative names for a club.
+///
+/// Some name pairs share no tokens at all and no fuzzy matcher can bridge them:
+/// "Olympique Lyonnais" / "Lyon", "Stade Rennais" / "Rennes". Those need
+/// recorded aliases.
+///
+/// `verifiedBy` is null for provider-derived aliases. Those are recorded for a
+/// human to review and MUST NOT be fed back into matching: a 0.72 fuzzy match
+/// stored as an alias would match at 1.00 on the next run, laundering a guess
+/// into a certainty without any new evidence. Only verified aliases match.
+model TeamAlias {
+  id         String   @id @default(cuid())
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  alias      String
+  source     String
+  verifiedBy String?
+  createdAt  DateTime @default(now())
+
+  @@unique([teamId, alias])
+  @@index([alias])
 }
 
 model TeamStat {
@@ -121,16 +236,40 @@ model Fixture {
   kickoff     DateTime
   status      String
   matchday    Int?
+  sport       Sport                @default(FOOTBALL)
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
   odds        Odds[]
+  oddsMovements OddsMovement[]
   result      FixtureResult?
+  enrichment  FixtureEnrichment?
   predictions PredictionSnapshot[]
   evaluations PredictionEvaluation[]
+  alerts      PredictionAlert[]
+  shadowScores ShadowScore[]
+  featureVectors FeatureVector[]
 
   @@index([kickoff])
   @@index([status])
   @@index([competitionId, kickoff])
+  @@index([sport, kickoff])
+}
+
+model FixtureEnrichment {
+  id           String   @id @default(cuid())
+  fixtureId    String   @unique
+  fixture      Fixture  @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  weatherJson  Json?
+  injuriesJson Json?
+  lineupsJson  Json?
+  refereeJson  Json?
+  goalsJson    Json?
+  cardsJson    Json?
+  source       String   @default("agentic-enrichment-v0")
+  capturedAt   DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([capturedAt])
 }
 
 model Odds {
@@ -139,11 +278,29 @@ model Odds {
   fixture    Fixture  @relation(fields: [fixtureId], references: [id])
   bookCode   String
   market     String
+  marketType MarketType @default(MONEYLINE_3WAY)
   price      Float
   capturedAt DateTime @default(now())
 
   @@index([fixtureId, market])
   @@index([capturedAt])
+}
+
+model OddsMovement {
+  id            String   @id @default(cuid())
+  fixtureId     String
+  fixture       Fixture  @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  bookCode      String
+  market        String
+  previousPrice Float
+  currentPrice  Float
+  delta         Float
+  movementPct   Float
+  source        String
+  capturedAt    DateTime @default(now())
+
+  @@index([fixtureId, capturedAt])
+  @@index([bookCode, market, capturedAt])
 }
 
 model FixtureResult {
@@ -156,11 +313,31 @@ model FixtureResult {
   raw        Json
 }
 
+model PredictionAlert {
+  id        String   @id @default(cuid())
+  fixtureId String?
+  fixture   Fixture? @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  kind      String
+  severity  String
+  title     String
+  message   String
+  dedupeKey String   @unique
+  channels  Json?
+  status    String   @default("queued")
+  createdAt DateTime @default(now())
+  sentAt    DateTime?
+
+  @@index([kind, createdAt])
+  @@index([status, createdAt])
+  @@index([fixtureId, createdAt])
+}
+
 model PredictionSnapshot {
   id          String   @id @default(cuid())
   fixtureId   String
   fixture     Fixture  @relation(fields: [fixtureId], references: [id])
   market      String   @default("1")
+  marketType  MarketType @default(MONEYLINE_3WAY)
   probability Float    @default(0.5)
   edge        Float    @default(0)
   elo         Float
@@ -174,8 +351,20 @@ model PredictionSnapshot {
   generatedAt DateTime @default(now())
   evaluation  PredictionEvaluation?
 
+  /// The model version that produced this prediction. Nullable for rows written
+  /// before the registry existed; new predictions MUST carry it so historical
+  /// performance can be attributed to a specific, reproducible model.
+  modelVersionId String?
+  modelVersion   ModelVersion? @relation(fields: [modelVersionId], references: [id])
+
+  /// The feature vector this prediction was scored from — closes the loop from
+  /// prediction back to the exact inputs and feature-set version used.
+  featureVectorId String?
+  featureVector   FeatureVector? @relation(fields: [featureVectorId], references: [id])
+
   @@index([fixtureId, generatedAt])
   @@index([market, generatedAt])
+  @@index([modelVersionId, generatedAt])
 }
 
 model PredictionEvaluation {
@@ -185,6 +374,7 @@ model PredictionEvaluation {
   fixtureId           String
   fixture             Fixture            @relation(fields: [fixtureId], references: [id])
   market              String
+  marketType          MarketType         @default(MONEYLINE_3WAY)
   resultMarket        String
   probability         Float
   confidence          Float
@@ -218,10 +408,21 @@ model PredictionBacktestRun {
   brierScore         Float
   logLoss            Float
   calibrationError   Float
+  /// Worst peak-to-trough decline of the running bankroll across the settled
+  /// sequence, as a fraction of peak. ROI alone hides the ruin risk of a
+  /// strategy that ends up but drew down 60% on the way — that path bankrupts a
+  /// real bettor before the recovery arrives.
+  maxDrawdown        Float                        @default(0)
+  /// Longest run of consecutive losing settlements. Operator-facing risk signal.
+  maxLosingStreak    Int                          @default(0)
+  /// Which model version this backtest evaluated. Null for legacy/global runs.
+  modelVersionId     String?
+  modelVersion       ModelVersion?                @relation(fields: [modelVersionId], references: [id])
   createdAt          DateTime                     @default(now())
   buckets            PredictionCalibrationBucket[]
 
   @@index([createdAt])
+  @@index([modelVersionId, createdAt])
 }
 
 model PredictionCalibrationBucket {
@@ -378,6 +579,76 @@ model Subscription {
   @@index([userId, status])
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Internal job orchestration (n8n and other service callers).
+//
+// Vercel serverless caps at 300s, so long work (training, backfill, backtest)
+// CANNOT complete inside a request. Endpoints therefore enqueue and return a
+// job id; a long-running worker claims and executes. Until that worker exists,
+// long-running kinds must be rejected at enqueue rather than accepted and
+// silently never run.
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REJECTED
+}
+
+enum JobKind {
+  INGESTION_REFERENCE
+  INGESTION_MATCH_DAY
+  INGESTION_RESULTS
+  TRAINING_CHALLENGER
+  BACKTEST
+  MODEL_SHADOW
+  MODEL_PROMOTE
+  MODEL_ROLLBACK
+}
+
+model JobRun {
+  id        String    @id @default(cuid())
+  kind      JobKind
+  status    JobStatus @default(QUEUED)
+
+  /// Caller-supplied key. Replaying the same key returns the ORIGINAL job
+  /// rather than starting a second one — n8n retries must not double-run
+  /// ingestion or promote a model twice.
+  idempotencyKey String @unique
+
+  /// Service caller identity, never a subscriber.
+  requestedBy String
+  /// Validated request body. Never contains credentials.
+  params      Json    @default("{}")
+  result      Json?
+  error       String?
+
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+
+  /// Resume point for chunked execution. Long jobs run as a series of slices,
+  /// each finishing inside the 300s serverless limit; the worker re-invokes
+  /// until `moreWork` is false. Without this, "run a backtest" would be a
+  /// single request that cannot finish.
+  cursor      Json?
+  /// 0-100, for operator visibility only. Never used for control flow.
+  progress    Int       @default(0)
+
+  queuedAt    DateTime  @default(now())
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  /// Set when claimed; a stale lease can be reclaimed after expiry.
+  leaseUntil  DateTime?
+  claimedBy   String?
+
+  @@index([status, queuedAt])
+  @@index([kind, queuedAt])
+  @@index([requestedBy, queuedAt])
+}
+
 model AuditLog {
   id        String   @id @default(cuid())
   actor     String
@@ -426,4 +697,278 @@ model UserPick {
 
   @@index([userId, createdAt])
   @@index([fixtureId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Model lifecycle / registry (gap #1).
+//
+// Before this, "which model is live" was implicit and promotion/rollback was a
+// manual redeploy. A prediction service cannot be operated safely that way: you
+// need to know exactly which versioned model produced any historical call, be
+// able to promote a challenger through explicit gates, and roll back in one step
+// when a live model degrades.
+//
+// Invariant enforced in code (registry.ts), not just here: at most ONE
+// PRODUCTION ModelVersion per (family, sport). The DB cannot express "one row
+// with stage=PRODUCTION per family" as a simple unique constraint because stage
+// is mutable, so the promotion path runs in a transaction that retires the
+// incumbent first.
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum ModelStage {
+  DRAFT // registered, not yet trained
+  TRAINING // fit in progress
+  SHADOW // scoring live fixtures without exposure to users
+  APPROVED // passed gates, eligible for promotion
+  PRODUCTION // currently serving users
+  RETIRED // replaced or withdrawn
+  FAILED // training or a gate failed; kept for audit, never serves
+}
+
+model ModelVersion {
+  id       String     @id @default(cuid())
+  /// Human-facing unique identifier, e.g. "ensemble@2026.07.21-1".
+  name     String     @unique
+  /// Model family. The single-PRODUCTION invariant is scoped per family+sport,
+  /// so "ensemble", "dixon-coles", "elo" can each have their own live version.
+  family   String
+  sport    Sport      @default(FOOTBALL)
+  stage    ModelStage @default(DRAFT)
+
+  // ── Reproducibility: everything needed to rebuild this exact model ──────────
+  gitSha              String?
+  featureSetName      String?
+  featureSetVersion   Int?
+  params              Json      @default("{}")
+  trainingWindowStart DateTime?
+  trainingWindowEnd   DateTime?
+  trainedAt           DateTime?
+
+  /// Validation-split metrics captured at approval. NEVER the test set — fitting
+  /// or gating on test makes every downstream number meaningless.
+  metrics Json @default("{}")
+
+  // ── Promotion / rollback provenance ────────────────────────────────────────
+  approvedBy String?
+  approvedAt DateTime?
+  promotedAt DateTime?
+  retiredAt  DateTime?
+  /// The version this one replaced at promotion. Enables one-step rollback: to
+  /// revert, re-promote `supersedes`.
+  supersedesId String?
+  supersedes   ModelVersion?  @relation("ModelSupersedes", fields: [supersedesId], references: [id])
+  supersededBy ModelVersion[] @relation("ModelSupersedes")
+  notes        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transitions        ModelStageTransition[]
+  metricHistory      ModelMetric[]
+  predictions        PredictionSnapshot[]
+  shadowScores       ShadowScore[]
+  backtests          PredictionBacktestRun[]
+  comparisonsAsCandidate ModelComparison[] @relation("ComparisonCandidate")
+  comparisonsAsChampion  ModelComparison[] @relation("ComparisonChampion")
+
+  @@index([family, sport, stage])
+  @@index([stage])
+}
+
+/// Immutable audit of every stage change: who, when, why, and a snapshot of the
+/// gate evaluation that authorised it. Rollback and compliance both depend on
+/// this being append-only — the app never updates or deletes a transition.
+model ModelStageTransition {
+  id             String       @id @default(cuid())
+  modelVersionId String
+  modelVersion   ModelVersion @relation(fields: [modelVersionId], references: [id], onDelete: Cascade)
+  fromStage      ModelStage?
+  toStage        ModelStage
+  actor          String
+  reason         String?
+  /// Snapshot of gate inputs/results at decision time. Reproduces "why was this
+  /// promoted" without trusting later, mutable metric rows.
+  gate           Json         @default("{}")
+  createdAt      DateTime     @default(now())
+
+  @@index([modelVersionId, createdAt])
+  @@index([toStage, createdAt])
+}
+
+/// Time-series of a model's measured quality, segmented by phase and scope.
+/// `phase` = 'validation' | 'shadow' | 'production'; `scope` = 'global' | a
+/// competitionId | a market. Segmenting matters: a model can be well calibrated
+/// globally and badly miscalibrated on one league.
+model ModelMetric {
+  id               String       @id @default(cuid())
+  modelVersionId   String
+  modelVersion     ModelVersion @relation(fields: [modelVersionId], references: [id], onDelete: Cascade)
+  phase            String
+  scope            String       @default("global")
+  sampleSize       Int
+  brierScore       Float
+  logLoss          Float
+  calibrationError Float
+  hitRate          Float?
+  roi              Float?
+  capturedAt       DateTime     @default(now())
+
+  @@index([modelVersionId, phase, capturedAt])
+  @@index([scope, phase, capturedAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Versioned feature store (gap #6).
+//
+// Training-serving skew is the classic silent ML failure: the model learns on
+// features computed one way and is served features computed another. A FeatureSet
+// pins an ordered, hashed list of feature specs; every served FeatureVector
+// records the spec hash it was built under. Training reads the SAME FeatureVector
+// rows, so parity is a checked invariant, not a hope.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model FeatureSet {
+  id       String @id @default(cuid())
+  name     String
+  version  Int
+  /// Content hash of the ordered feature specs. A vector whose specHash differs
+  /// from its FeatureSet's is a parity violation and must not train or serve.
+  specHash String
+  /// Ordered [{ name, dtype, source, transform, fillPolicy }]. Ordered because
+  /// some downstream consumers (and the hash) depend on column order.
+  specs    Json
+  status   String @default("active") // 'active' | 'deprecated'
+  notes    String?
+  createdAt DateTime @default(now())
+
+  @@unique([name, version])
+  @@index([name, status])
+}
+
+/// A computed feature vector for one fixture under one feature-set version. This
+/// is the serving-time snapshot AND the training row — there is only one copy,
+/// which is the whole point.
+model FeatureVector {
+  id                String   @id @default(cuid())
+  fixtureId         String
+  fixture           Fixture  @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  featureSetName    String
+  featureSetVersion Int
+  specHash          String
+  values            Json
+  /// Share of specs that resolved to a non-null value. Feeds the publish policy:
+  /// a thin vector should suppress rather than publish a confident-looking pick.
+  completeness      Float
+  computedAt        DateTime @default(now())
+
+  predictions PredictionSnapshot[]
+
+  @@unique([fixtureId, featureSetName, featureSetVersion])
+  @@index([featureSetName, featureSetVersion, computedAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shadow scoring (gap #2).
+//
+// A challenger scores every live fixture alongside production, its predictions
+// recorded but never shown. When fixtures settle, the same evaluation the live
+// model gets is applied here, so promotion rests on real out-of-sample behaviour
+// on identical fixtures — not a backtest the candidate may have overfit.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ShadowScore {
+  id             String       @id @default(cuid())
+  modelVersionId String
+  modelVersion   ModelVersion @relation(fields: [modelVersionId], references: [id], onDelete: Cascade)
+  fixtureId      String
+  fixture        Fixture      @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  market         String
+  probability    Float
+  edge           Float
+  confidence     Float
+
+  // ── Filled once the fixture settles ────────────────────────────────────────
+  resultMarket String?
+  hit          Boolean?
+  brierScore   Float?
+  logLoss      Float?
+  settledAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@unique([modelVersionId, fixtureId, market])
+  @@index([modelVersionId, createdAt])
+  @@index([modelVersionId, settledAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Drift & calibration-health monitoring (gap #3).
+//
+// We already COMPUTE calibration; this watches it over time and raises an alert
+// when probability quality degrades or the live feature/score distribution
+// drifts from the training baseline. Without this a stale model degrades
+// silently until users notice.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model DriftReport {
+  id            String   @id @default(cuid())
+  /// 'feature' | 'score' | 'calibration'
+  kind          String
+  /// 'global' | a competitionId | a market
+  scope         String   @default("global")
+  /// e.g. 'psi:home_strength', 'ece', 'goal_rate'
+  metric        String
+  baselineValue Float
+  currentValue  Float
+  /// The drift statistic itself (PSI, KS, or |delta|) that was compared to threshold.
+  statistic     Float
+  threshold     Float
+  breached      Boolean
+  severity      String // 'ok' | 'warn' | 'critical'
+  sampleSize    Int
+  windowStart   DateTime
+  windowEnd     DateTime
+  /// Optional link to the model whose scores/calibration were measured.
+  modelVersionId String?
+  createdAt     DateTime @default(now())
+
+  @@index([kind, createdAt])
+  @@index([breached, createdAt])
+  @@index([scope, kind, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Candidate-vs-production comparison (gap #7).
+//
+// The promotion decision, recorded. Runs a candidate and the current production
+// model over the SAME settled fixtures and stores the deltas plus a gated
+// recommendation. Promotion is never "the candidate won last week" — it is a
+// non-inferiority test on a minimum sample.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ModelComparison {
+  id          String       @id @default(cuid())
+  candidateId String
+  candidate   ModelVersion @relation("ComparisonCandidate", fields: [candidateId], references: [id], onDelete: Cascade)
+  championId  String?
+  champion    ModelVersion? @relation("ComparisonChampion", fields: [championId], references: [id])
+  scope       String       @default("global")
+  sampleSize  Int
+
+  candidateBrier   Float
+  championBrier    Float?
+  candidateLogLoss Float
+  championLogLoss  Float?
+  candidateRoi     Float
+  championRoi      Float?
+  candidateEce     Float
+  championEce      Float?
+
+  /// 'PROMOTE' | 'HOLD' | 'REJECT' | 'INSUFFICIENT_DATA'
+  recommendation String
+  /// Every gate that passed/failed, for an auditable decision.
+  reasons        Json     @default("[]")
+  createdAt      DateTime @default(now())
+
+  @@index([candidateId, createdAt])
 }

@@ -9,7 +9,11 @@ const premium = entitlementsForTier('MONTHLY');
 
 const FEATURES: ReadonlyArray<{ label: string; free: string; premium: string }> = [
   { label: 'Daily predictions', free: `${free.picksPerDay} predictions/day`, premium: `${premium.picksPerDay} predictions/day` },
-  { label: 'Analysis depth', free: 'Basic', premium: 'Deep narrative + line movement' },
+  { label: 'Confidence + probability', free: 'Included', premium: 'Included with model breakdown' },
+  { label: 'Value-bet reasoning', free: 'Basic', premium: 'Edge, fair price, and alert context' },
+  { label: 'Odds comparison', free: 'Regional books', premium: 'Best price + movement history' },
+  { label: 'Injury / lineup / weather context', free: 'Provider status', premium: 'Connected feeds as available' },
+  { label: 'Historical performance', free: 'Public sample threshold', premium: 'ROI, Brier, log loss, calibration' },
   { label: 'Value bet alerts', free: free.valueBets ? 'Included' : '—', premium: premium.valueBets ? 'Real-time' : '—' },
   { label: 'Kelly staking calculator', free: free.kelly ? 'Included' : '—', premium: premium.kelly ? 'Included' : '—' },
   { label: 'Telegram / email alerts', free: free.telegram ? 'Included' : '—', premium: premium.telegram ? 'Included' : '—' },

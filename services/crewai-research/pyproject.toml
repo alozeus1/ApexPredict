@@ -1,0 +1,13 @@
+[project]
+name = "apexpredix-crewai-research"
+version = "0.1.0"
+description = "Offline CrewAI research agents for ApexPredix prediction enrichment."
+requires-python = ">=3.11"
+dependencies = [
+  "crewai>=0.130.0",
+  "pydantic>=2.7.0",
+  "python-dotenv>=1.0.1"
+]
+
+[tool.uv]
+package = false

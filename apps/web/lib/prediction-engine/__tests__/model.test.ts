@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { generatePrediction } from '../model';
+import { runPredictionGraph } from '../orchestrator';
 
 const match = {
   id: 1,
@@ -63,5 +64,24 @@ describe('generatePrediction', () => {
 
     expect(prediction.odds[0]?.bookCode).toBe('MODEL_FAIR_PRICE');
     expect(prediction.valueBet).toBe(false);
+  });
+
+  it('runs the agent graph with baseline enrichment and a normal prediction payload', async () => {
+    const result = await runPredictionGraph({
+      match,
+      homeStats: {
+        position: 1, team: match.homeTeam, playedGames: 20, won: 15, draw: 3, lost: 2,
+        points: 48, goalsFor: 44, goalsAgainst: 15, goalDifference: 29,
+      },
+      awayStats: {
+        position: 18, team: match.awayTeam, playedGames: 20, won: 3, draw: 3, lost: 14,
+        points: 12, goalsFor: 14, goalsAgainst: 40, goalDifference: -26,
+      },
+    });
+
+    expect(result.prediction.market).toBe('1');
+    expect(result.prediction.narrative).toContain('Expected goals baseline');
+    expect(result.enrichment?.weather.available).toBe(false);
+    expect(result.enrichment?.injuries.available).toBe(false);
   });
 });

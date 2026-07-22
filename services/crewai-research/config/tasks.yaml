@@ -1,0 +1,43 @@
+vendor_freshness_audit:
+  description: >
+    Compare candidate weather, injury, odds, referee, card, and shot-event xG
+    providers. Report coverage, latency, historical depth, API limits, and price.
+  expected_output: >
+    A provider scorecard with recommended production feeds and fields that map
+    to FixtureEnrichment.
+  agent: prediction_methodologist
+
+weather_feature_review:
+  description: >
+    Determine which weather fields are reliable enough to use in goal and tempo
+    adjustments. Exclude any feed without stadium-level timestamped data.
+  expected_output: >
+    A proposed weather feature contract with confidence thresholds and null
+    handling rules.
+  agent: weather_context_analyst
+
+injury_lineup_review:
+  description: >
+    Define injury and lineup impact features that can be used before kickoff
+    without overstating uncertain news.
+  expected_output: >
+    A proposed injury feature contract with freshness, player-impact, and source
+    trust requirements.
+  agent: injury_lineup_analyst
+
+discipline_cards_review:
+  description: >
+    Identify referee, card, suspension, and team-discipline fields needed for
+    card-market predictions.
+  expected_output: >
+    A discipline feature contract and the minimum historical sample size needed
+    before enabling card predictions.
+  agent: discipline_referee_analyst
+
+model_promotion_review:
+  description: >
+    Evaluate any candidate model against the current deterministic fallback using
+    Brier score, log loss, calibration error, ROI, and closing-line value.
+  expected_output: >
+    A promote, hold, or reject decision with metric deltas and failure cases.
+  agent: backtest_auditor

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://apexpredict.internal/schemas/phase0-baseline.v1.json",
+  "generatedAt": "2026-07-19T00:00:00.000Z",
+  "phase": 0,
+  "branch": "feat/engine-correctness-and-multi-sport",
+  "verdict": "NOT_MARKET_READY",
+  "verdictReason": "Required baseline evidence does not exist; one critical fabrication defect (G1) is present.",
+
+  "baselineMetrics": {
+    "status": "UNAVAILABLE",
+    "note": "No metrics were obtained. Do not quote values from this file. Absence is recorded deliberately rather than estimated.",
+    "brierScore": null,
+    "logLoss": null,
+    "expectedCalibrationError": null,
+    "maxCalibrationError": null,
+    "accuracyByMarket": null,
+    "predictionCount": null,
+    "roi": null,
+    "closingLineValue": null,
+    "blockedBy": ["G2", "migration-20260719-unapplied", "no-standalone-backtest-entrypoint"]
+  },
+
+  "verification": {
+    "install": { "run": false, "reason": "sandbox node_modules built for darwin-arm64" },
+    "typecheck": { "run": true, "result": "PASS", "command": "npx tsc --noEmit", "scope": "apps/web", "errors": 0 },
+    "lint": { "run": false, "reason": "eslint binary not resolvable in sandbox" },
+    "unitTests": { "run": false, "reason": "rollup native binary mismatch (darwin vs linux)" },
+    "integrationTests": { "run": false, "reason": "requires running app + database" },
+    "e2eTests": { "run": false, "reason": "requires Playwright browsers" },
+    "build": { "run": false, "reason": "same toolchain constraint" },
+    "backtest": { "run": false, "reason": "PredictionBacktestRun empty; no standalone entrypoint; migration unapplied" },
+    "sandboxMathsHarness": {
+      "run": true,
+      "result": "PASS",
+      "checks": 73,
+      "scope": "pure engine maths only (model.ts, signals.ts, mapping proposal, api-sports client)",
+      "caveat": "Not a substitute for the repository test suite. Does not exercise LangGraph or Prisma runtimes."
+    }
+  },
+
+  "defectConfirmation": [
+    { "id": "D1", "claim": "Uses only Football-Data.org standings", "status": "CONFIRMED", "evidence": "apps/web/app/api/cron/daily-refresh/route.ts:19-21; apps/web/lib/providers/fixtures/football-data-provider.ts:27-29" },
+    { "id": "D2", "claim": "Team strength from position/points/games/GF/GA", "status": "CONFIRMED_NARROWED", "evidence": "apps/web/lib/prediction-engine/model.ts:124-135", "note": "Recent form now blended at 25% weight" },
+    { "id": "D3", "claim": "Elo and xG are affine transforms of one probability", "status": "ALREADY_FIXED", "evidence": "apps/web/lib/prediction-engine/signals.ts:44-74; orchestrator.ts:99-118; test signals.test.ts:72-80" },
+    { "id": "D4", "claim": "Only Poisson is genuinely different", "status": "ALREADY_FIXED_PARTIAL", "evidence": "signals.ts:44,83", "note": "Two functionally independent models, but both consume only standings. See gap G4." },
+    { "id": "D5", "claim": "Ensemble not used to select the pick", "status": "ALREADY_FIXED", "evidence": "orchestrator.ts:134-136; test signals.test.ts:161-169" },
+    { "id": "D6", "claim": "Can blend probabilities of different markets", "status": "ALREADY_FIXED", "evidence": "signals.ts:27-34,111-123" },
+    { "id": "D7", "claim": "Ignores the form field", "status": "ALREADY_FIXED", "evidence": "model.ts:95-115,131" },
+    { "id": "D8", "claim": "Neutral strength fallback for cup/early season", "status": "CONFIRMED", "evidence": "model.ts:125" },
+    { "id": "D9", "claim": "No injuries/lineups/rest/travel/referee/event-stats/market-movement features", "status": "CONFIRMED_ONE_EXCEPTION", "evidence": "enrichment.ts:61-64", "note": "OddsMovement is implemented but not consumed as a model feature" }
+  ],
+
+  "gapRegister": [
+    { "id": "G1", "severity": "CRITICAL", "title": "Silent canned-fixture fallback serves fabricated predictions", "evidence": "apps/web/lib/data/get-fixtures.ts:21,40-44; apps/web/data/fixtures.json", "impact": "Subscribers may see invented model scores and valueBet flags indistinguishable from real output", "remediation": "Gate canned data behind an explicit dev flag; empty state in production; alert on fallback", "validation": "E2E: database unavailable yields no rendered predictions" },
+    { "id": "G2", "severity": "HIGH", "title": "No baseline metrics exist", "remediation": "Standalone backtest script after migration", "validation": "Recorded Brier/log-loss/ECE with sample size and CI" },
+    { "id": "G3", "severity": "HIGH", "title": "Single live data source; secondary provider throws by design", "evidence": "football-data-provider.ts:27-29", "remediation": "Wire API-Sports", "validation": "Failover integration test" },
+    { "id": "G4", "severity": "HIGH", "title": "Elo and Poisson are informationally correlated (both standings-only)", "remediation": "Add point-in-time form/ML model", "validation": "Ablation reduces out-of-sample log loss" },
+    { "id": "G5", "severity": "HIGH", "title": "No point-in-time feature store or leakage tests", "remediation": "MatchFeature table with asOf; CI leakage assertions", "validation": "No feature timestamp exceeds prediction timestamp" },
+    { "id": "G6", "severity": "HIGH", "title": "Cup and early-season fixtures score neutral 0.5", "evidence": "model.ts:125", "remediation": "Competition priors + suppression", "validation": "Publishing gate blocks low-information fixtures" },
+    { "id": "G7", "severity": "MEDIUM", "title": "No injuries, lineups, referee, rest, travel or event statistics", "evidence": "enrichment.ts:61-64", "remediation": "API-Sports providers + pre-kickoff worker", "validation": "Coverage >= 90% on launch competitions" },
+    { "id": "G8", "severity": "MEDIUM", "title": "No provider licensing registry; all rights UNKNOWN", "remediation": "Phase 1 registry", "validation": "Documented rights per provider" },
+    { "id": "G9", "severity": "MEDIUM", "title": "PredictionSnapshot lacks model version and feature snapshot reference", "remediation": "Add modelVersion, featureSnapshotId", "validation": "Backtest filterable by model version" },
+    { "id": "G10", "severity": "MEDIUM", "title": "No publishing policy layer (no NO_BET / SUPPRESSED states)", "remediation": "Phase 10 policy engine", "validation": "Unit test per gate" },
+    { "id": "G11", "severity": "MEDIUM", "title": "No provider, quota or mapping observability", "remediation": "Admin views", "validation": "Admin E2E" },
+    { "id": "G12", "severity": "MEDIUM", "title": "Odds are h2h only and not de-vigged; edge overstated", "evidence": "the-odds-api.ts; model.ts edge computation", "remediation": "Implement de-vigging", "validation": "Unit test against worked example" },
+    { "id": "G13", "severity": "MEDIUM", "title": "No closing odds captured; closing-line value impossible", "remediation": "Capture closing price at kickoff", "validation": "CLV present in backtest output" },
+    { "id": "G14", "severity": "LOW", "title": "Stray untracked files in repo root", "evidence": "hello-back.txt, hello-floci.txt", "remediation": "Delete", "validation": "Clean git status" }
+  ],
+
+  "releaseGates": {
+    "cleanBuild": "UNVERIFIED",
+    "typecheck": "PASS",
+    "lint": "UNVERIFIED",
+    "tests": "UNVERIFIED",
+    "migrationsValidated": "FAIL",
+    "providerRightsDocumented": "FAIL",
+    "entityMappingThreshold": "FAIL",
+    "leakageTests": "FAIL",
+    "walkForwardTesting": "FAIL",
+    "calibrationMeasured": "FAIL",
+    "ensembleBeatsBaseline": "UNMEASURABLE",
+    "noFabricatedOutput": "FAIL",
+    "noGuaranteedWinLanguage": "PASS",
+    "independentCodexReview": "NOT_RUN"
+  },
+
+  "openQuestions": [
+    "Is a staging database available, or must all work target production Neon?",
+    "Is the Codex integration installed? If not, Loop E is a permanently open gate.",
+    "Which competitions constitute the launch set?",
+    "Are commercial licences held for OpticOdds and TheRundown, or are they aspirational?"
+  ]
+}

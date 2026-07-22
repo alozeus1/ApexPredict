@@ -14,6 +14,41 @@ export interface ModelOutput {
   confidence: number;
 }
 
+export interface MatchContextStatus {
+  available: boolean;
+  provider?: string;
+  reason?: string;
+  summary: string;
+}
+
+export interface OddsMovementContext {
+  bookCode: string;
+  market: OddsByBook['market'];
+  previousPrice: number;
+  currentPrice: number;
+  movementPct: number;
+  capturedAt: string;
+}
+
+export interface PerformanceContext {
+  sampleSize: number;
+  windowDays: number;
+  roi: number;
+  hitRate: number;
+  brierScore: number;
+  logLoss: number;
+  calibrationError: number;
+}
+
+export interface MatchPremiumContext {
+  weather: MatchContextStatus;
+  injuries: MatchContextStatus;
+  lineups: MatchContextStatus;
+  referee: MatchContextStatus;
+  oddsMovement: OddsMovementContext[];
+  performance?: PerformanceContext;
+}
+
 export interface Match {
   id: string;
   sport: Sport;
@@ -26,5 +61,6 @@ export interface Match {
   topPick: string;
   valueBet: boolean;
   narrative: string;
+  premiumContext?: MatchPremiumContext;
   featured?: boolean;
 }

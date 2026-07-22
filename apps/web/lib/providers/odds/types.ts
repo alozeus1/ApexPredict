@@ -1,8 +1,11 @@
+import type { FootballDataMatch } from '@/lib/live-data/football-data';
+
 /** A single bookmaker price for a market on a fixture. */
 export interface MarketOdd {
   bookCode: string;
   market: string;
   price: number;
+  source?: string;
 }
 
 /**
@@ -16,12 +19,6 @@ export interface OddsProvider {
   fetchOdds(fixtureExternalId: number): Promise<MarketOdd[]>;
 }
 
-/** The Odds API — reserved. Wired in S2. */
-export class TheOddsApiProvider implements OddsProvider {
-  readonly name = 'the-odds-api';
-  readonly priority = 100;
-
-  fetchOdds(): Promise<MarketOdd[]> {
-    throw new Error('TheOddsApiProvider not implemented — wired in S2');
-  }
+export interface BatchOddsProvider extends OddsProvider {
+  fetchCompetitionOdds(code: string, matches: FootballDataMatch[]): Promise<Map<number, MarketOdd[]>>;
 }
