@@ -4,11 +4,19 @@ import agents from '@/data/agents.json';
 import type { AgentJSON } from '@/data/agents.schema';
 import { requireCronAuth } from '@/lib/cron-auth';
 import { configuredCompetitions, type FootballDataStandingRow, type FootballDataTeam } from '@/lib/live-data/football-data';
-import { generatePrediction } from '@/lib/prediction-engine/model';
+import { generatePrediction, teamStrength, recentFormScore } from '@/lib/prediction-engine/model';
 import { buildFixtureEnrichment } from '@/lib/prediction-engine/enrichment';
 import { runPredictionGraph } from '@/lib/prediction-engine/orchestrator';
 import { persistMarketOdds, queueValueBetAlert } from '@/lib/prediction-engine/premium-signals';
 import { runBacktest } from '@/lib/prediction-engine/backtest';
+import { MATCH_1X2_FEATURE_SET } from '@/lib/features/spec';
+import { ensureFeatureSet, persistVector } from '@/lib/features/store';
+import { ensureProductionModel } from '@/lib/models/registry';
+import { settleShadowScores } from '@/lib/models/shadow';
+import { adaptiveEnsembleWeights } from '@/lib/prediction-engine/ensemble-weights';
+import { runCalibrationHealth, runFeatureDrift } from '@/lib/monitoring/health';
+import { shotsEnrichment } from '@/lib/prediction-engine/xg';
+import { buildTeamShotProfiles } from '@/lib/prediction-engine/shot-profiles';
 import { FootballDataProvider, SportmonksProvider } from '@/lib/providers/fixtures/football-data-provider';
 import { TheOddsApiProvider } from '@/lib/providers/odds/the-odds-api';
 import { runWorker, runWorkerWithFailover } from '@/lib/workers/runWorker';
@@ -68,6 +76,32 @@ export async function GET(request: Request) {
     let alertsQueued = 0;
     let evaluatedNow = 0;
     const competitionErrors: string[] = [];
+
+    // One asOf for the whole run so every model-ops artifact (weights, feature
+    // vectors, monitoring windows) shares a consistent clock.
+    const asOf = new Date();
+
+    // Resolve (bootstrapping on first run) the live model every snapshot is
+    // attributed to, register the feature set, and compute adaptive ensemble
+    // weights. All are defensively wrapped: a registry hiccup must not stop the
+    // refresh, it just falls back to unattributed snapshots / equal weights.
+    const productionModel = await ensureProductionModel(prisma, {
+      family: 'ensemble',
+      sport: 'FOOTBALL',
+      name: 'ensemble',
+      featureSetName: MATCH_1X2_FEATURE_SET.name,
+      featureSetVersion: MATCH_1X2_FEATURE_SET.version,
+    }).catch((error) => {
+      competitionErrors.push(`model registry unavailable: ${errorMessage(error)}`);
+      return null;
+    });
+
+    await ensureFeatureSet(prisma, MATCH_1X2_FEATURE_SET).catch((error) => {
+      competitionErrors.push(`feature set registration failed: ${errorMessage(error)}`);
+    });
+
+    const adaptive = await adaptiveEnsembleWeights(prisma, { asOf }).catch(() => null);
+    const ensembleWeights = adaptive?.weights;
 
     for (const code of configuredCompetitions()) {
       try {
@@ -177,13 +211,25 @@ export async function GET(request: Request) {
           const homeStats = standings.get(match.homeTeam.id);
           const awayStats = standings.get(match.awayTeam.id);
           const enrichment = await buildFixtureEnrichment(match, homeStats, awayStats);
+          // Shots-based xG (gap #4): active once a shot-statistics feed populates
+          // profiles. Until then this attaches an honest "unavailable" block and
+          // the xg-agent stays at weight 0 rather than inventing a signal.
+          const shotProfiles = await buildTeamShotProfiles({
+            homeExternalId: match.homeTeam.id,
+            awayExternalId: match.awayTeam.id,
+            asOf,
+          }).catch(() => ({ home: undefined, away: undefined }));
+          enrichment.shots = shotsEnrichment(shotProfiles.home, shotProfiles.away);
+
           const predictionInput = {
             match,
             homeStats,
             awayStats,
             marketOdds: providerOdds,
           };
-          const graphResult = await runPredictionGraph(predictionInput, enrichment).catch((error) => {
+          // Adaptive per-signal weights (gap #5) drive the ensemble; undefined
+          // falls back to the fixed weights inside the graph.
+          const graphResult = await runPredictionGraph(predictionInput, enrichment, ensembleWeights).catch((error) => {
             competitionErrors.push(`${code}: prediction graph fallback for match ${match.id}: ${errorMessage(error)}`);
             return undefined;
           });
@@ -217,6 +263,36 @@ export async function GET(request: Request) {
             enrichmentsWritten += 1;
           }
 
+          // Persist the versioned feature vector (gap #6) from the same inputs the
+          // engine scored, so training reads exactly what serving saw. Market and
+          // rest-day features are left null until those extractors are wired; the
+          // recorded completeness reflects that honestly.
+          let featureVectorId: string | undefined;
+          try {
+            const fvEnrichment = graphResult?.enrichment ?? enrichment;
+            const homeStrength = teamStrength(homeStats);
+            const awayStrength = teamStrength(awayStats);
+            const vector = await persistVector(prisma, fixture.id, MATCH_1X2_FEATURE_SET, {
+              home_strength: homeStrength,
+              away_strength: awayStrength,
+              strength_spread: homeStrength - awayStrength,
+              home_form: recentFormScore(homeStats?.form ?? undefined) ?? null,
+              away_form: recentFormScore(awayStats?.form ?? undefined) ?? null,
+              expected_home_goals: fvEnrichment.goals.expectedHomeGoals,
+              expected_away_goals: fvEnrichment.goals.expectedAwayGoals,
+              home_shots_xg: fvEnrichment.shots?.expectedHomeGoals ?? null,
+              away_shots_xg: fvEnrichment.shots?.expectedAwayGoals ?? null,
+              market_home_fair: null,
+              market_draw_fair: null,
+              market_away_fair: null,
+              rest_days_home: null,
+              rest_days_away: null,
+            });
+            featureVectorId = vector.id;
+          } catch (error) {
+            competitionErrors.push(`feature vector for match ${match.id}: ${errorMessage(error)}`);
+          }
+
           await prisma.predictionSnapshot.create({
             data: {
               fixtureId: fixture.id,
@@ -231,6 +307,10 @@ export async function GET(request: Request) {
               topPick: prediction.topPick,
               valueBet: prediction.valueBet,
               narrative: prediction.narrative,
+              // Attribute the prediction to the live model and the exact feature
+              // vector it was scored from (gaps #1/#6).
+              ...(productionModel ? { modelVersionId: productionModel.id } : {}),
+              ...(featureVectorId ? { featureVectorId } : {}),
             },
           });
           predictionsWritten += 1;
@@ -280,8 +360,23 @@ export async function GET(request: Request) {
       throw new Error(`No competitions refreshed. ${competitionErrors.join(' | ')}`);
     }
 
-    const backtest = await runBacktest(prisma, { windowDays: 90, stake: 10 });
+    const backtest = await runBacktest(prisma, {
+      windowDays: 90,
+      stake: 10,
+      ...(productionModel ? { modelVersionId: productionModel.id } : {}),
+    });
     evaluatedNow = backtest.evaluatedNow;
+
+    // Model-ops monitoring (gaps #2/#3): settle any shadow predictions whose
+    // fixtures finished, then check calibration health and feature drift. All
+    // additive and wrapped — a monitoring fault must never fail the refresh.
+    const shadowSettled = await settleShadowScores(prisma, asOf).catch(() => ({ settled: 0, considered: 0 }));
+    const calibrationHealth = await runCalibrationHealth(prisma, { asOf }).catch(() => null);
+    const featureDrift = await runFeatureDrift(prisma, {
+      featureSetName: MATCH_1X2_FEATURE_SET.name,
+      featureSetVersion: MATCH_1X2_FEATURE_SET.version,
+      asOf,
+    }).catch(() => null);
 
     await Promise.all([
       heartbeat('fixture-sync', 'live', `${fixturesWritten} fixtures upserted`, started),
@@ -293,6 +388,18 @@ export async function GET(request: Request) {
       heartbeat('prediction-engine', 'live', `${predictionsWritten} prediction snapshots generated`, started),
       heartbeat('settlement', 'live', `${resultsWritten} results settled`, started),
       heartbeat('backtest', 'live', `${evaluatedNow} predictions evaluated; ${backtest.run.sampleSize} in 90d window`, started),
+      heartbeat(
+        'model-registry',
+        'live',
+        productionModel ? `serving ${productionModel.name}` : 'registry unavailable',
+        started,
+      ),
+      heartbeat(
+        'model-monitoring',
+        'live',
+        `${shadowSettled.settled} shadow settled; calibration ${calibrationHealth ? 'checked' : 'skipped'}; drift ${featureDrift?.judged ? 'checked' : 'insufficient'}`,
+        started,
+      ),
       ...(agents as AgentJSON[])
         .filter((agent) => !['fixture-sync', 'odds-ingest', 'team-stats', 'match-enrichment', 'line-movement', 'value-hunter', 'settlement', 'backtest'].includes(agent.id))
         .map((agent) => heartbeat(agent.id, agent.status, `${agent.name} daily refresh tick`, started)),
@@ -308,6 +415,9 @@ export async function GET(request: Request) {
       movementsWritten,
       alertsQueued,
       evaluatedNow,
+      modelVersion: productionModel?.name ?? null,
+      shadowSettled: shadowSettled.settled,
+      weightsAdaptive: adaptive ? !adaptive.fellBackToUniform : false,
       competitionErrors,
     };
   }, { message: (r) => `${r.fixturesWritten} fixtures, ${r.predictionsWritten} predictions, ${r.evaluatedNow} evaluated` });
