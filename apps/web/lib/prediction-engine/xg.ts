@@ -213,12 +213,12 @@ export function shotsEnrichment(
   }
   const estimate = estimateExpectedGoalsFromShots(home, away, priors);
   if (!estimate.available) {
-    return { available: false, source: 'shots-xg', reason: estimate.reason };
+    return { available: false, source: 'shots-xg', ...(estimate.reason ? { reason: estimate.reason } : {}) };
   }
   return {
     available: true,
     source: 'shots-xg',
-    method: estimate.method === 'unavailable' ? undefined : estimate.method,
+    ...(estimate.method !== 'unavailable' ? { method: estimate.method } : {}),
     expectedHomeGoals: estimate.expectedHomeGoals,
     expectedAwayGoals: estimate.expectedAwayGoals,
     sampleSize: estimate.sampleSize,

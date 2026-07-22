@@ -127,7 +127,7 @@ const graph = new StateGraph(PredictionGraphState)
         available: true,
         weight: state.weights?.xg ?? 0.3,
         distribution: poissonDistribution(shots!.expectedHomeGoals!, shots!.expectedAwayGoals!),
-        reason: shots!.method,
+        ...(shots!.method ? { reason: shots!.method } : {}),
       };
       return { xgSignal: signal };
     }
